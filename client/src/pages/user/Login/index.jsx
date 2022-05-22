@@ -1,4 +1,6 @@
 import Footer from '@/components/Footer';
+import localStorage from "localStorage";
+
 import { login } from '@/services/ant-design-pro/api';
 import { getFakeCaptcha } from '@/services/ant-design-pro/login';
 import {
@@ -51,6 +53,7 @@ const Login = () => {
           defaultMessage: '登录成功！',
         });
         message.success(defaultLoginSuccessMessage);
+        await localStorage.setItem("tid", msg.tid)
         await fetchUserInfo();
         /** 此方法会跳转到 redirect 参数所在的位置 */
 

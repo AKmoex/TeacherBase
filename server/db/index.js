@@ -20,5 +20,5 @@ const pool = new Pool(config)
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
-  select:(text)=>pool.query(text)
+  select:(text,params)=>pool.query(text,params)
 }

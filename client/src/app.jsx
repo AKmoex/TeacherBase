@@ -3,7 +3,10 @@ import RightContent from '@/components/RightContent';
 import { BookOutlined, LinkOutlined } from '@ant-design/icons';
 import { PageLoading, SettingDrawer } from '@ant-design/pro-layout';
 import { history, Link } from 'umi';
+import localStorage from "localStorage";
+
 import defaultSettings from '../config/defaultSettings';
+
 import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -19,7 +22,9 @@ export const initialStateConfig = {
 export async function getInitialState() {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser();
+      const tid = await localStorage.getItem("tid");
+      console.log(tid);
+      const msg = await queryCurrentUser(tid);
       return msg.data;
     } catch (error) {
       history.push(loginPath);
