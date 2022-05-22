@@ -1,4 +1,6 @@
 import { outLogin } from '@/services/ant-design-pro/api';
+import localStorage from "localStorage";
+
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Menu, Spin } from 'antd';
 import { stringify } from 'querystring';
@@ -11,7 +13,7 @@ import styles from './index.less';
  * 退出登录，并且将当前的 url 保存
  */
 const loginOut = async () => {
-  await outLogin();
+  await localStorage.removeItem('tid');
   const { query = {}, search, pathname } = history.location;
   const { redirect } = query; // Note: There may be security issues, please note
 
