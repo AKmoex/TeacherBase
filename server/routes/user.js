@@ -7,10 +7,9 @@ const router = new Router()
 // export our router to be mounted by the parent application
 module.exports = router
 
-router.get('/',async(err,res)=>{
-    if(err){
-        console.log(err);
-    }
+router.post('/login',async(req,res)=>{
+    console.log(req.body);
+   
     const { rows } = await db.select('SELECT * FROM test')
     console.log(rows);
     res.send(rows[0])

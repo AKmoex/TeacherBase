@@ -1,11 +1,11 @@
 const express = require("express")
-const mountRoutes = require('./routes')
 
-
-//app.use(express.json());
 
 
 const app = express()
+app.use(express.json());
+
+const mountRoutes = require('./routes')
 mountRoutes(app)
 
 
