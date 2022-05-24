@@ -22,9 +22,8 @@ export const initialStateConfig = {
 export async function getInitialState() {
   const fetchUserInfo = async () => {
     try {
-      const tid = await localStorage.getItem("tid");
-      console.log(tid);
-      const msg = await queryCurrentUser(tid);
+      const msg = await queryCurrentUser();
+      console.log(msg.data);
       return msg.data;
     } catch (error) {
       history.push(loginPath);

@@ -36,6 +36,9 @@ const Login = () => {
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
+    // if(userInfo === undefined ){
+    //   await localStorage.removeItem('token');
+    // }
 
     if (userInfo) {
       await setInitialState((s) => ({ ...s, currentUser: userInfo }));
@@ -53,7 +56,7 @@ const Login = () => {
           defaultMessage: '登录成功！',
         });
         message.success(defaultLoginSuccessMessage);
-        await localStorage.setItem("tid", msg.tid)
+        await localStorage.setItem("token", msg.token)
         await fetchUserInfo();
         /** 此方法会跳转到 redirect 参数所在的位置 */
 
@@ -134,13 +137,13 @@ const Login = () => {
           {type === 'account' && (
             <>
               <ProFormText
-                name="username"
+                name="id"
                 fieldProps={{
                   size: 'large',
                   prefix: <UserOutlined className={styles.prefixIcon} />,
                 }}
                 placeholder={intl.formatMessage({
-                  id: 'pages.login.username.placeholder',
+                  id: 'pages.login.id.placeholder',
                   defaultMessage: '用户名: admin or user',
                 })}
                 rules={[
@@ -148,7 +151,7 @@ const Login = () => {
                     required: true,
                     message: (
                       <FormattedMessage
-                        id="pages.login.username.required"
+                        id="pages.login.id.required"
                         defaultMessage="请输入用户名!"
                       />
                     ),

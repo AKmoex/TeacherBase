@@ -1,6 +1,6 @@
 // ./routes/index.js
 const users = require('./user')
 module.exports = app => {
-  app.use('/api/users', users)
+  app.use('/api/user', users)
   // etc..
 }

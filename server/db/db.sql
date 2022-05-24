@@ -22,7 +22,7 @@ drop table if exists Teacher cascade;
 create table Teacher(
     id char(8) primary key,
     name varchar(32),
-    sex tinyint check (sex in (0,1,2)),
+    gender tinyint check (gender in (0,1,2)),
     entry_date date,
     term_date date,
     phone varchar(32),
@@ -30,7 +30,8 @@ create table Teacher(
     password varchar(100) not null default '',
     foreign key (department) references department(id),
     position varchar(256),
-    job varchar(256)
+    job varchar(256),
+    email varchar(256)
 );
 
 
@@ -94,6 +95,6 @@ alter sequence arc_auto_inc owned by Archive.id;
 
 
 
-insert into teacher values('00000000','张三',1,'2000-01-30','2000-01-30','18755005131',null,'123456','副院长','玩');
-insert into teacher values('00000001','李四',1,'2000-01-30','2000-01-30','18755005131',null,'123456','老师','教学神');
-insert into teacher values('00000002','王五',1,'2000-01-30','2000-01-30','18755005131',null,'123456','副教授','学');
+insert into teacher values('00000000','张三',1,'2000-01-30','2000-01-30','18755005131',null,'123456','副院长','玩','2645827007@qq.com');
+insert into teacher values('00000001','李四',1,'2000-01-30','2000-01-30','18755005131',null,'123456','老师','教学神','2645827007@qq.com');
+insert into teacher values('00000002','王五',1,'2000-01-30','2000-01-30','18755005131',null,'123456','副教授','学','2645827007@qq.com');
