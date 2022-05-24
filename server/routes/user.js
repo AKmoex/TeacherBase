@@ -2,7 +2,7 @@ const Router = require('express-promise-router')
 const { isUndefined } = require('lodash')
 const db = require('../db')
 const jwt=require('jsonwebtoken')
-const { verify } = require('crypto')
+const authMiddleware=require('../middlewares/auth')
 
 const router = new Router()
 
@@ -57,16 +57,11 @@ router.post('/login',async(req,res)=>{
 
 })
 
-router.get('/currentUser',async(req,res)=>{
+router.get('/currentUser',authMiddleware(),async(req,res)=>{
+    console.log(req.id);
     
-    const token = String(req.headers.authorization).split(' ').pop();
-    const tokenData=jwt.verify(token,process.env.jwtSecret)
-    const id=tokenData.id
-    
-    
-
-    const { rows } = await db.select('SELECT * FROM teacher where id=$1',[id])
-     try{
+    try{
+        const { rows } = await db.select('SELECT * FROM teacher where id=$1',[req.id])
         res.send({
             success: true,
             data: {
@@ -87,7 +82,7 @@ router.get('/currentUser',async(req,res)=>{
             errorCode: '401',
             errorMessage: '请先登录！',
             success: true,
-          });
+        });
     }
 
 })
