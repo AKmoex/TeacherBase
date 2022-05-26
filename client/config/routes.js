@@ -44,6 +44,13 @@ export default [
     component: './TableList',
   },
   {
+    name: 'list.department',
+    icon: 'table',
+    path: '/department',
+    component: './Department',
+    access: 'canAdmin',
+  },
+  {
     path: '/',
     redirect: '/welcome',
   },

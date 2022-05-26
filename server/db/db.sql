@@ -11,7 +11,9 @@ create table Department(
     id integer primary key default nextval('dep_auto_inc'),
     name varchar(32) unique,
     establish_date date,
-    phone varchar(32)
+    phone varchar(32),
+    t_count int,
+    address varchar(256)
 );
 
 -- 将自增学列 dep_auto_inc 与Department关联, 实现主键自增
@@ -31,7 +33,11 @@ create table Teacher(
     foreign key (department) references department(id),
     position varchar(256),
     job varchar(256),
-    email varchar(256)
+    email varchar(256),
+    ethnicity varchar(256),
+    political varchar(256),
+    identity_type varchar(256),
+    identity varchar(256)
 );
 
 
@@ -95,6 +101,14 @@ alter sequence arc_auto_inc owned by Archive.id;
 
 
 
-insert into teacher values('00000000','张三',1,'2000-01-30','2000-01-30','18755005131',null,'123456','副院长','玩','2645827007@qq.com');
-insert into teacher values('00000001','李四',1,'2000-01-30','2000-01-30','18755005131',null,'123456','老师','教学神','2645827007@qq.com');
-insert into teacher values('00000002','王五',1,'2000-01-30','2000-01-30','18755005131',null,'123456','副教授','学','2645827007@qq.com');
+insert into teacher values('00000000','张三',1,'2000-01-30','2000-01-30','18755005131',null,'123456','副院长','玩','2645827007@qq.com','','','','');
+insert into teacher values('00000001','李四',1,'2000-01-30','2000-01-30','18755005131',null,'123456','老师','教学神','2645827007@qq.com','','','','');
+insert into teacher values('00000002','王五',1,'2000-01-30','2000-01-30','18755005131',null,'123456','副教授','学','2645827007@qq.com','','','','');
+
+
+insert into Department(name,establish_date,phone,t_count,address)
+ values('计算机学院','2000-01-30','18755005131',120,'安徽省合肥市');
+insert into Department(name,establish_date,phone,t_count,address)
+ values('经济学院','2021-01-30','13625511879',150,'安徽省合蜀山区');
+insert into Department(name,establish_date,phone,t_count,address)
+ values('材料学院','2021-11-30','13625511879',300,'安徽省翡翠湖');

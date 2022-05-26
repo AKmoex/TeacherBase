@@ -1,4 +1,4 @@
-import { outLogin } from '@/services/ant-design-pro/api';
+import { outLogin } from '@/services/user';
 import localStorage from "localStorage";
 
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';

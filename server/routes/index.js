@@ -1,6 +1,8 @@
 // ./routes/index.js
-const users = require('./user')
+const user = require('./user')
+const department = require('./department')
 module.exports = app => {
-  app.use('/api/user', users)
+  app.use('/api/user', user)
+  app.use('/api/department', department)
   // etc..
 }
