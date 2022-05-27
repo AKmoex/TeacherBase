@@ -1,20 +1,19 @@
-import Footer from '@/components/Footer';
-import RightContent from '@/components/RightContent';
-import { BookOutlined, LinkOutlined } from '@ant-design/icons';
-import { PageLoading, SettingDrawer } from '@ant-design/pro-layout';
-import { history, Link } from 'umi';
-import localStorage from "localStorage";
+import Footer from '@/components/Footer'
+import RightContent from '@/components/RightContent'
+import { BookOutlined, LinkOutlined } from '@ant-design/icons'
+import { PageLoading, SettingDrawer } from '@ant-design/pro-layout'
+import '@arco-design/web-react/dist/css/arco.css'
+import { history, Link } from 'umi'
+import defaultSettings from '../config/defaultSettings'
+import { currentUser as queryCurrentUser } from './services/user'
 
-import defaultSettings from '../config/defaultSettings';
-
-import { currentUser as queryCurrentUser } from './services/user';
-const isDev = process.env.NODE_ENV === 'development';
-const loginPath = '/user/login';
+const isDev = process.env.NODE_ENV === 'development'
+const loginPath = '/user/login'
 /** 获取用户信息比较慢的时候会展示一个 loading */
 
 export const initialStateConfig = {
-  loading: <PageLoading />,
-};
+  loading: <PageLoading />
+}
 /**
  * @see  https://umijs.org/zh-CN/plugins/plugin-initial-state
  * */
@@ -22,29 +21,29 @@ export const initialStateConfig = {
 export async function getInitialState() {
   const fetchUserInfo = async () => {
     try {
-      const msg = await queryCurrentUser();
-      console.log(msg.data);
-      return msg.data;
+      const msg = await queryCurrentUser()
+      console.log(msg.data)
+      return msg.data
     } catch (error) {
-      history.push(loginPath);
+      history.push(loginPath)
     }
 
-    return undefined;
-  }; // 如果不是登录页面，执行
+    return undefined
+  } // 如果不是登录页面，执行
 
   if (history.location.pathname !== loginPath) {
-    const currentUser = await fetchUserInfo();
+    const currentUser = await fetchUserInfo()
     return {
       fetchUserInfo,
       currentUser,
-      settings: defaultSettings,
-    };
+      settings: defaultSettings
+    }
   }
 
   return {
     fetchUserInfo,
-    settings: defaultSettings,
-  };
+    settings: defaultSettings
+  }
 } // ProLayout 支持的api https://procomponents.ant.design/components/layout
 
 export const layout = ({ initialState, setInitialState }) => {
@@ -52,14 +51,14 @@ export const layout = ({ initialState, setInitialState }) => {
     rightContentRender: () => <RightContent />,
     disableContentMargin: false,
     waterMarkProps: {
-      content: initialState?.currentUser?.name,
+      content: initialState?.currentUser?.name
     },
     footerRender: () => <Footer />,
     onPageChange: () => {
-      const { location } = history; // 如果没有登录，重定向到 login
+      const { location } = history // 如果没有登录，重定向到 login
 
       if (!initialState?.currentUser && location.pathname !== loginPath) {
-        history.push(loginPath);
+        history.push(loginPath)
       }
     },
     links: isDev
@@ -71,7 +70,7 @@ export const layout = ({ initialState, setInitialState }) => {
           <Link to="/~docs" key="docs">
             <BookOutlined />
             <span>业务组件文档</span>
-          </Link>,
+          </Link>
         ]
       : [],
     menuHeaderRender: undefined,
@@ -89,13 +88,13 @@ export const layout = ({ initialState, setInitialState }) => {
               enableDarkTheme
               settings={initialState?.settings}
               onSettingChange={(settings) => {
-                setInitialState((preInitialState) => ({ ...preInitialState, settings }));
+                setInitialState((preInitialState) => ({ ...preInitialState, settings }))
               }}
             />
           )}
         </>
-      );
+      )
     },
-    ...initialState?.settings,
-  };
-};
+    ...initialState?.settings
+  }
+}

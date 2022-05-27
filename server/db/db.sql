@@ -9,7 +9,7 @@ create sequence dep_auto_inc
 drop table if exists Department cascade;
 create table Department(
     id integer primary key default nextval('dep_auto_inc'),
-    name varchar(32) unique,
+    name varchar(128) unique,
     establish_date date,
     phone varchar(32),
     t_count int,
@@ -107,8 +107,17 @@ insert into teacher values('00000002','王五',1,'2000-01-30','2000-01-30','1875
 
 
 insert into Department(name,establish_date,phone,t_count,address)
- values('计算机学院','2000-01-30','18755005131',120,'安徽省合肥市');
+ values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380',120,'翡翠湖校区双子楼A做1107');
 insert into Department(name,establish_date,phone,t_count,address)
- values('经济学院','2021-01-30','13625511879',150,'安徽省合蜀山区');
+ values('食品与生物工程学院','2021-01-30','0551- 62901362',150,'翡翠湖校区食品与生物工程大楼二楼');
 insert into Department(name,establish_date,phone,t_count,address)
- values('材料学院','2021-11-30','13625511879',300,'安徽省翡翠湖');
+ values('材料科学与工程学院','2021-11-30','0551- 62901362',300,'安徽省合肥市屯溪路193号');
+
+ insert into Department(name,establish_date,phone,t_count,address)
+ values('外国语学院','2021-11-30','0551-62901716',25,'合肥工业大学翡翠湖校区科教楼A栋第15层');
+
+
+  insert into Department(name,establish_date,phone,t_count,address)
+ values('机械工程学院','2021-11-30','0551-62901326',25,'安徽省合肥市屯溪路193号');
+  insert into Department(name,establish_date,phone,t_count,address)
+ values('电气与自动化工程学院','2021-11-30','0551-6290-1408',25,'安徽省合肥市屯溪路193号逸夫科教楼');
