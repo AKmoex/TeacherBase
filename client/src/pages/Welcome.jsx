@@ -1,7 +1,7 @@
-import { PageContainer } from '@ant-design/pro-layout';
-import { Alert, Card, Typography } from 'antd';
-import { FormattedMessage, useIntl } from 'umi';
-import styles from './Welcome.less';
+import { PageContainer } from '@ant-design/pro-layout'
+import { Alert, Card, Typography } from 'antd'
+import { FormattedMessage, useIntl } from 'umi'
+import styles from './Welcome.less'
 
 const CodePreview = ({ children }) => (
   <pre className={styles.pre}>
@@ -9,24 +9,24 @@ const CodePreview = ({ children }) => (
       <Typography.Text copyable>{children}</Typography.Text>
     </code>
   </pre>
-);
+)
 
 const Welcome = () => {
-  const intl = useIntl();
+  const intl = useIntl()
   return (
     <PageContainer>
       <Card>
         <Alert
           message={intl.formatMessage({
             id: 'pages.welcome.alertMessage',
-            defaultMessage: 'Faster and stronger heavy-duty components have been released.',
+            defaultMessage: 'Faster and stronger heavy-duty components have been released.'
           })}
           type="success"
           showIcon
           banner
           style={{
             margin: -12,
-            marginBottom: 24,
+            marginBottom: 24
           }}
         />
         <Typography.Text strong>
@@ -43,7 +43,7 @@ const Welcome = () => {
         <Typography.Text
           strong
           style={{
-            marginBottom: 12,
+            marginBottom: 12
           }}
         >
           <FormattedMessage id="pages.welcome.advancedLayout" defaultMessage="Advanced layout" />{' '}
@@ -58,7 +58,7 @@ const Welcome = () => {
         <CodePreview>yarn add @ant-design/pro-layout</CodePreview>
       </Card>
     </PageContainer>
-  );
-};
+  )
+}
 
-export default Welcome;
+export default Welcome
