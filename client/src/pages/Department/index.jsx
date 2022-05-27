@@ -125,7 +125,8 @@ const Department = () => {
   const [createLoading, setCreateLoading] = React.useState(false)
 
   const formRef = useRef()
-  //const [form] = Form.useForm()
+  const tableRef = useRef()
+
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'))
 
   const onValuesChange = (changeValue, values) => {
@@ -149,6 +150,7 @@ const Department = () => {
   return (
     <PageContainer>
       <ProList
+        actionRef={tableRef}
         options={{
           search: true
         }}
@@ -234,6 +236,7 @@ const Department = () => {
                         title: 'Success',
                         content: result.data.message
                       })
+                      tableRef.current.reload()
                     } else {
                       Notification.error({
                         title: 'Failed',
@@ -299,6 +302,7 @@ const Department = () => {
                       content: result.data.message
                     })
                     setCreateVisible(false)
+                    tableRef.current.reload()
                   } else {
                     Notification.error({
                       title: 'Failed',
