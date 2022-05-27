@@ -49,3 +49,57 @@ router.get('/', authMiddleware(), async (req, res) => {
     })
   }
 })
+router.post('/create', authMiddleware(), async (req, res) => {
+  const id = req.id
+  const { dep_name, dep_date, dep_address, dep_phone } = req.body
+
+  if (id === '00000000') {
+    if (
+      !isUndefined(dep_name) &&
+      !isUndefined(dep_date) &&
+      !isUndefined(dep_address) &&
+      !isUndefined(dep_phone)
+    ) {
+      try {
+        //console.log(dep_name, dep_date, dep_address, dep_phone)
+        let { rows } = await db.query(
+          'INSERT INTO department(name, establish_date,phone,address) VALUES($1, $2, $3, $4) returning *',
+          [dep_name, dep_date, dep_address, dep_phone]
+        )
+        // console.log(dep_name, dep_date, dep_address, dep_phone)
+        // console.log(rows[0])
+        res.send({
+          data: {
+            success: true,
+            message: '创建部门成功!'
+          },
+          success: true
+        })
+      } catch {
+        res.send({
+          data: {
+            success: false,
+            message: '创建部门失败,部门名称唯一!'
+          },
+          success: true
+        })
+      }
+    } else {
+      res.send({
+        data: {
+          success: false,
+          message: '创建部门失败'
+        },
+        success: true
+      })
+    }
+  } else {
+    res.send({
+      data: {
+        success: false,
+        message: '创建部门失败'
+      },
+      success: true
+    })
+  }
+})

@@ -1,15 +1,82 @@
-import { department } from '@/services/department'
+import { createDepartment, department } from '@/services/department'
 import { ProList } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
-import { Button, Modal } from '@arco-design/web-react'
+import { Button, DatePicker, Form, Input, Modal, Notification } from '@arco-design/web-react'
 import { Space, Tag } from 'antd'
-import React, { useState } from 'react'
+import dayjs from 'dayjs'
+import React, { useRef, useState } from 'react'
 import { BiMap, BiPhone } from 'react-icons/bi'
+
+const FormItem = Form.Item
+
+const cascaderOptions = [
+  {
+    value: 'beijing',
+    label: 'Beijing',
+    children: [
+      {
+        value: 'beijingshi',
+        label: 'Beijing',
+        children: [
+          {
+            value: 'chaoyang',
+            label: 'Chaoyang',
+            children: [
+              {
+                value: 'datunli',
+                label: 'Datunli'
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    value: 'shanghai',
+    label: 'Shanghai',
+    children: [
+      {
+        value: 'shanghaishi',
+        label: 'Shanghai',
+        children: [
+          {
+            value: 'huangpu',
+            label: 'Huangpu'
+          }
+        ]
+      }
+    ]
+  }
+]
+
+const formItemLayout = {
+  labelCol: {
+    span: 7
+  },
+  wrapperCol: {
+    span: 17
+  }
+}
+const noLabelLayout = {
+  wrapperCol: {
+    span: 17,
+    offset: 7
+  }
+}
 
 const Department = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [createVisible, setCreateVisible] = React.useState(false)
   const [createLoading, setCreateLoading] = React.useState(false)
+
+  const formRef = useRef()
+  //const [form] = Form.useForm()
+  const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'))
+
+  const onValuesChange = (changeValue, values) => {
+    console.log('onValuesChange: ', changeValue, values)
+  }
 
   const request = async (params, soter, filter) => {
     console.log(params)
@@ -82,7 +149,7 @@ const Department = () => {
                 <div
                   style={{
                     display: 'flex',
-                    alignItems: 'center' /* 垂直居中 */,
+                    alignItems: 'center',
                     paddingTop: '10'
                   }}
                 >
@@ -142,42 +209,115 @@ const Department = () => {
         }}
       />
       <Modal
-        title="Modal Title"
+        style={{ paddingLeft: 20, paddingRight: 20 }}
+        title="创建新的部门"
         visible={createVisible}
         footer={
           <>
             <Button
               onClick={() => {
+                formRef.current.resetFields()
                 setCreateVisible(false)
               }}
             >
-              Return
+              取消
             </Button>
             <Button
               loading={createLoading}
-              onClick={() => {
-                setCreateLoading(true)
-                setTimeout(() => {
+              onClick={async () => {
+                try {
+                  //setCreateLoading(true)
+                  await formRef.current.validate()
+
+                  const new_d = {
+                    dep_address: formRef.current.getFieldsValue().create_address
+                      ? ''
+                      : formRef.current.getFieldsValue().create_address,
+                    dep_name: formRef.current.getFieldsValue().create_name,
+                    dep_phone:
+                      formRef.current.getFieldsValue().create_phone === undefined
+                        ? ''
+                        : formRef.current.getFieldsValue().create_phone,
+                    dep_date: formRef.current.getFieldsValue().create_date
+                  }
+                  setCreateLoading(true)
+                  const result = await createDepartment(new_d)
                   setCreateLoading(false)
-                  setCreateVisible(false)
-                }, 1500)
+                  // console.log(result.data)
+                  if (result.data.success) {
+                    Notification.success({
+                      title: 'Success',
+                      content: result.data.message
+                    })
+                    setCreateVisible(false)
+                  } else {
+                    Notification.error({
+                      title: 'Failed',
+                      content: result.data.message
+                    })
+                  }
+
+                  //setCreateLoading(true)
+                  //Message.success('校验通过')
+                } catch (e) {
+                  //setCreateLoading(false)
+                  //Message.error('校验失败')
+                }
               }}
               type="primary"
               style={{ marginLeft: 12 }}
             >
-              Submit
+              创建
             </Button>
           </>
         }
         onCancel={() => {
+          formRef.current.resetFields()
           setCreateVisible(false)
         }}
       >
-        <p>Some content...</p>
-        <p>Some content...</p>
-        <p>Some content...</p>
-        <p>Some content...</p>
-        <p>Some content...</p>
+        <div style={{ maxWidth: 650 }}>
+          <Form
+            ref={formRef}
+            {...formItemLayout}
+            size={'large'}
+            onValuesChange={onValuesChange}
+            scrollToFirstError
+            layout={'vertical'}
+            initialValues={{
+              create_date: date,
+              create_phone: '',
+              create_address: ''
+            }}
+          >
+            <FormItem
+              label="部门名称"
+              field="create_name"
+              rules={[{ required: true, message: '请输入部门名称' }]}
+            >
+              <Input placeholder="please enter department name" />
+            </FormItem>
+            <FormItem label="通讯地址" field="create_address">
+              <Input placeholder="please enter department address" />
+            </FormItem>
+            <FormItem
+              label="联系电话"
+              field="create_phone"
+              rules={[
+                { required: false, message: '请输入联系电话' },
+                {
+                  match: /^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/,
+                  message: '联系电话格式错误'
+                }
+              ]}
+            >
+              <Input placeholder="please enter department phone" />
+            </FormItem>
+            <FormItem label="成立时间" field="create_date" rules={[{ required: true }]}>
+              <DatePicker format="YYYY-MM-DD" />
+            </FormItem>
+          </Form>
+        </div>
       </Modal>
     </PageContainer>
   )

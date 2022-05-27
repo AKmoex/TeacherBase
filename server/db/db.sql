@@ -12,7 +12,7 @@ create table Department(
     name varchar(128) unique,
     establish_date date,
     phone varchar(32),
-    t_count int,
+    t_count int default 0,
     address varchar(256)
 );
 
