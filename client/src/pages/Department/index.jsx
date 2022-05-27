@@ -1,54 +1,22 @@
-import { createDepartment, department } from '@/services/department'
+import { createDepartment, deleteDepartment, department } from '@/services/department'
 import { ProList } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
-import { Button, DatePicker, Form, Input, Modal, Notification } from '@arco-design/web-react'
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  Modal,
+  Notification,
+  Popconfirm
+} from '@arco-design/web-react'
 import { Space, Tag } from 'antd'
 import dayjs from 'dayjs'
+import { isNil } from 'lodash'
 import React, { useRef, useState } from 'react'
 import { BiMap, BiPhone } from 'react-icons/bi'
 
 const FormItem = Form.Item
-
-const cascaderOptions = [
-  {
-    value: 'beijing',
-    label: 'Beijing',
-    children: [
-      {
-        value: 'beijingshi',
-        label: 'Beijing',
-        children: [
-          {
-            value: 'chaoyang',
-            label: 'Chaoyang',
-            children: [
-              {
-                value: 'datunli',
-                label: 'Datunli'
-              }
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    value: 'shanghai',
-    label: 'Shanghai',
-    children: [
-      {
-        value: 'shanghaishi',
-        label: 'Shanghai',
-        children: [
-          {
-            value: 'huangpu',
-            label: 'Huangpu'
-          }
-        ]
-      }
-    ]
-  }
-]
 
 const formItemLayout = {
   labelCol: {
@@ -65,6 +33,92 @@ const noLabelLayout = {
   }
 }
 
+const confirm = (e) => {
+  console.log(e)
+  //message.success('Click on Yes')
+}
+
+const cancel = (e) => {
+  console.log(e)
+  // message.error('Click on No')
+}
+
+const renderDescription = (row) => {
+  if (isNil(row.dep_address) && isNil(row.dep_phone)) {
+    return <></>
+  } else if (isNil(row.dep_address)) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          paddingTop: '10'
+        }}
+      >
+        <Space size="large">
+          <div style={{ marginLeft: '20' }}>
+            <Space size={'small'}>
+              <div>
+                <BiPhone fontSize="19" />
+              </div>
+              <div>{row.dep_phone}</div>
+            </Space>
+          </div>
+        </Space>
+      </div>
+    )
+  } else if (isNil(row.dep_phone)) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          paddingTop: '10'
+        }}
+      >
+        <Space size="large">
+          <div>
+            <Space size={'small'}>
+              <div>
+                <BiMap fontSize="19" />
+              </div>
+              <div>{row.dep_address}</div>
+            </Space>
+          </div>
+        </Space>
+      </div>
+    )
+  } else {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          paddingTop: '10'
+        }}
+      >
+        <Space size="large">
+          <div>
+            <Space size={'small'}>
+              <div>
+                <BiMap fontSize="19" />
+              </div>
+              <div>{row.dep_address}</div>
+            </Space>
+          </div>
+          <div style={{ marginLeft: '20' }}>
+            <Space size={'small'}>
+              <div>
+                <BiPhone fontSize="19" />
+              </div>
+              <div>{row.dep_phone}</div>
+            </Space>
+          </div>
+        </Space>
+      </div>
+    )
+  }
+}
 const Department = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [createVisible, setCreateVisible] = React.useState(false)
@@ -81,7 +135,7 @@ const Department = () => {
   const request = async (params, soter, filter) => {
     console.log(params)
     const result = await department()
-
+    console.log(result.data.department)
     return {
       total: 200,
       data: result.data.department,
@@ -121,9 +175,9 @@ const Department = () => {
         headerTitle="所有部门"
         request={request}
         pagination={{
-          pageSize: 5
+          pageSize: 10
         }}
-        showActions="hover"
+        showActions="always"
         metas={{
           title: {
             dataIndex: 'dep_name',
@@ -145,35 +199,7 @@ const Department = () => {
             dataIndex: 'dep_name',
             search: false,
             render: (_, row) => {
-              return (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    paddingTop: '10'
-                  }}
-                >
-                  <Space size="large">
-                    <div>
-                      <Space size={'small'}>
-                        <div>
-                          <BiMap fontSize="19" />
-                        </div>
-                        <div>{row.dep_address}</div>
-                      </Space>
-                    </div>
-
-                    <div style={{ marginLeft: '20' }}>
-                      <Space size={'small'}>
-                        <div>
-                          <BiPhone fontSize="19" />
-                        </div>
-                        <div>{row.dep_phone}</div>
-                      </Space>
-                    </div>
-                  </Space>
-                </div>
-              )
+              return renderDescription(row)
             }
           },
 
@@ -193,17 +219,42 @@ const Department = () => {
             search: false
           },
           actions: {
-            render: (text, row) => [
-              <a href={row.url} target="_blank" rel="noopener noreferrer" key="link">
-                链路
-              </a>,
-              <a href={row.url} target="_blank" rel="noopener noreferrer" key="warning">
-                报警
-              </a>,
-              <a href={row.url} target="_blank" rel="noopener noreferrer" key="view">
-                查看
-              </a>
-            ],
+            render: (text, row) => {
+              return [
+                <Popconfirm
+                  title="确定删除该部门?"
+                  onOk={async () => {
+                    console.log(row)
+                    //Message.info({ content: 'ok' })
+                    const result = await deleteDepartment({
+                      dep_id: row.dep_id
+                    })
+                    if (result.data.success) {
+                      Notification.success({
+                        title: 'Success',
+                        content: result.data.message
+                      })
+                    } else {
+                      Notification.error({
+                        title: 'Failed',
+                        content: result.data.message
+                      })
+                    }
+                  }}
+                  onCancel={() => {
+                    //Message.error({ content: 'cancel' })
+                  }}
+                >
+                  <a href={row.url} target="_blank" rel="noopener noreferrer" key="view">
+                    删除
+                  </a>
+                </Popconfirm>,
+
+                <a href={row.url} target="_blank" rel="noopener noreferrer" key="view">
+                  查看
+                </a>
+              ]
+            },
             search: false
           }
         }}
@@ -230,9 +281,7 @@ const Department = () => {
                   await formRef.current.validate()
 
                   const new_d = {
-                    dep_address: formRef.current.getFieldsValue().create_address
-                      ? ''
-                      : formRef.current.getFieldsValue().create_address,
+                    dep_address: formRef.current.getFieldsValue().create_address,
                     dep_name: formRef.current.getFieldsValue().create_name,
                     dep_phone:
                       formRef.current.getFieldsValue().create_phone === undefined

@@ -17,6 +17,7 @@ router.get('/', authMiddleware(), async (req, res) => {
       const data = []
       rows.forEach((elem, index) => {
         data.push({
+          dep_id: elem.id,
           dep_name: elem.name,
           dep_date: elem.establish_date,
           dep_count: elem.t_count,
@@ -61,13 +62,11 @@ router.post('/create', authMiddleware(), async (req, res) => {
       !isUndefined(dep_phone)
     ) {
       try {
-        //console.log(dep_name, dep_date, dep_address, dep_phone)
         let { rows } = await db.query(
           'INSERT INTO department(name, establish_date,phone,address) VALUES($1, $2, $3, $4) returning *',
-          [dep_name, dep_date, dep_address, dep_phone]
+          [dep_name, dep_date, dep_phone, dep_address]
         )
-        // console.log(dep_name, dep_date, dep_address, dep_phone)
-        // console.log(rows[0])
+
         res.send({
           data: {
             success: true,
@@ -75,7 +74,7 @@ router.post('/create', authMiddleware(), async (req, res) => {
           },
           success: true
         })
-      } catch {
+      } catch (err) {
         res.send({
           data: {
             success: false,
@@ -98,6 +97,62 @@ router.post('/create', authMiddleware(), async (req, res) => {
       data: {
         success: false,
         message: '创建部门失败'
+      },
+      success: true
+    })
+  }
+})
+
+router.post('/delete', authMiddleware(), async (req, res) => {
+  const id = req.id
+  const { dep_id } = req.body
+
+  if (id === '00000000') {
+    if (!isUndefined(dep_id)) {
+      try {
+        const client = await db.pool.connect()
+
+        await client.query('BEGIN')
+        const updateText = ' UPDATE teacher SET department=NULL WHERE department=$1'
+
+        await client.query(updateText, [dep_id])
+        const deleteText = 'DELETE FROM department WHERE id=$1'
+        await client.query(deleteText, [dep_id])
+
+        await client.query('COMMIT')
+        console.log(client)
+
+        res.send({
+          data: {
+            success: true,
+            message: '删除该部门成功!'
+          },
+          success: true
+        })
+      } catch (err) {
+        console.log(err)
+        res.send({
+          data: {
+            success: false,
+            message: '部门删除失败!'
+          },
+          success: true
+        })
+      }
+    } else {
+      res.send({
+        data: {
+          success: false,
+          message: '部门删除失败'
+        },
+        success: true
+      })
+    }
+  } else {
+    res.send({
+      data: {
+        success: false,
+        message: '删除部门失败'
       },
       success: true
     })

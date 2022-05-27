@@ -19,5 +19,6 @@ module.exports = {
   query: (text, params) => pool.query(text, params),
   select: (text, params) => pool.query(text, params),
   // 根据id查询出用户基本信息
-  getProFileByID: (text, params) => pool.query(text, params)
+  getProFileByID: (text, params) => pool.query(text, params),
+  pool
 }
