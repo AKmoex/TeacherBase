@@ -1,9 +1,8 @@
 const Router = require('express-promise-router')
 const { isUndefined } = require('lodash')
 const db = require('../db')
-const jwt = require('jsonwebtoken')
 const authMiddleware = require('../middlewares/auth')
-const { devNull } = require('os')
+const util = require('util')
 
 const router = new Router()
 
@@ -70,7 +69,7 @@ router.post('/create', authMiddleware(), async (req, res) => {
         res.send({
           data: {
             success: true,
-            message: '创建部门成功!'
+            message: '创建部门成功 !'
           },
           success: true
         })
@@ -78,7 +77,7 @@ router.post('/create', authMiddleware(), async (req, res) => {
         res.send({
           data: {
             success: false,
-            message: '创建部门失败,部门名称唯一!'
+            message: '创建部门失败,部门名称已存在 !'
           },
           success: true
         })
@@ -126,6 +125,61 @@ router.post('/delete', authMiddleware(), async (req, res) => {
           data: {
             success: true,
             message: '删除该部门成功!'
+          },
+          success: true
+        })
+      } catch (err) {
+        console.log(err)
+        res.send({
+          data: {
+            success: false,
+            message: '部门删除失败!'
+          },
+          success: true
+        })
+      }
+    } else {
+      res.send({
+        data: {
+          success: false,
+          message: '部门删除失败'
+        },
+        success: true
+      })
+    }
+  } else {
+    res.send({
+      data: {
+        success: false,
+        message: '删除部门失败'
+      },
+      success: true
+    })
+  }
+})
+
+router.post('/delete/multiple', authMiddleware(), async (req, res) => {
+  const id = req.id
+  const { dep_ids } = req.body
+
+  if (id === '00000000') {
+    if (!isUndefined(dep_ids)) {
+      try {
+        const client = await db.pool.connect()
+
+        await client.query('BEGIN')
+        for (let i = 0; i < dep_ids.length; i++) {
+          const updateText = ' UPDATE teacher SET department=NULL WHERE department=$1'
+          await client.query(updateText, [dep_ids[i]])
+          const deleteText = 'DELETE FROM department WHERE id=$1'
+          await client.query(deleteText, [dep_ids[i]])
+        }
+        await client.query('COMMIT')
+
+        res.send({
+          data: {
+            success: true,
+            message: util.format('成功删除 %d 个部门 !', dep_ids.length)
           },
           success: true
         })

@@ -1,4 +1,9 @@
-import { createDepartment, deleteDepartment, department } from '@/services/department'
+import {
+  createDepartment,
+  deleteDepartment,
+  deleteDepartmentMultiple,
+  department
+} from '@/services/department'
 import { ProList } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
 import {
@@ -10,7 +15,7 @@ import {
   Notification,
   Popconfirm
 } from '@arco-design/web-react'
-import { Space, Tag } from 'antd'
+import { Button as AButton, Space, Tag } from 'antd'
 import dayjs from 'dayjs'
 import { isNil } from 'lodash'
 import React, { useRef, useState } from 'react'
@@ -150,6 +155,43 @@ const Department = () => {
   return (
     <PageContainer>
       <ProList
+        tableAlertRender={() => {
+          console.log(selectedRowKeys)
+          return (
+            <div>
+              {selectedRowKeys.length > 0 ? (
+                <div style={{ display: 'flex', justifyContent: 'flex-between' }}>
+                  <div style={{ flex: 1 }}>已选择 {selectedRowKeys.length} 项</div>
+                  <div>
+                    <AButton
+                      type="link"
+                      onClick={async () => {
+                        const result = await deleteDepartmentMultiple({
+                          dep_ids: selectedRowKeys
+                        })
+                        if (result.data.success) {
+                          Notification.success({
+                            title: 'Success',
+                            content: result.data.message
+                          })
+                          tableRef.current.reload()
+                          setSelectedRowKeys([])
+                        } else {
+                          Notification.error({
+                            title: 'Failed',
+                            content: result.data.message
+                          })
+                        }
+                      }}
+                    >
+                      批量删除
+                    </AButton>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          )
+        }}
         actionRef={tableRef}
         options={{
           search: true
@@ -173,7 +215,7 @@ const Department = () => {
         search={{
           filterType: 'light'
         }}
-        rowKey="name"
+        rowKey="dep_id"
         headerTitle="所有部门"
         request={request}
         pagination={{
@@ -226,7 +268,6 @@ const Department = () => {
                 <Popconfirm
                   title="确定删除该部门?"
                   onOk={async () => {
-                    console.log(row)
                     //Message.info({ content: 'ok' })
                     const result = await deleteDepartment({
                       dep_id: row.dep_id
@@ -236,6 +277,7 @@ const Department = () => {
                         title: 'Success',
                         content: result.data.message
                       })
+                      setSelectedRowKeys([])
                       tableRef.current.reload()
                     } else {
                       Notification.error({
