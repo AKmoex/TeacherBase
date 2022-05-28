@@ -130,7 +130,7 @@ const Department = () => {
 
   const request = async (params, soter, filter) => {
     console.log(params)
-    const result = await department()
+    const result = await department(params)
     console.log(result.data.department)
     return {
       total: result.data.department.length,
@@ -183,7 +183,11 @@ const Department = () => {
         }}
         actionRef={tableRef}
         options={{
-          search: true
+          search: { allowClear: true },
+          density: false,
+          fullScreen: true,
+          reload: true,
+          setting: false
         }}
         size={'large'}
         split={true}

@@ -20,6 +20,7 @@ request.interceptors.request.use((url, options) => {
 
 /** 获取所有部门 GET /api/department */
 export async function department(params, options) {
+  console.log(params)
   return request('/api/department', {
     method: 'GET',
     params: { ...params },

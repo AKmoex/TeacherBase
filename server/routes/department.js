@@ -11,8 +11,9 @@ module.exports = router
 router.get('/', authMiddleware(), async (req, res) => {
   if (req.id === '00000000') {
     try {
-      const { rows } = await db.query('SELECT * FROM department')
-      console.log(rows)
+      const { rows } = await db.query('SELECT * FROM department WHERE name LIKE $1', [
+        `%${req.query.keyword}%`
+      ])
       const data = []
       rows.forEach((elem, index) => {
         data.push({
@@ -49,6 +50,7 @@ router.get('/', authMiddleware(), async (req, res) => {
     })
   }
 })
+
 router.post('/create', authMiddleware(), async (req, res) => {
   const id = req.id
   const { dep_name, dep_date, dep_address, dep_phone } = req.body
