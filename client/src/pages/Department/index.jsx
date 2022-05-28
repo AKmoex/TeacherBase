@@ -20,6 +20,7 @@ import dayjs from 'dayjs'
 import { isNil } from 'lodash'
 import React, { useRef, useState } from 'react'
 import { BiMap, BiPhone } from 'react-icons/bi'
+const ExportJsonExcel = require('js-export-excel')
 
 const FormItem = Form.Item
 
@@ -118,6 +119,7 @@ const Department = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [createVisible, setCreateVisible] = React.useState(false)
   const [createLoading, setCreateLoading] = React.useState(false)
+  const [data, setData] = useState([])
 
   const formRef = useRef()
   const tableRef = useRef()
@@ -132,6 +134,7 @@ const Department = () => {
     console.log(params)
     const result = await department(params)
     console.log(result.data.department)
+    setData(result.data.department)
     return {
       total: result.data.department.length,
       data: result.data.department,
@@ -141,6 +144,52 @@ const Department = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys) => setSelectedRowKeys(keys)
+  }
+  const excelDownload = () => {
+    const downloadData = []
+    if (selectedRowKeys.length == 0) {
+      for (let i = 0; i < data.length; i++) {
+        downloadData.push({
+          部门名称: data[i].dep_name,
+          通讯地址: data[i].dep_address,
+          联系电话: data[i].dep_phone,
+          成立时间: dayjs(data[i].dep_date).format('YYYY-MM-DD'),
+          在职教师人数: data[i].dep_count
+        })
+      }
+    } else {
+      for (let i = 0; i < selectedRowKeys.length; i++) {
+        for (let j = 0; j < data.length; j++) {
+          if (selectedRowKeys[i] == data[j].dep_id) {
+            downloadData.push({
+              部门名称: data[j].dep_name,
+              通讯地址: data[j].dep_address,
+              联系电话: data[j].dep_phone,
+              成立时间: dayjs(data[j].dep_date).format('YYYY-MM-DD'),
+              在职教师人数: data[j].dep_count
+            })
+            break
+          }
+        }
+      }
+    }
+
+    var option = {}
+
+    option.fileName = '部门信息表'
+    option.datas = [
+      {
+        sheetData: downloadData,
+        sheetName: 'sheet',
+        sheetFilter: ['部门名称', '通讯地址', '联系电话', '成立时间', '在职教师人数'],
+        sheetHeader: ['部门名称', '通讯地址', '联系电话', '成立时间', '在职教师人数'],
+        columnWidths: [13, 20, 8, 6, 3]
+      }
+    ]
+
+    var toExcel = new ExportJsonExcel(option)
+    toExcel.saveExcel()
+    // toExcel.saveExcel()
   }
   return (
     <PageContainer>
@@ -202,6 +251,15 @@ const Department = () => {
               }}
             >
               创建
+            </Button>,
+            <Button
+              key="3"
+              type="primary"
+              onClick={() => {
+                excelDownload()
+              }}
+            >
+              数据导出
             </Button>
           ]
         }}
