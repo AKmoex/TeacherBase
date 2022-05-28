@@ -38,16 +38,6 @@ const noLabelLayout = {
   }
 }
 
-const confirm = (e) => {
-  console.log(e)
-  //message.success('Click on Yes')
-}
-
-const cancel = (e) => {
-  console.log(e)
-  // message.error('Click on No')
-}
-
 const renderDescription = (row) => {
   if (isNil(row.dep_address) && isNil(row.dep_phone)) {
     return <></>
@@ -143,7 +133,7 @@ const Department = () => {
     const result = await department()
     console.log(result.data.department)
     return {
-      total: 200,
+      total: result.data.department.length,
       data: result.data.department,
       success: true
     }
@@ -156,7 +146,6 @@ const Department = () => {
     <PageContainer>
       <ProList
         tableAlertRender={() => {
-          console.log(selectedRowKeys)
           return (
             <div>
               {selectedRowKeys.length > 0 ? (
@@ -219,7 +208,7 @@ const Department = () => {
         headerTitle="所有部门"
         request={request}
         pagination={{
-          pageSize: 10
+          pageSize: 8
         }}
         showActions="always"
         metas={{
