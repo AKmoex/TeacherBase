@@ -10,6 +10,7 @@ module.exports = router
 
 router.post('/login', async (req, res) => {
   const { id, password } = req.body
+  console.log(id, password)
 
   if (!isUndefined(id) && !isUndefined(password)) {
     try {
