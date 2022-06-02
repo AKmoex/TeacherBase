@@ -24,6 +24,7 @@ export default {
   'menu.list': '列表页',
   'menu.list.table-list': '查询表格',
   'menu.list.department': '部门管理',
+  'menu.list.teacher': '教师管理',
   'menu.list.basic-list': '标准列表',
   'menu.list.card-list': '卡片列表',
   'menu.list.search-list': '搜索列表',
@@ -49,5 +50,5 @@ export default {
   'menu.editor': '图形编辑器',
   'menu.editor.flow': '流程编辑器',
   'menu.editor.mind': '脑图编辑器',
-  'menu.editor.koni': '拓扑编辑器',
-};
+  'menu.editor.koni': '拓扑编辑器'
+}

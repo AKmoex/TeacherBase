@@ -24,6 +24,7 @@ export default {
   'menu.list': 'List',
   'menu.list.table-list': 'Search Table',
   'menu.list.department': 'Department',
+  'menu.list.teacher': 'Teacher',
   'menu.list.basic-list': 'Basic List',
   'menu.list.card-list': 'Card List',
   'menu.list.search-list': 'Search List',
@@ -49,5 +50,5 @@ export default {
   'menu.editor': 'Graphic Editor',
   'menu.editor.flow': 'Flow Editor',
   'menu.editor.mind': 'Mind Editor',
-  'menu.editor.koni': 'Koni Editor',
-};
+  'menu.editor.koni': 'Koni Editor'
+}

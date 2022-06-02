@@ -6,18 +6,18 @@ export default [
       {
         name: 'login',
         path: '/user/login',
-        component: './user/Login',
+        component: './user/Login'
       },
       {
-        component: './404',
-      },
-    ],
+        component: './404'
+      }
+    ]
   },
   {
     path: '/welcome',
     name: 'welcome',
     icon: 'smile',
-    component: './Welcome',
+    component: './Welcome'
   },
   {
     path: '/admin',
@@ -30,31 +30,38 @@ export default [
         path: '/admin/sub-page',
         name: 'sub-page',
         icon: 'smile',
-        component: './Welcome',
+        component: './Welcome'
       },
       {
-        component: './404',
-      },
-    ],
+        component: './404'
+      }
+    ]
   },
   {
     name: 'list.table-list',
     icon: 'table',
     path: '/list',
-    component: './TableList',
+    component: './TableList'
   },
   {
     name: 'list.department',
     icon: 'table',
     path: '/department',
     component: './Department',
-    access: 'canAdmin',
+    access: 'canAdmin'
+  },
+  {
+    name: 'list.teacher',
+    icon: 'table',
+    path: '/teacher',
+    component: './Teacher',
+    access: 'canAdmin'
   },
   {
     path: '/',
-    redirect: '/welcome',
+    redirect: '/welcome'
   },
   {
-    component: './404',
-  },
-];
+    component: './404'
+  }
+]
