@@ -12,7 +12,7 @@ const multer = require('multer')
 const upload = multer({ dest: __dirname + '/../../files' })
 router.post('/photo', upload.single('file'), async (req, res) => {
   const file = req.file
-  file.url = 'http://localhost:5000/static/' + file.filename
+  file.url = '/static/' + file.filename
   console.log(file)
   res.send(file)
 })
