@@ -38,6 +38,30 @@ export default [
     ]
   },
   {
+    path: '/teacher',
+    name: 'list.teacher-list',
+    icon: 'crown',
+    access: 'canAdmin',
+    //component: './Teacher',
+    routes: [
+      {
+        path: '/teacher/list',
+        name: 'list.teacher-list',
+        icon: 'smile',
+        component: './Teacher'
+      },
+      {
+        path: '/teacher/add',
+        name: 'list.teacher-add',
+        icon: 'smile',
+        component: './Teacher/AddTeacher'
+      },
+      {
+        component: './404'
+      }
+    ]
+  },
+  {
     name: 'list.table-list',
     icon: 'table',
     path: '/list',
@@ -50,13 +74,7 @@ export default [
     component: './Department',
     access: 'canAdmin'
   },
-  {
-    name: 'list.teacher',
-    icon: 'table',
-    path: '/teacher',
-    component: './Teacher',
-    access: 'canAdmin'
-  },
+
   {
     path: '/',
     redirect: '/welcome'

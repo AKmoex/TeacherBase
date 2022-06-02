@@ -20,25 +20,50 @@ create table Department(
 alter sequence dep_auto_inc owned by department.id;
 
 
+
+
+
+
+
 drop table if exists Teacher cascade;
 create table Teacher(
     id char(8) primary key,
     name varchar(32),
     gender tinyint default 0 check (gender in (0,1,2)),
-    entry_date date,
-    term_date date,
     phone varchar(32),
-    department integer,
-    password varchar(100) not null default '',
-    position varchar(256),
-    job varchar(256),
     email varchar(256),
-    ethnicity varchar(256),
-    political varchar(256),
-    identity varchar(256),
-    address varchar(256),
-    foreign key (department) references department(id)
+    birthday date,
+    photo varchar(256), -- 照片
+
+    term_date date, -- 离职时间
+    entry_date date, -- 入职时间
+    department_id integer, -- 所属院系
+    
+    job varchar(256),
+    ethnicity varchar(256), -- 名族
+    political varchar(256), -- 政治面貌
+    address varchar(256), -- 通讯地址
+    
+    title varchar(256), -- 职称
+    password varchar(100) not null default '',
+    foreign key (department_id) references department(id)
 );
+
+-- drop sequence if exists tit_auto_inc cascade;
+-- create sequence tit_auto_inc
+--     minvalue 1
+--     maxvalue 9999999999999
+--     start with 1
+--     increment by 1;
+-- drop table if exists Title cascade;
+-- create table Title(
+--     id integer primary key default nextval('tit_auto_inc'),
+--     teacher_id char(8),
+--     content varchar(256),
+--     foreign key (teacher_id) references Teacher(id)
+-- );
+-- alter sequence tit_auto_inc owned by Title.id;
+
 
 -- 教育经历
 drop sequence if exists edu_auto_inc cascade;
@@ -70,11 +95,11 @@ create sequence fam_auto_inc
 drop table if exists Family cascade;
 create table Family(
     id integer primary key default nextval('fam_auto_inc'),
-    teacher char(8),
+    teacher_id char(8),
     name varchar(32),
     relation varchar(32),
     phone varchar(32),
-    foreign key (teacher) references Teacher(id)
+    foreign key (teacher_id) references Teacher(id)
 );
 alter sequence fam_auto_inc owned by Family.id;
 
@@ -100,12 +125,16 @@ alter sequence arc_auto_inc owned by Archive.id;
 
 
 
-insert into teacher(id,name,gender,entry_date,phone,position,job,email,ethnicity,political,identity,address,password)
- values('00000000','张三',1,'2000-01-30','18755005131','副院长','掌管一切','akmoex@gmail.com','汉','中共党员','341181200103223434','安徽省合肥市翡翠湖公寓南楼503','123456');
-insert into teacher(id,name,gender,entry_date,phone,position,job,email,ethnicity,political,identity,address,password)
- values('00000001','李三光',2,'2000-01-30','18755005131','副教授','教书','akmoex@outlook.com','汉','中共党员','341181200103223434','安徽省合肥市翡翠湖公寓南楼503','123456');
-insert into teacher(id,name,gender,entry_date,phone,position,job,email,ethnicity,political,identity,address,password)
- values('00000002','金毛',1,'2000-01-30','18755005131','副书记','科研','akmoex@hfut.edu.com','维吾尔','共青团员','341181200103223434','安徽省合肥市翡翠湖公寓南楼503','123456');
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
+ values('00000000','张三',1,'2000-01-30','18755005131','掌管一切','akmoex@gmail.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503','123456');
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
+ values('00000001','李三光',2,'2000-01-30','18755005131','教书','akmoex@outlook.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503','123456');
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
+ values('00000002','金毛',1,'2000-01-30','18755005131','科研','akmoex@hfut.edu.com','维吾尔族','共青团员','安徽省合肥市翡翠湖公寓南楼503','123456');
+
+
+
+
 
 
 insert into Department(name,establish_date,phone,t_count,address)
