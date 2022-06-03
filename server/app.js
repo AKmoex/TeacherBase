@@ -4,7 +4,7 @@ const express = require('express')
 
 const app = express()
 app.use(express.json())
-app.use('/api/file', express.static(__dirname + '/files'))
+app.use('/api/file', express.static(__dirname + '/static'))
 
 const mountRoutes = require('./routes')
 mountRoutes(app)

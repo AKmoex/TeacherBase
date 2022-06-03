@@ -9,7 +9,7 @@ const router = new Router()
 module.exports = router
 
 const multer = require('multer')
-const upload = multer({ dest: __dirname + '/../../files' })
+const upload = multer({ dest: __dirname + '/../../static' })
 router.post('/photo', upload.single('file'), async (req, res) => {
   const file = req.file
   file.url = '/static/' + file.filename
