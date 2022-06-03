@@ -1,7 +1,6 @@
 import { department as getAllDepartment } from '@/services/department'
 import { PageContainer } from '@ant-design/pro-layout'
 import {
-  Alert,
   AutoComplete,
   Button,
   DatePicker,
@@ -11,11 +10,12 @@ import {
   Radio,
   Select,
   Steps,
-  Table,
   Upload
 } from '@arco-design/web-react'
 import { IconLeft, IconRight } from '@arco-design/web-react/icon'
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import Form1 from './components/Form1'
+import Table3 from './components/Table3'
 const Step = Steps.Step
 const TextArea = Input.TextArea
 const FormItem = Form.Item
@@ -35,337 +35,34 @@ const noLabelLayout = {
   }
 }
 
-const EditableContext = React.createContext({})
-const EditableRow = (props) => {
-  const { children, record, className, ...rest } = props
-  const refForm = useRef(null)
-  const getForm = () => refForm.current
-
-  return (
-    <EditableContext.Provider value={{ getForm }}>
-      <Form
-        style={{ display: 'table-row' }}
-        children={children}
-        ref={refForm}
-        wrapper="tr"
-        wrapperProps={rest}
-        className={`${className} editable-row`}
-      />
-    </EditableContext.Provider>
-  )
-}
-
-const EditableCell = (props) => {
-  const { children, className, rowData, column, onHandleSave } = props
-
-  const ref = useRef(null)
-  const refInput = useRef(null)
-  const { getForm } = useContext(EditableContext)
-  const [editing, setEditing] = useState(false)
-
-  const handleClick = useCallback(
-    (e) => {
-      if (
-        editing &&
-        column.editable &&
-        ref.current &&
-        !ref.current.contains(e.target) &&
-        !e.target.classList.contains('js-demo-select-option')
-      ) {
-        cellValueChangeHandler(rowData[column.dataIndex])
-      }
-    },
-    [editing, rowData, column]
-  )
-
-  useEffect(() => {
-    editing && refInput.current && refInput.current.focus()
-  }, [editing])
-
-  useEffect(() => {
-    document.addEventListener('click', handleClick, true)
-    return () => {
-      document.removeEventListener('click', handleClick, true)
-    }
-  }, [handleClick])
-
-  const cellValueChangeHandler = (value) => {
-    if (column.dataIndex === 'fam_relation') {
-      const values = { [column.dataIndex]: value }
-      onHandleSave && onHandleSave({ ...rowData, ...values })
-      setTimeout(() => setEditing(!editing), 300)
-    } else {
-      const form = getForm()
-      form.validate([column.dataIndex], (errors, values) => {
-        if (!errors || !errors[column.dataIndex]) {
-          setEditing(!editing)
-          onHandleSave && onHandleSave({ ...rowData, ...values })
-        }
-      })
-    }
-  }
-
-  if (editing) {
-    if (column.dataIndex === 'fam_relation') {
-      return (
-        <div ref={ref}>
-          <FormItem
-            style={{ marginBottom: 0 }}
-            labelCol={{
-              span: 0
-            }}
-            wrapperCol={{
-              span: 24
-            }}
-            initialValue={rowData[column.dataIndex]}
-            field={column.dataIndex}
-            rules={[
-              {
-                required: true,
-                message: '关系必须选择'
-              }
-            ]}
-          >
-            <Select
-              onChange={cellValueChangeHandler}
-              defaultValue={rowData[column.dataIndex]}
-              options={['父亲', '母亲', '夫妻', '子女', '兄弟', '姐妹']}
-            />
-          </FormItem>
-        </div>
-      )
-    } else if (column.dataIndex === 'fam_phone') {
-      return (
-        <div ref={ref}>
-          <FormItem
-            style={{ marginBottom: 0 }}
-            labelCol={{
-              span: 0
-            }}
-            wrapperCol={{
-              span: 24
-            }}
-            initialValue={rowData[column.dataIndex]}
-            field={column.dataIndex}
-          >
-            <Input ref={refInput} onPressEnter={cellValueChangeHandler} />
-          </FormItem>
-        </div>
-      )
-    } else {
-      return (
-        <div ref={ref}>
-          <FormItem
-            style={{ marginBottom: 0 }}
-            labelCol={{
-              span: 0
-            }}
-            wrapperCol={{
-              span: 24
-            }}
-            initialValue={rowData[column.dataIndex]}
-            field={column.dataIndex}
-            rules={[
-              {
-                required: true,
-                message: '姓名不能为空'
-              }
-            ]}
-          >
-            <Input ref={refInput} onPressEnter={cellValueChangeHandler} />
-          </FormItem>
-        </div>
-      )
-    }
-    // return (
-    //   <div ref={ref}>
-    //     {column.dataIndex === 'fam_relation' ? (
-    //       <Select
-    //         onChange={cellValueChangeHandler}
-    //         defaultValue={rowData[column.dataIndex]}
-    //         options={['父亲', '母亲', '夫妻', '子女', '兄弟', '姐妹']}
-    //       />
-    //     ) : (
-    //       <FormItem
-    //         style={{ marginBottom: 0 }}
-    //         labelCol={{
-    //           span: 0
-    //         }}
-    //         wrapperCol={{
-    //           span: 24
-    //         }}
-    //         initialValue={rowData[column.dataIndex]}
-    //         field={column.dataIndex}
-    //         rules={[
-    //           {
-    //             required: true
-    //           }
-    //         ]}
-    //       >
-    //         <Input ref={refInput} onPressEnter={cellValueChangeHandler} />
-    //       </FormItem>
-    //     )}
-    //   </div>
-    // )
-  }
-
-  return (
-    <div
-      className={column.editable ? `editable-cell ${className}` : className}
-      onClick={() => column.editable && setEditing(!editing)}
-    >
-      {children}
-    </div>
-  )
-}
-
-const Table3 = () => {
-  const [count, setCount] = useState(5)
-  const [data, setData] = useState([
-    {
-      key: '1',
-      fam_name: 'Jane Doe',
-      fam_relation: '夫妻',
-      fam_phone: '18755005131'
-    }
-  ])
-
-  const columns = [
-    {
-      title: '姓名',
-      dataIndex: 'fam_name',
-      editable: true
-    },
-    {
-      title: '关系',
-      dataIndex: 'fam_relation',
-      editable: true
-    },
-    {
-      title: '联系电话',
-      dataIndex: 'fam_phone',
-      editable: true
-    },
-    {
-      title: 'Operation',
-      dataIndex: 'op',
-      render: (col, record) => (
-        <Button onClick={() => removeRow(record.key)} type="primary" status="danger">
-          Delete
-        </Button>
-      )
-    }
-  ]
-
-  const handleSave = (row) => {
-    const newData = [...data]
-    const index = newData.findIndex((item) => row.key === item.key)
-    newData.splice(index, 1, {
-      ...newData[index],
-      ...row
-    })
-    setData(newData)
-  }
-
-  const removeRow = (key) => {
-    setData(data.filter((item) => item.key !== key))
-  }
-
-  const addRow = () => {
-    setCount(count + 1)
-    setData(
-      data.concat({
-        key: `${count + 1}`,
-        fam_name: 'name',
-        fam_phone: 'phone',
-        fam_relation: '父亲'
-      })
-    )
-  }
-
-  return (
-    <div style={{ paddingLeft: 30, paddingRight: 30, marginBottom: 50 }}>
-      <Button style={{ marginBottom: 10 }} type="primary" onClick={addRow}>
-        Add
-      </Button>
-      <Table
-        data={data}
-        components={{
-          body: {
-            row: EditableRow,
-            cell: EditableCell
-          }
-        }}
-        columns={columns.map((column) =>
-          column.editable
-            ? {
-                ...column,
-                onCell: () => ({
-                  onHandleSave: handleSave
-                })
-              }
-            : column
-        )}
-        className="table-demo-editable-cell"
-      />
-    </div>
-  )
-}
-
 const AddTeacher = () => {
   const [current, setCurrent] = useState(1)
   const [forms, setForms] = useState([])
-  const [allData, setAllData] = useState({})
+  const [allData, setAllData] = useState({
+    tea_id: '',
+    tea_name: '',
+    tea_password: '',
+    tea_familys: []
+  })
+  const childRef3 = useRef()
+  const childRef1 = useRef()
   useEffect(() => {
-    setForms([<Form1 />, <Form2 />, <Table3 />])
+    setForms([
+      <Form1
+        ref={childRef1}
+        props={{
+          tea_id: allData.tea_id,
+          tea_name: allData.tea_name,
+          tea_password: allData.tea_password
+        }}
+      />,
+      <Form2 />,
+      <Table3 ref={childRef3} props={{ tea_familys: allData.tea_familys }} />
+    ])
   }, [])
 
-  const formRef1 = useRef()
   const formRef2 = useRef()
-  const Form1 = () => {
-    const [size, setSize] = useState('large')
-    const [department, setDepartment] = useState([])
 
-    useEffect(async () => {
-      const res = await getAllDepartment({ keyword: '%' })
-      setDepartment(res.data.department)
-    }, [])
-
-    return (
-      <div style={{ maxWidth: 650 }}>
-        <Alert
-          style={{ marginBottom: 10, marginLeft: 200, width: 400 }}
-          type="warning"
-          content="教师工号为 8 位且唯一"
-        />
-        <Alert
-          style={{ marginBottom: 20, marginLeft: 200, width: 400 }}
-          type="success"
-          content="初始登陆密码默认为123456"
-        />
-        <Form
-          ref={formRef1}
-          {...formItemLayout}
-          size={size}
-          initialValues={{
-            slider: 20,
-            'a.b[0].c': ['b']
-          }}
-          scrollToFirstError
-        >
-          <FormItem label="工号" field="tea_id" rules={[{ required: true }]}>
-            <Input placeholder="please enter..." />
-          </FormItem>
-          <FormItem label="姓名" field="tea_name" rules={[{ required: true }]}>
-            <Input placeholder="please enter..." />
-          </FormItem>
-          <FormItem label="登陆密码" field="tea_password" rules={[{ required: true }]}>
-            <Input.Password placeholder="please enter..." />
-          </FormItem>
-        </Form>
-      </div>
-    )
-  }
   const Form2 = () => {
     const [size, setSize] = useState('large')
     const [department, setDepartment] = useState([])
@@ -582,6 +279,7 @@ const AddTeacher = () => {
       </div>
     )
   }
+
   const renderContent = (step) => {
     return (
       <div
@@ -599,7 +297,7 @@ const AddTeacher = () => {
             type="secondary"
             disabled={current <= 1}
             onClick={() => {
-              console.log(allData)
+              console.log('BACK', allData)
               setCurrent(current - 1)
             }}
             style={{ paddingLeft: 8, marginLeft: 300, marginBottom: 40 }}
@@ -608,7 +306,7 @@ const AddTeacher = () => {
             Back
           </Button>
           <Button
-            disabled={current >= 3}
+            disabled={current >= 4}
             onClick={async () => {
               if (current == 1) {
                 //setCreateLoading(true)
@@ -645,6 +343,24 @@ const AddTeacher = () => {
                 console.log(formRef2.current.getFieldsValue())
                 setAllData(d2)
                 console.log(allData)
+                setCurrent(current + 1)
+              } else if (current === 3) {
+                const table3Data = childRef3.current.table3Data
+                console.log(table3Data)
+                const d3 = []
+                for (let i = 0; i < table3Data.length; i++) {
+                  d3.push({
+                    fam_name: table3Data[i].table3Data,
+                    fam_phone: table3Data.fam_phone === undefined ? '' : table3Data[i].fam_phone,
+                    fam_relation: table3Data[i].table3Data
+                  })
+                }
+                const oldD = allData
+                oldD.tea_familys = table3Data
+                setAllData({
+                  ...oldD
+                })
+
                 setCurrent(current + 1)
               }
             }}
