@@ -594,13 +594,13 @@ const AddTeacher = () => {
                       {fields.map((item, index) => {
                         return (
                           <div key={item.key}>
-                            <Form.Item style={{ marginBottom: 3, marginLeft: 70 }}>
+                            <Form.Item style={{ marginBottom: 3, marginLeft: 30 }}>
                               <Space>
                                 <FormItem
                                   layout="vertical"
                                   label="学位"
                                   field={item.field + '.type'}
-                                  rules={[{ required: true }]}
+                                  rules={[{ required: true, message: '请选择学位' }]}
                                   style={{ width: 80 }}
                                 >
                                   <Select
@@ -615,13 +615,12 @@ const AddTeacher = () => {
                                     allowClear
                                   />
                                 </FormItem>
-
                                 <Form.Item
-                                  label="起始时间"
+                                  label="起止时间"
                                   layout="vertical"
                                   field={item.field + '.date'}
-                                  rules={[{ required: true }]}
-                                  style={{ width: 300 }}
+                                  rules={[{ required: true, message: '请选择起止时间' }]}
+                                  style={{ width: 230 }}
                                 >
                                   <DatePicker.RangePicker
                                     mode={'month'}
@@ -629,13 +628,20 @@ const AddTeacher = () => {
                                     onSelect={onSelect}
                                   />
                                 </Form.Item>
-
                                 <Form.Item
                                   layout="vertical"
                                   label="学校/机构"
                                   field={item.field + '.school'}
-                                  rules={[{ required: true }]}
-                                  style={{ width: 300 }}
+                                  rules={[{ required: true, message: '请输入学校/机构' }]}
+                                  style={{ width: 230 }}
+                                >
+                                  <Input />
+                                </Form.Item>
+                                <Form.Item
+                                  layout="vertical"
+                                  label="学院/专业"
+                                  field={item.field + '.major'}
+                                  style={{ width: 250 }}
                                 >
                                   <Input />
                                 </Form.Item>
@@ -651,7 +657,7 @@ const AddTeacher = () => {
                           </div>
                         )
                       })}
-                      <Form.Item style={{ marginLeft: 70 }}>
+                      <Form.Item style={{ marginLeft: 30 }}>
                         <Button
                           onClick={() => {
                             add()

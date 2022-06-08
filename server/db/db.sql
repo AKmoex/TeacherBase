@@ -49,20 +49,6 @@ create table Teacher(
     foreign key (department_id) references department(id)
 );
 
--- drop sequence if exists tit_auto_inc cascade;
--- create sequence tit_auto_inc
---     minvalue 1
---     maxvalue 9999999999999
---     start with 1
---     increment by 1;
--- drop table if exists Title cascade;
--- create table Title(
---     id integer primary key default nextval('tit_auto_inc'),
---     teacher_id char(8),
---     content varchar(256),
---     foreign key (teacher_id) references Teacher(id)
--- );
--- alter sequence tit_auto_inc owned by Title.id;
 
 
 -- 教育经历
