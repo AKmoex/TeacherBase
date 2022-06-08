@@ -10,11 +10,12 @@ import {
   Modal,
   Radio,
   Select,
+  Space,
   Steps,
   Table,
   Upload
 } from '@arco-design/web-react'
-import { IconLeft, IconRight } from '@arco-design/web-react/icon'
+import { IconDelete, IconLeft, IconPlus, IconRight } from '@arco-design/web-react/icon'
 import React, {
   forwardRef,
   useCallback,
@@ -327,7 +328,14 @@ const AddTeacher = () => {
   }, [])
   const formRef1 = useRef()
   const formRef2 = useRef()
+  const formRef4 = useRef()
+  function onSelect(dateString, date) {
+    console.log('onSelect', dateString, date)
+  }
 
+  function onChange(dateString, date) {
+    console.log('onChange: ', dateString, date)
+  }
   const renderContent = (step) => {
     return (
       <div
@@ -556,6 +564,122 @@ const AddTeacher = () => {
             <Table3 ref={childRef3} props={{ tea_familys: allData.tea_familys }} />
           </div>
         }
+        {
+          <div style={{ maxWidth: 1200, display: current === 4 ? '' : 'none' }}>
+            <Form
+              ref={formRef4}
+              {...formItemLayout}
+              size={'large'}
+              scrollToFirstError
+              initialValues={{
+                tea_edu: []
+              }}
+              onValuesChange={(_, v) => {
+                console.log(_, v)
+              }}
+            >
+              <Alert
+                style={{ marginBottom: 10, marginLeft: 200, width: 350 }}
+                content="完善教育经历（从大学起）"
+              />
+              <Alert
+                style={{ marginBottom: 10, marginLeft: 200, width: 350 }}
+                content="起始时间必须合法"
+                type="warning"
+              />
+              <Form.List field="tea_edu">
+                {(fields, { add, remove, move }) => {
+                  return (
+                    <div>
+                      {fields.map((item, index) => {
+                        return (
+                          <div key={item.key}>
+                            <Form.Item style={{ marginBottom: 3, marginLeft: 70 }}>
+                              <Space>
+                                <FormItem
+                                  layout="vertical"
+                                  label="学位"
+                                  field={item.field + '.type'}
+                                  rules={[{ required: true }]}
+                                  style={{ width: 80 }}
+                                >
+                                  <Select
+                                    style={{ fontSize: 16 }}
+                                    placeholder="please select"
+                                    options={[
+                                      { label: '本科', value: '本科' },
+                                      { label: '硕士', value: '硕士' },
+                                      { label: '博士', value: '博士' },
+                                      { label: '博士后', value: '博士后' }
+                                    ]}
+                                    allowClear
+                                  />
+                                </FormItem>
+
+                                <Form.Item
+                                  label="起始时间"
+                                  layout="vertical"
+                                  field={item.field + '.date'}
+                                  rules={[{ required: true }]}
+                                  style={{ width: 300 }}
+                                >
+                                  <DatePicker.RangePicker
+                                    mode={'month'}
+                                    onChange={onChange}
+                                    onSelect={onSelect}
+                                  />
+                                </Form.Item>
+
+                                <Form.Item
+                                  layout="vertical"
+                                  label="学校/机构"
+                                  field={item.field + '.school'}
+                                  rules={[{ required: true }]}
+                                  style={{ width: 300 }}
+                                >
+                                  <Input />
+                                </Form.Item>
+
+                                <Button
+                                  icon={<IconDelete />}
+                                  shape="circle"
+                                  status="danger"
+                                  onClick={() => remove(index)}
+                                ></Button>
+                              </Space>
+                            </Form.Item>
+                          </div>
+                        )
+                      })}
+                      <Form.Item style={{ marginLeft: 70 }}>
+                        <Button
+                          onClick={() => {
+                            add()
+                          }}
+                          type="primary"
+                          icon={<IconPlus />}
+                        >
+                          添加
+                        </Button>
+
+                        <Button
+                          style={{ marginLeft: 20 }}
+                          onClick={() => {
+                            formRef4.current.resetFields()
+                          }}
+                          status="danger"
+                          icon={<IconDelete />}
+                        >
+                          重置
+                        </Button>
+                      </Form.Item>
+                    </div>
+                  )
+                }}
+              </Form.List>
+            </Form>
+          </div>
+        }
         <div>
           <Button
             type="secondary"
@@ -571,10 +695,9 @@ const AddTeacher = () => {
             Back
           </Button>
           <Button
-            disabled={current >= 4}
+            disabled={current >= 6}
             onClick={async () => {
               if (current == 1) {
-                //setCreateLoading(true)
                 await formRef1.current.validate()
                 const d1 = {
                   tea_id: formRef1.current.getFieldsValue().tea_id,
@@ -584,8 +707,6 @@ const AddTeacher = () => {
                 setAllData(d1)
 
                 setCurrent(current + 1)
-                //console.log(allData)
-                // console.log(result.data)
               } else if (current === 2) {
                 await formRef2.current.validate()
                 const d2 = {
@@ -607,7 +728,14 @@ const AddTeacher = () => {
                 }
                 console.log(formRef2.current.getFieldsValue())
                 setAllData(d2)
-                console.log(allData)
+
+                const D = {
+                  ...allData,
+                  ...d2
+                }
+                setAllData({
+                  ...D
+                })
                 setCurrent(current + 1)
               } else if (current === 3) {
                 const table3Data = childRef3.current.table3Data
@@ -627,6 +755,21 @@ const AddTeacher = () => {
                 })
 
                 setCurrent(current + 1)
+              } else if (current == 4) {
+                await formRef4.current.validate()
+                if (formRef4.current.getFieldsValue().tea_edu === undefined) {
+                  setCurrent(current + 1)
+                } else {
+                  const d2 = {
+                    tea_edu: formRef4.current.getFieldsValue().tea_edu
+                  }
+                  const oldD = allData
+                  oldD.tea_edu = d2
+                  setAllData({
+                    ...oldD
+                  })
+                  setCurrent(current + 1)
+                }
               }
             }}
             style={{ marginLeft: 20, paddingRight: 8 }}

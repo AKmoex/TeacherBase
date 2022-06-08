@@ -75,12 +75,14 @@ create sequence edu_auto_inc
 drop table if exists Education cascade;
 create table Education(
     id integer primary key default nextval('edu_auto_inc'),
-    teacher char(8),
+    teacher_id char(8),
     start_date date,
     end_date date,
     school varchar(256),
     Degree varchar(32) check (Degree in ('本科','硕士','博士','博士后')),
-    foreign key (teacher) references Teacher(id)
+    foreign key (teacher_id) references Teacher(id),
+    -- 日期约束
+    check(end_date=null or start_date<end_date)
 );
 alter sequence edu_auto_inc owned by Education.id;
 
