@@ -25,7 +25,6 @@ import React, {
   useRef,
   useState
 } from 'react'
-
 const Step = Steps.Step
 const TextArea = Input.TextArea
 const FormItem = Form.Item
@@ -329,6 +328,7 @@ const AddTeacher = () => {
   const formRef1 = useRef()
   const formRef2 = useRef()
   const formRef4 = useRef()
+  const formRef5 = useRef()
   function onSelect(dateString, date) {
     console.log('onSelect', dateString, date)
   }
@@ -336,6 +336,7 @@ const AddTeacher = () => {
   function onChange(dateString, date) {
     console.log('onChange: ', dateString, date)
   }
+
   const renderContent = (step) => {
     return (
       <div
@@ -686,6 +687,100 @@ const AddTeacher = () => {
             </Form>
           </div>
         }
+        {
+          <div style={{ maxWidth: 1200, display: current === 5 ? '' : 'none' }}>
+            <Form
+              ref={formRef5}
+              {...formItemLayout}
+              size={'large'}
+              scrollToFirstError
+              initialValues={{
+                tea_job: []
+              }}
+              onValuesChange={(_, v) => {
+                console.log(_, v)
+              }}
+            >
+              <Form.List field="tea_job">
+                {(fields, { add, remove, move }) => {
+                  return (
+                    <div>
+                      {fields.map((item, index) => {
+                        return (
+                          <div key={item.key}>
+                            <Form.Item style={{ marginBottom: 3, marginLeft: 30 }}>
+                              <Space>
+                                <Form.Item
+                                  label="起止时间"
+                                  layout="vertical"
+                                  field={item.field + '.date'}
+                                  rules={[{ required: true, message: '请选择起止时间' }]}
+                                  style={{ width: 230 }}
+                                >
+                                  <DatePicker.RangePicker
+                                    mode={'month'}
+                                    onChange={onChange}
+                                    onSelect={onSelect}
+                                  />
+                                </Form.Item>
+                                <Form.Item
+                                  layout="vertical"
+                                  label="地点"
+                                  field={item.field + '.location'}
+                                  rules={[{ required: true, message: '请输入工作公司/机构等' }]}
+                                  style={{ width: 230 }}
+                                >
+                                  <Input />
+                                </Form.Item>
+                                <Form.Item
+                                  layout="vertical"
+                                  label="内容/备注"
+                                  field={item.field + '.content'}
+                                  style={{ width: 250 }}
+                                >
+                                  <TextArea autoSize />
+                                </Form.Item>
+
+                                <Button
+                                  icon={<IconDelete />}
+                                  shape="circle"
+                                  status="danger"
+                                  onClick={() => remove(index)}
+                                ></Button>
+                              </Space>
+                            </Form.Item>
+                          </div>
+                        )
+                      })}
+                      <Form.Item style={{ marginLeft: 30 }}>
+                        <Button
+                          onClick={() => {
+                            add()
+                          }}
+                          type="primary"
+                          icon={<IconPlus />}
+                        >
+                          添加
+                        </Button>
+
+                        <Button
+                          style={{ marginLeft: 20 }}
+                          onClick={() => {
+                            formRef5.current.resetFields()
+                          }}
+                          status="danger"
+                          icon={<IconDelete />}
+                        >
+                          重置
+                        </Button>
+                      </Form.Item>
+                    </div>
+                  )
+                }}
+              </Form.List>
+            </Form>
+          </div>
+        }
         <div>
           <Button
             type="secondary"
@@ -701,7 +796,7 @@ const AddTeacher = () => {
             Back
           </Button>
           <Button
-            disabled={current >= 6}
+            disabled={current >= 7}
             onClick={async () => {
               if (current == 1) {
                 await formRef1.current.validate()
@@ -771,6 +866,21 @@ const AddTeacher = () => {
                   }
                   const oldD = allData
                   oldD.tea_edu = d2
+                  setAllData({
+                    ...oldD
+                  })
+                  setCurrent(current + 1)
+                }
+              } else if (current == 5) {
+                await formRef5.current.validate()
+                if (formRef5.current.getFieldsValue().tea_job === undefined) {
+                  setCurrent(current + 1)
+                } else {
+                  const d2 = {
+                    tea_job: formRef5.current.getFieldsValue().tea_job
+                  }
+                  const oldD = allData
+                  oldD.tea_job = d2
                   setAllData({
                     ...oldD
                   })
