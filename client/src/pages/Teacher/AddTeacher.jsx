@@ -1,4 +1,5 @@
 import { department as getAllDepartment } from '@/services/department'
+import { addTeacherDetails } from '@/services/teacher'
 import { PageContainer } from '@ant-design/pro-layout'
 import {
   Alert,
@@ -204,8 +205,14 @@ const EditableCell = (props) => {
 const Table3 = forwardRef((props, ref) => {
   const { tea_familys } = props.props
   console.log('Tbles', props.props.tea_familys)
+
   const [count, setCount] = useState(() => {
-    return props.props.tea_familys.length || 0
+    if (props.props.tea_familys == undefined || props.props.tea_familys.length == undefined) {
+      return 0
+    } else {
+      return props.props.tea_familys.length
+    }
+    //return props.props.tea_familys.length || 0
   })
 
   const [table3Data, setTable3Data] = useState(() => {
@@ -316,6 +323,7 @@ const AddTeacher = () => {
   const [form2department, setForm2Department] = useState([])
   const [department, setDepartment] = useState([])
   const childRef3 = useRef()
+  const [file, setFile] = React.useState()
 
   useEffect(async () => {
     const res = await getAllDepartment({ keyword: '%' })
@@ -624,6 +632,22 @@ const AddTeacher = () => {
       </div>
     )
   }
+  // const onUploadChange = (files) => {
+  //   console.log(files)
+  //   const newFiles = files.map((item) => ({
+  //     ...item,
+  //     percent: 80,
+  //     status: 'uploading'
+  //   }))
+
+  //   setFileList(newFiles)
+  // }
+  // const onUploadChange={(_, currentFile) => {
+  //   setFile({
+  //     ...currentFile,
+  //     url: URL.createObjectURL(currentFile.originFile),
+  //   })
+  // }}
 
   const renderContent = (step) => {
     return (
@@ -679,7 +703,16 @@ const AddTeacher = () => {
                   limit={1}
                   name="file"
                   action="/api/file/photo"
+                  onChange={(_, currentFile) => {
+                    if (currentFile.status == 'done') {
+                      console.log(currentFile.response.url)
+                      formRef2.current.setFieldsValue({
+                        tea_photo: currentFile.response.url
+                      })
+                    }
+                  }}
                   onPreview={(file) => {
+                    console.log(file)
                     Modal.info({
                       title: 'Preview',
                       content: (
@@ -698,7 +731,7 @@ const AddTeacher = () => {
                   <Radio value="2">女</Radio>
                 </Radio.Group>
               </FormItem>
-              <FormItem label="出生日期" field="tea_brithday">
+              <FormItem label="出生日期" field="tea_birthday">
                 <DatePicker />
               </FormItem>
               <FormItem
@@ -983,13 +1016,13 @@ const AddTeacher = () => {
               size={'large'}
               scrollToFirstError
               initialValues={{
-                tea_job: []
+                tea_work: []
               }}
               onValuesChange={(_, v) => {
                 console.log(_, v)
               }}
             >
-              <Form.List field="tea_job">
+              <Form.List field="tea_work">
                 {(fields, { add, remove, move }) => {
                   return (
                     <div>
@@ -1094,7 +1127,7 @@ const AddTeacher = () => {
             Back
           </Button>
           <Button
-            disabled={current >= 7}
+            disabled={current >= 8}
             onClick={async () => {
               if (current == 1) {
                 await formRef1.current.validate()
@@ -1107,9 +1140,15 @@ const AddTeacher = () => {
 
                 setCurrent(current + 1)
               } else if (current === 2) {
+                console.log(file)
+                //console.log(file.url)
+
                 await formRef2.current.validate()
                 const d2 = {
-                  tea_photo: '',
+                  tea_photo:
+                    formRef2.current.getFieldsValue().tea_photo === undefined
+                      ? ''
+                      : formRef2.current.getFieldsValue().tea_photo,
                   tea_gender: formRef2.current.getFieldsValue().tea_gender,
                   tea_birthday:
                     formRef2.current.getFieldsValue().tea_birthday === undefined
@@ -1138,22 +1177,33 @@ const AddTeacher = () => {
                 setCurrent(current + 1)
               } else if (current === 3) {
                 const table3Data = childRef3.current.table3Data
-                console.log(table3Data)
-                const d3 = []
-                for (let i = 0; i < table3Data.length; i++) {
-                  d3.push({
-                    fam_name: table3Data[i].table3Data,
-                    fam_phone: table3Data.fam_phone === undefined ? '' : table3Data[i].fam_phone,
-                    fam_relation: table3Data[i].table3Data
-                  })
-                }
-                const oldD = allData
-                oldD.tea_familys = table3Data
-                setAllData({
-                  ...oldD
-                })
+                if (table3Data == undefined || table3Data.length == undefined) {
+                  const d3 = []
 
-                setCurrent(current + 1)
+                  const oldD = allData
+                  oldD.tea_familys = d3
+                  setAllData({
+                    ...oldD
+                  })
+                  setCurrent(current + 1)
+                } else {
+                  console.log(table3Data)
+                  const d3 = []
+                  for (let i = 0; i < table3Data.length; i++) {
+                    d3.push({
+                      fam_name: table3Data[i].table3Data,
+                      fam_phone: table3Data.fam_phone === undefined ? '' : table3Data[i].fam_phone,
+                      fam_relation: table3Data[i].table3Data
+                    })
+                  }
+                  const oldD = allData
+                  oldD.tea_familys = d3
+                  setAllData({
+                    ...oldD
+                  })
+
+                  setCurrent(current + 1)
+                }
               } else if (current == 4) {
                 await formRef4.current.validate()
                 if (formRef4.current.getFieldsValue().tea_edu === undefined) {
@@ -1171,14 +1221,14 @@ const AddTeacher = () => {
                 }
               } else if (current == 5) {
                 await formRef5.current.validate()
-                if (formRef5.current.getFieldsValue().tea_job === undefined) {
+                if (formRef5.current.getFieldsValue().tea_work === undefined) {
                   setCurrent(current + 1)
                 } else {
                   const d2 = {
-                    tea_job: formRef5.current.getFieldsValue().tea_job
+                    tea_work: formRef5.current.getFieldsValue().tea_work
                   }
                   const oldD = allData
-                  oldD.tea_job = d2
+                  oldD.tea_work = d2
                   setAllData({
                     ...oldD
                   })
@@ -1201,6 +1251,7 @@ const AddTeacher = () => {
                 setAllData({
                   ...oldD
                 })
+                const result = await addTeacherDetails(allData)
                 // setCurrent(current + 1)
               }
             }}
@@ -1233,41 +1284,18 @@ const AddTeacher = () => {
             onChange={setCurrent}
             style={{ width: 200 }}
           >
+            <Step style={{ marginBottom: -12 }} title="账号信息" description="教师的工号、密码" />
+            <Step style={{ marginBottom: -12 }} title="基本信息" description="输入教师的基本信息" />
+            <Step style={{ marginBottom: -12 }} title="家庭关系" description="添加教师的家庭成员" />
+            <Step style={{ marginBottom: -12 }} title="教育经历" description="完善教育经历" />
+            <Step style={{ marginBottom: -12 }} title="工作经历" description="完善工作经历" />
+            <Step style={{ marginBottom: -12 }} title="奖惩记录" description="添加教师的奖惩记录" />
             <Step
-              style={{ marginBottom: -5 }}
-              title="账号信息"
-              description="This is a description"
+              style={{ marginBottom: -10 }}
+              title="科研项目"
+              description="教师的科研项目或成果"
             />
-            <Step
-              style={{ marginBottom: -5 }}
-              title="基本信息"
-              description="This is a description"
-            />
-            <Step
-              style={{ marginBottom: -5 }}
-              title="家庭关系"
-              description="This is a description"
-            />
-            <Step
-              style={{ marginBottom: -5 }}
-              title="教育经历"
-              description="This is a description"
-            />
-            <Step
-              style={{ marginBottom: -5 }}
-              title="工作经历"
-              description="This is a description"
-            />
-            <Step
-              style={{ marginBottom: -5 }}
-              title="奖惩记录"
-              description="This is a description"
-            />
-            <Step
-              style={{ marginBottom: -5 }}
-              title="科研成果"
-              description="This is a description"
-            />
+            <Step style={{ marginBottom: -10 }} title="完成添加" description="添加结果页面" />
           </Steps>
         </div>
         {renderContent(current)}
