@@ -27,12 +27,12 @@ alter sequence dep_auto_inc owned by department.id;
 
 drop table if exists Teacher cascade;
 create table Teacher(
-    id char(8) primary key,
-    name varchar(32),
+    id char(8) primary key,-- 工号
+    name varchar(32), -- 姓名
     gender tinyint default 0 check (gender in (0,1,2)),
-    phone varchar(32),
-    email varchar(256),
-    birthday date,
+    phone varchar(32), -- 手机号码
+    email varchar(256), -- 邮箱
+    birthday date, -- 出生日期
     photo varchar(256), -- 照片
 
     term_date date, -- 离职时间
@@ -45,10 +45,9 @@ create table Teacher(
     address varchar(256), -- 通讯地址
     
     title varchar(256), -- 职称
-    password varchar(100) not null default '',
+    password varchar(100) not null default '', --密码
     foreign key (department_id) references department(id)
 );
-
 
 
 -- 教育经历
@@ -181,3 +180,7 @@ insert into Department(name,establish_date,phone,t_count,address)
  values('机械工程学院','2021-11-30','0551-62901326',25,'安徽省合肥市屯溪路193号');
   insert into Department(name,establish_date,phone,t_count,address)
  values('电气与自动化工程学院','2021-11-30','0551-6290-1408',25,'安徽省合肥市屯溪路193号逸夫科教楼');
+
+
+drop view if exists TeacherInfoView cascade;
+create view TeacherInfoView as select distinct T.*,D.name as department_name from Teacher T left outer join Department D on T.department_id=D.id  ;

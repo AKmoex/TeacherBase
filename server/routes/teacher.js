@@ -16,7 +16,7 @@ module.exports = router
 router.get('/', authMiddleware(), async (req, res) => {
   if (req.id === '00000000') {
     try {
-      const { rows } = await db.query('SELECT * FROM teacher')
+      const { rows } = await db.query('SELECT * FROM TeacherInfoView')
 
       var array = [1, 2, 3, 4]
       remove(rows, function (n) {
@@ -50,6 +50,7 @@ router.get('/', authMiddleware(), async (req, res) => {
         }
       })
     } catch (err) {
+      console.log(err)
       res.send({
         success: false,
         data: {
