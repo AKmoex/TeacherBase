@@ -306,6 +306,7 @@ const AddTeacher = () => {
   const [current, setCurrent] = useState(1)
   const [forms, setForms] = useState([])
   const [table6Data, setTable6Data] = useState([])
+  const [table7Data, setTable7Data] = useState([])
   const [allData, setAllData] = useState({
     tea_id: '',
     tea_name: '',
@@ -475,6 +476,141 @@ const AddTeacher = () => {
               </Radio.Group>
             </FormItem>
             <FormItem label="详细说明" required field="detail">
+              <Input.TextArea
+                maxLength={{ length: 60, errorOnly: false }}
+                showWordLimit
+                placeholder="More than 50 letters will be error"
+                //wrapperStyle={{ width: 300,  }}
+                autoSize={{ minRows: 2, maxRows: 6 }}
+              />
+            </FormItem>
+          </Form>
+        </Modal>
+      </div>
+    )
+  }
+
+  const Table7 = () => {
+    const [selectedRowKeys, setSelectedRowKeys] = useState([])
+    const [visible, setVisible] = useState(false)
+    const [confirmLoading, setConfirmLoading] = useState(false)
+
+    const [form] = Form.useForm()
+
+    const columns = [
+      {
+        title: '科研项目',
+        dataIndex: 'title'
+      },
+      {
+        title: '时间',
+        dataIndex: 'obtain_date'
+      },
+      {
+        title: '描述',
+        dataIndex: 'detail'
+      }
+    ]
+    const onOk = async () => {
+      await form.validate()
+      const d = form.getFieldsValue()
+
+      if (d.detail == undefined) {
+        d.detail = ''
+      }
+      const d1 = table7Data
+      if (table7Data.length == 0) {
+        d.id = 0
+      } else {
+        d.id = table7Data[table7Data.length - 1].id + 1
+      }
+
+      d1.push(d)
+
+      setConfirmLoading(true)
+      await setTable7Data(d1)
+      setConfirmLoading(false)
+      setVisible(false)
+      console.log(d1)
+    }
+
+    const formItemLayout = {
+      labelCol: {
+        span: 4
+      },
+      wrapperCol: {
+        span: 20
+      }
+    }
+    return (
+      <div style={{ marginLeft: 40, marginRight: 40 }}>
+        <Button onClick={() => setVisible(true)} type="primary" icon={<IconPlus />}>
+          添加
+        </Button>
+        <Button
+          //disabled={true}
+          style={{ marginLeft: 20 }}
+          onClick={() => {
+            console.log(selectedRowKeys)
+            const d = cloneDeep(table6Data)
+
+            remove(d, function (n) {
+              for (let i = 0; i < selectedRowKeys.length; i++) {
+                if (n.id == selectedRowKeys[i]) {
+                  return true
+                }
+              }
+            })
+            setTable6Data(d)
+            //console.log(table6Data)
+          }}
+          status="danger"
+          icon={<IconDelete />}
+        >
+          删除
+        </Button>
+        <Table
+          style={{ marginTop: 20 }}
+          rowKey="id"
+          columns={columns}
+          data={table7Data}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: (selectedRowKeys, selectedRows) => {
+              console.log('onChange:', selectedRowKeys, selectedRows)
+              setSelectedRowKeys(selectedRowKeys)
+            },
+            onSelect: (selected, record, selectedRows) => {
+              //console.log(table6Data)
+              console.log('onSelect:', selected, record, selectedRows)
+            },
+            checkboxProps: (record) => {
+              return {
+                disabled: record.id === '4'
+              }
+            }
+          }}
+        />
+        <Modal
+          title="新增科研项目"
+          visible={visible}
+          onOk={onOk}
+          confirmLoading={confirmLoading}
+          onCancel={() => setVisible(false)}
+        >
+          <Form
+            {...formItemLayout}
+            form={form}
+            labelCol={{ style: { flexBasis: 90 } }}
+            wrapperCol={{ style: { flexBasis: 'calc(100% - 90px)' } }}
+          >
+            <FormItem label="项目名称" field="title" rules={[{ required: true }]}>
+              <Input placeholder="" />
+            </FormItem>
+            <FormItem label="时间" required field="obtain_date" rules={[{ required: true }]}>
+              <DatePicker />
+            </FormItem>
+            <FormItem label="描述" required field="detail">
               <Input.TextArea
                 maxLength={{ length: 60, errorOnly: false }}
                 showWordLimit
@@ -938,6 +1074,11 @@ const AddTeacher = () => {
             <Table6></Table6>
           </div>
         }
+        {
+          <div style={{ maxWidth: 1000, marginBottom: 20, display: current === 7 ? '' : 'none' }}>
+            <Table7></Table7>
+          </div>
+        }
         <div>
           <Button
             type="secondary"
@@ -1052,6 +1193,15 @@ const AddTeacher = () => {
                   ...oldD
                 })
                 setCurrent(current + 1)
+              } else if (current == 7) {
+                console.log(allData)
+
+                const oldD = allData
+                oldD.tea_research = table7Data
+                setAllData({
+                  ...oldD
+                })
+                // setCurrent(current + 1)
               }
             }}
             style={{ marginLeft: 20, paddingRight: 8 }}

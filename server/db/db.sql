@@ -113,6 +113,25 @@ create table Archive(
 alter sequence arc_auto_inc owned by Archive.id;
 
 
+-- 科研项目
+drop sequence if exists res_auto_inc cascade;
+create sequence res_auto_inc
+    minvalue 1
+    maxvalue 9999999999999
+    start with 1
+    increment by 1;
+drop table if exists Research cascade;
+create table Research(
+    id integer primary key default nextval('res_auto_inc'),
+    teacher_id char(8),
+    title varchar(256),
+    obtain_date date,
+    detail text,
+    foreign key (teacher_id) references Teacher(id)
+);
+alter sequence res_auto_inc owned by Research.id;
+
+
 
 
 insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
