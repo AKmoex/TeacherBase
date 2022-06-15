@@ -18,15 +18,7 @@ import {
 } from '@arco-design/web-react'
 import { IconDelete, IconLeft, IconPlus, IconRight } from '@arco-design/web-react/icon'
 import { cloneDeep, remove } from 'lodash'
-import React, {
-  forwardRef,
-  useCallback,
-  useContext,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState
-} from 'react'
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 const Step = Steps.Step
 const TextArea = Input.TextArea
@@ -202,116 +194,131 @@ const EditableCell = (props) => {
   )
 }
 
-const Table3 = forwardRef((props, ref) => {
-  const { tea_familys } = props.props
-  console.log('Tbles', props.props.tea_familys)
+// const Table3 = forwardRef((props, ref) => {
+//   const { tea_familys } = props.props
+//   if (tea_familys == undefined) {
+//   } else {
+//     for (let i = props.props.tea_familys.length - 1; i >= 0; i--) {
+//       if (
+//         props.props.tea_familys[i].fam_name == undefined ||
+//         props.props.tea_familys[i].fam_phone == undefined ||
+//         props.props.tea_familys[i].fam_relation == undefined
+//       ) {
+//         props.props.tea_familys.splice(i, 1)
+//       }
+//     }
+//   }
 
-  const [count, setCount] = useState(() => {
-    if (props.props.tea_familys == undefined || props.props.tea_familys.length == undefined) {
-      return 0
-    } else {
-      return props.props.tea_familys.length
-    }
-    //return props.props.tea_familys.length || 0
-  })
+//   console.log('tea_familys', tea_familys)
+//   console.log('Tbles', props.props.tea_familys)
 
-  const [table3Data, setTable3Data] = useState(() => {
-    return tea_familys || []
-  })
-  useEffect(() => {
-    setTable3Data(props.props.tea_familys)
-  }, [props.props.tea_familys])
-  useImperativeHandle(ref, () => ({
-    table3Data: table3Data
-  }))
-  const columns = [
-    {
-      title: '姓名',
-      dataIndex: 'fam_name',
-      editable: true
-    },
-    {
-      title: '关系',
-      dataIndex: 'fam_relation',
-      editable: true
-    },
-    {
-      title: '联系电话',
-      dataIndex: 'fam_phone',
-      editable: true
-    },
-    {
-      title: 'Operation',
-      dataIndex: 'op',
-      render: (col, record) => (
-        <Button onClick={() => removeRow(record.key)} type="primary" status="danger">
-          Delete
-        </Button>
-      )
-    }
-  ]
+//   const [count, setCount] = useState(() => {
+//     // if (props.props.tea_familys == undefined || props.props.tea_familys.length == undefined) {
+//     //   return 0
+//     // } else {
+//     //   return props.props.tea_familys.length
+//     // }
+//     return props.props.tea_familys.length || 0
+//   })
 
-  const handleSave = (row) => {
-    const newData = [...table3Data]
-    const index = newData.findIndex((item) => row.key === item.key)
-    newData.splice(index, 1, {
-      ...newData[index],
-      ...row
-    })
-    setTable3Data(newData)
-  }
+//   const [table3Data, setTable3Data] = useState(() => {
+//     return tea_familys || []
+//   })
+//   useEffect(() => {
+//     setTable3Data(props.props.tea_familys)
+//   }, [props.props.tea_familys])
+//   useImperativeHandle(ref, () => ({
+//     table3Data: table3Data
+//   }))
+//   const columns = [
+//     {
+//       title: '姓名',
+//       dataIndex: 'fam_name',
+//       editable: true
+//     },
+//     {
+//       title: '关系',
+//       dataIndex: 'fam_relation',
+//       editable: true
+//     },
+//     {
+//       title: '联系电话',
+//       dataIndex: 'fam_phone',
+//       editable: true
+//     },
+//     {
+//       title: 'Operation',
+//       dataIndex: 'op',
+//       render: (col, record) => (
+//         <Button onClick={() => removeRow(record.key)} type="primary" status="danger">
+//           Delete
+//         </Button>
+//       )
+//     }
+//   ]
 
-  const removeRow = (key) => {
-    setTable3Data(table3Data.filter((item) => item.key !== key))
-  }
+//   const handleSave = (row) => {
+//     const newData = [...table3Data]
+//     const index = newData.findIndex((item) => row.key === item.key)
+//     newData.splice(index, 1, {
+//       ...newData[index],
+//       ...row
+//     })
+//     setTable3Data(newData)
+//   }
 
-  const addRow = () => {
-    setCount(count + 1)
-    var temp_d3 = table3Data
-    if (temp_d3 == undefined) {
-      temp_d3 = []
-    }
-    temp_d3.push({
-      key: `${count + 1}`,
-      fam_name: 'name',
-      fam_phone: 'phone',
-      fam_relation: '父亲'
-    })
-    setTable3Data(temp_d3)
-  }
+//   const removeRow = (key) => {
+//     setTable3Data(table3Data.filter((item) => item.key !== key))
+//   }
 
-  return (
-    <div style={{ paddingLeft: 30, paddingRight: 30, marginBottom: 50 }}>
-      <Button style={{ marginBottom: 10 }} type="primary" onClick={addRow}>
-        Add
-      </Button>
-      <Table
-        data={table3Data}
-        components={{
-          body: {
-            row: EditableRow,
-            cell: EditableCell
-          }
-        }}
-        columns={columns.map((column) =>
-          column.editable
-            ? {
-                ...column,
-                onCell: () => ({
-                  onHandleSave: handleSave
-                })
-              }
-            : column
-        )}
-        className="table-demo-editable-cell"
-      />
-    </div>
-  )
-})
+//   const addRow = () => {
+//     setCount(count + 1)
+//     var temp_d3 = table3Data
+//     if (temp_d3 == undefined) {
+//       temp_d3 = []
+//     }
+//     temp_d3.push({
+//       key: `${count + 1}`,
+//       fam_name: 'name',
+//       fam_phone: 'phone',
+//       fam_relation: '父亲'
+//     })
+//     setTable3Data(temp_d3)
+//   }
+
+//   return (
+//     <div style={{ paddingLeft: 30, paddingRight: 30, marginBottom: 50 }}>
+//       <Button style={{ marginBottom: 10 }} type="primary" onClick={addRow}>
+//         Add
+//       </Button>
+//       <Table
+//         data={table3Data}
+//         components={{
+//           body: {
+//             row: EditableRow,
+//             cell: EditableCell
+//           }
+//         }}
+//         columns={columns.map((column) =>
+//           column.editable
+//             ? {
+//                 ...column,
+//                 onCell: () => ({
+//                   onHandleSave: handleSave
+//                 })
+//               }
+//             : column
+//         )}
+//         className="table-demo-editable-cell"
+//       />
+//     </div>
+//   )
+// })
 
 const AddTeacher = () => {
   const [current, setCurrent] = useState(1)
   const [forms, setForms] = useState([])
+  const [table3Data, setTable3Data] = useState([])
   const [table6Data, setTable6Data] = useState([])
   const [table7Data, setTable7Data] = useState([])
   const [allData, setAllData] = useState({
@@ -347,6 +354,139 @@ const AddTeacher = () => {
 
   function onChange(dateString, date) {
     console.log('onChange: ', dateString, date)
+  }
+  const Table3 = () => {
+    const [selectedRowKeys, setSelectedRowKeys] = useState([])
+    const [visible, setVisible] = useState(false)
+    const [confirmLoading, setConfirmLoading] = useState(false)
+
+    const [form] = Form.useForm()
+
+    const columns = [
+      {
+        title: '姓名',
+        dataIndex: 'fam_name'
+      },
+      {
+        title: '关系',
+        dataIndex: 'fam_relation'
+      },
+      {
+        title: '联系电话',
+        dataIndex: 'fam_phone'
+      }
+    ]
+    const onOk = async () => {
+      await form.validate()
+      const d = form.getFieldsValue()
+
+      const d1 = table6Data
+      if (table6Data.length == 0) {
+        d.id = 0
+      } else {
+        d.id = table6Data[table6Data.length - 1].id + 1
+      }
+
+      d1.push(d)
+
+      setConfirmLoading(true)
+      await setTable3Data(d1)
+      setConfirmLoading(false)
+      setVisible(false)
+      console.log(d1)
+    }
+
+    const formItemLayout = {
+      labelCol: {
+        span: 4
+      },
+      wrapperCol: {
+        span: 20
+      }
+    }
+    return (
+      <div style={{ marginLeft: 40, marginRight: 40 }}>
+        <Button onClick={() => setVisible(true)} type="primary" icon={<IconPlus />}>
+          添加
+        </Button>
+        <Button
+          //disabled={true}
+          style={{ marginLeft: 20 }}
+          onClick={() => {
+            console.log(selectedRowKeys)
+            const d = cloneDeep(table6Data)
+
+            remove(d, function (n) {
+              for (let i = 0; i < selectedRowKeys.length; i++) {
+                if (n.id == selectedRowKeys[i]) {
+                  return true
+                }
+              }
+            })
+            setTable3Data(d)
+            //console.log(table6Data)
+          }}
+          status="danger"
+          icon={<IconDelete />}
+        >
+          删除
+        </Button>
+        <Table
+          style={{ marginTop: 20 }}
+          rowKey="id"
+          columns={columns}
+          data={table3Data}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: (selectedRowKeys, selectedRows) => {
+              console.log('onChange:', selectedRowKeys, selectedRows)
+              setSelectedRowKeys(selectedRowKeys)
+            },
+            onSelect: (selected, record, selectedRows) => {
+              //console.log(table6Data)
+              console.log('onSelect:', selected, record, selectedRows)
+            },
+            checkboxProps: (record) => {
+              return {
+                disabled: record.id === '4'
+              }
+            }
+          }}
+        />
+        <Modal
+          title="新增家庭成员"
+          visible={visible}
+          onOk={onOk}
+          confirmLoading={confirmLoading}
+          onCancel={() => setVisible(false)}
+        >
+          <Form
+            {...formItemLayout}
+            form={form}
+            labelCol={{ style: { flexBasis: 90 } }}
+            wrapperCol={{ style: { flexBasis: 'calc(100% - 90px)' } }}
+          >
+            <FormItem label="姓名" field="fam_name" rules={[{ required: true }]}>
+              <Input placeholder="" />
+            </FormItem>
+            <FormItem label="关系" required field="fam_relation" rules={[{ required: true }]}>
+              <Input placeholder="" />
+            </FormItem>
+            <FormItem label="手机号码" required field="fam_phone">
+              <Input
+                placeholder=""
+                rules={[
+                  {
+                    match: /^1[3456789]\d{9}$/,
+                    message: '手机号码格式不正确'
+                  }
+                ]}
+              />
+            </FormItem>
+          </Form>
+        </Modal>
+      </div>
+    )
   }
 
   const Table6 = () => {
@@ -632,22 +772,6 @@ const AddTeacher = () => {
       </div>
     )
   }
-  // const onUploadChange = (files) => {
-  //   console.log(files)
-  //   const newFiles = files.map((item) => ({
-  //     ...item,
-  //     percent: 80,
-  //     status: 'uploading'
-  //   }))
-
-  //   setFileList(newFiles)
-  // }
-  // const onUploadChange={(_, currentFile) => {
-  //   setFile({
-  //     ...currentFile,
-  //     url: URL.createObjectURL(currentFile.originFile),
-  //   })
-  // }}
 
   const renderContent = (step) => {
     return (
@@ -882,8 +1006,8 @@ const AddTeacher = () => {
           </div>
         }
         {
-          <div style={{ paddingLeft: 30, paddingRight: 50, display: current === 3 ? '' : 'none' }}>
-            <Table3 ref={childRef3} props={{ tea_familys: allData.tea_familys }} />
+          <div style={{ maxWidth: 1000, marginBottom: 20, display: current === 3 ? '' : 'none' }}>
+            <Table3></Table3>
           </div>
         }
         {
@@ -1176,34 +1300,13 @@ const AddTeacher = () => {
                 })
                 setCurrent(current + 1)
               } else if (current === 3) {
-                const table3Data = childRef3.current.table3Data
-                if (table3Data == undefined || table3Data.length == undefined) {
-                  const d3 = []
-
-                  const oldD = allData
-                  oldD.tea_familys = d3
-                  setAllData({
-                    ...oldD
-                  })
-                  setCurrent(current + 1)
-                } else {
-                  console.log(table3Data)
-                  const d3 = []
-                  for (let i = 0; i < table3Data.length; i++) {
-                    d3.push({
-                      fam_name: table3Data[i].table3Data,
-                      fam_phone: table3Data.fam_phone === undefined ? '' : table3Data[i].fam_phone,
-                      fam_relation: table3Data[i].table3Data
-                    })
-                  }
-                  const oldD = allData
-                  oldD.tea_familys = d3
-                  setAllData({
-                    ...oldD
-                  })
-
-                  setCurrent(current + 1)
-                }
+                const oldD = allData
+                oldD.tea_archive = table6Data
+                setAllData({
+                  ...oldD
+                })
+                setCurrent(current + 1)
+                //console.log(allData)
               } else if (current == 4) {
                 await formRef4.current.validate()
                 if (formRef4.current.getFieldsValue().tea_edu === undefined) {
@@ -1235,8 +1338,6 @@ const AddTeacher = () => {
                   setCurrent(current + 1)
                 }
               } else if (current == 6) {
-                console.log(allData)
-
                 const oldD = allData
                 oldD.tea_archive = table6Data
                 setAllData({
