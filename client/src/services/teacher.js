@@ -29,8 +29,8 @@ export async function teacher(params, options) {
 }
 
 /** 创建新的部门 POST /api/department/create */
-export async function createDepartment(body, options) {
-  return request('/api/department/create', {
+export async function addTeacherDetails(body, options) {
+  return request('/api/teacher/add/details', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

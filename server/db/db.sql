@@ -84,12 +84,32 @@ drop table if exists Family cascade;
 create table Family(
     id integer primary key default nextval('fam_auto_inc'),
     teacher_id char(8),
-    name varchar(32),
-    relation varchar(32),
+    name varchar(32) not null ,
+    relation varchar(32)not null,
     phone varchar(32),
     foreign key (teacher_id) references Teacher(id)
 );
 alter sequence fam_auto_inc owned by Family.id;
+
+
+-- 工作经历
+drop sequence if exists work_auto_inc cascade;
+create sequence work_auto_inc
+    minvalue 1
+    maxvalue 9999999999999
+    start with 1
+    increment by 1;
+drop table if exists Work cascade;
+create table Work(
+    id integer primary key default nextval('work_auto_inc'),
+    teacher_id char(8),
+    start_date date,
+    end_date date,
+    location varchar(32),
+    content varchar(32),
+    foreign key (teacher_id) references Teacher(id)
+);
+alter sequence work_auto_inc owned by Work.id;
 
 
 -- 奖惩记录

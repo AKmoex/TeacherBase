@@ -9,16 +9,19 @@ import {
   Form,
   Input,
   Modal,
+  Notification,
   Radio,
+  Result,
   Select,
   Space,
   Steps,
   Table,
+  Typography,
   Upload
 } from '@arco-design/web-react'
 import { IconDelete, IconLeft, IconPlus, IconRight } from '@arco-design/web-react/icon'
 import { cloneDeep, remove } from 'lodash'
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 const Step = Steps.Step
 const TextArea = Input.TextArea
@@ -39,288 +42,15 @@ const noLabelLayout = {
   }
 }
 
-const EditableContext = React.createContext({})
-
-const EditableRow = (props) => {
-  const { children, record, className, ...rest } = props
-  const refForm = useRef(null)
-  const getForm = () => refForm.current
-
-  return (
-    <EditableContext.Provider value={{ getForm }}>
-      <Form
-        style={{ display: 'table-row' }}
-        children={children}
-        ref={refForm}
-        wrapper="tr"
-        wrapperProps={rest}
-        className={`${className} editable-row`}
-      />
-    </EditableContext.Provider>
-  )
-}
-
-const EditableCell = (props) => {
-  const { children, className, rowData, column, onHandleSave } = props
-
-  const ref = useRef(null)
-  const refInput = useRef(null)
-  const { getForm } = useContext(EditableContext)
-  const [editing, setEditing] = useState(false)
-
-  const handleClick = useCallback(
-    (e) => {
-      if (
-        editing &&
-        column.editable &&
-        ref.current &&
-        !ref.current.contains(e.target) &&
-        !e.target.classList.contains('js-demo-select-option')
-      ) {
-        cellValueChangeHandler(rowData[column.dataIndex])
-      }
-    },
-    [editing, rowData, column]
-  )
-
-  useEffect(() => {
-    editing && refInput.current && refInput.current.focus()
-  }, [editing])
-
-  useEffect(() => {
-    document.addEventListener('click', handleClick, true)
-    return () => {
-      document.removeEventListener('click', handleClick, true)
-    }
-  }, [handleClick])
-
-  const cellValueChangeHandler = (value) => {
-    if (column.dataIndex === 'fam_relation') {
-      const values = { [column.dataIndex]: value }
-      onHandleSave && onHandleSave({ ...rowData, ...values })
-      setTimeout(() => setEditing(!editing), 300)
-    } else {
-      const form = getForm()
-      form.validate([column.dataIndex], (errors, values) => {
-        if (!errors || !errors[column.dataIndex]) {
-          setEditing(!editing)
-          onHandleSave && onHandleSave({ ...rowData, ...values })
-        }
-      })
-    }
-  }
-
-  if (editing) {
-    if (column.dataIndex === 'fam_relation') {
-      return (
-        <div ref={ref}>
-          <FormItem
-            style={{ marginBottom: 0 }}
-            labelCol={{
-              span: 0
-            }}
-            wrapperCol={{
-              span: 24
-            }}
-            initialValue={rowData[column.dataIndex]}
-            field={column.dataIndex}
-            rules={[
-              {
-                required: true,
-                message: '关系必须选择'
-              }
-            ]}
-          >
-            <Select
-              onChange={cellValueChangeHandler}
-              defaultValue={rowData[column.dataIndex]}
-              options={['父亲', '母亲', '夫妻', '子女', '兄弟', '姐妹']}
-            />
-          </FormItem>
-        </div>
-      )
-    } else if (column.dataIndex === 'fam_phone') {
-      return (
-        <div ref={ref}>
-          <FormItem
-            style={{ marginBottom: 0 }}
-            labelCol={{
-              span: 0
-            }}
-            wrapperCol={{
-              span: 24
-            }}
-            initialValue={rowData[column.dataIndex]}
-            field={column.dataIndex}
-          >
-            <Input ref={refInput} onPressEnter={cellValueChangeHandler} />
-          </FormItem>
-        </div>
-      )
-    } else {
-      return (
-        <div ref={ref}>
-          <FormItem
-            style={{ marginBottom: 0 }}
-            labelCol={{
-              span: 0
-            }}
-            wrapperCol={{
-              span: 24
-            }}
-            initialValue={rowData[column.dataIndex]}
-            field={column.dataIndex}
-            rules={[
-              {
-                required: true,
-                message: '姓名不能为空'
-              }
-            ]}
-          >
-            <Input ref={refInput} onPressEnter={cellValueChangeHandler} />
-          </FormItem>
-        </div>
-      )
-    }
-  }
-
-  return (
-    <div
-      className={column.editable ? `editable-cell ${className}` : className}
-      onClick={() => column.editable && setEditing(!editing)}
-    >
-      {children}
-    </div>
-  )
-}
-
-// const Table3 = forwardRef((props, ref) => {
-//   const { tea_familys } = props.props
-//   if (tea_familys == undefined) {
-//   } else {
-//     for (let i = props.props.tea_familys.length - 1; i >= 0; i--) {
-//       if (
-//         props.props.tea_familys[i].fam_name == undefined ||
-//         props.props.tea_familys[i].fam_phone == undefined ||
-//         props.props.tea_familys[i].fam_relation == undefined
-//       ) {
-//         props.props.tea_familys.splice(i, 1)
-//       }
-//     }
-//   }
-
-//   console.log('tea_familys', tea_familys)
-//   console.log('Tbles', props.props.tea_familys)
-
-//   const [count, setCount] = useState(() => {
-//     // if (props.props.tea_familys == undefined || props.props.tea_familys.length == undefined) {
-//     //   return 0
-//     // } else {
-//     //   return props.props.tea_familys.length
-//     // }
-//     return props.props.tea_familys.length || 0
-//   })
-
-//   const [table3Data, setTable3Data] = useState(() => {
-//     return tea_familys || []
-//   })
-//   useEffect(() => {
-//     setTable3Data(props.props.tea_familys)
-//   }, [props.props.tea_familys])
-//   useImperativeHandle(ref, () => ({
-//     table3Data: table3Data
-//   }))
-//   const columns = [
-//     {
-//       title: '姓名',
-//       dataIndex: 'fam_name',
-//       editable: true
-//     },
-//     {
-//       title: '关系',
-//       dataIndex: 'fam_relation',
-//       editable: true
-//     },
-//     {
-//       title: '联系电话',
-//       dataIndex: 'fam_phone',
-//       editable: true
-//     },
-//     {
-//       title: 'Operation',
-//       dataIndex: 'op',
-//       render: (col, record) => (
-//         <Button onClick={() => removeRow(record.key)} type="primary" status="danger">
-//           Delete
-//         </Button>
-//       )
-//     }
-//   ]
-
-//   const handleSave = (row) => {
-//     const newData = [...table3Data]
-//     const index = newData.findIndex((item) => row.key === item.key)
-//     newData.splice(index, 1, {
-//       ...newData[index],
-//       ...row
-//     })
-//     setTable3Data(newData)
-//   }
-
-//   const removeRow = (key) => {
-//     setTable3Data(table3Data.filter((item) => item.key !== key))
-//   }
-
-//   const addRow = () => {
-//     setCount(count + 1)
-//     var temp_d3 = table3Data
-//     if (temp_d3 == undefined) {
-//       temp_d3 = []
-//     }
-//     temp_d3.push({
-//       key: `${count + 1}`,
-//       fam_name: 'name',
-//       fam_phone: 'phone',
-//       fam_relation: '父亲'
-//     })
-//     setTable3Data(temp_d3)
-//   }
-
-//   return (
-//     <div style={{ paddingLeft: 30, paddingRight: 30, marginBottom: 50 }}>
-//       <Button style={{ marginBottom: 10 }} type="primary" onClick={addRow}>
-//         Add
-//       </Button>
-//       <Table
-//         data={table3Data}
-//         components={{
-//           body: {
-//             row: EditableRow,
-//             cell: EditableCell
-//           }
-//         }}
-//         columns={columns.map((column) =>
-//           column.editable
-//             ? {
-//                 ...column,
-//                 onCell: () => ({
-//                   onHandleSave: handleSave
-//                 })
-//               }
-//             : column
-//         )}
-//         className="table-demo-editable-cell"
-//       />
-//     </div>
-//   )
-// })
-
 const AddTeacher = () => {
   const [current, setCurrent] = useState(1)
   const [forms, setForms] = useState([])
   const [table3Data, setTable3Data] = useState([])
   const [table6Data, setTable6Data] = useState([])
   const [table7Data, setTable7Data] = useState([])
+  const [resultStatus, setResultStatus] = useState('success')
+  const [resultTitle, setResultTitle] = useState('教师添加成功')
+  const [resultSubTitle, setResultSubTitle] = useState('Add Teacher Success')
   const [allData, setAllData] = useState({
     tea_id: '',
     tea_name: '',
@@ -380,11 +110,11 @@ const AddTeacher = () => {
       await form.validate()
       const d = form.getFieldsValue()
 
-      const d1 = table6Data
-      if (table6Data.length == 0) {
+      const d1 = table3Data
+      if (table3Data.length == 0) {
         d.id = 0
       } else {
-        d.id = table6Data[table6Data.length - 1].id + 1
+        d.id = table3Data[table3Data.length - 1].id + 1
       }
 
       d1.push(d)
@@ -393,7 +123,6 @@ const AddTeacher = () => {
       await setTable3Data(d1)
       setConfirmLoading(false)
       setVisible(false)
-      console.log(d1)
     }
 
     const formItemLayout = {
@@ -538,7 +267,6 @@ const AddTeacher = () => {
       await setTable6Data(d1)
       setConfirmLoading(false)
       setVisible(false)
-      console.log(d1)
     }
 
     const formItemLayout = {
@@ -1236,6 +964,44 @@ const AddTeacher = () => {
             <Table7></Table7>
           </div>
         }
+        {
+          <div
+            style={{
+              maxWidth: 1000,
+              marginBottom: 20,
+              marginTop: 50,
+              display: current === 8 ? '' : 'none'
+            }}
+          >
+            <Result
+              status={resultStatus}
+              title={resultTitle}
+              subTitle={resultSubTitle}
+              extra={
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    window.location.reload()
+                  }}
+                >
+                  再次添加
+                </Button>
+              }
+            >
+              <Typography
+                className="result-content"
+                style={{ background: 'var(--color-fill-2)', padding: 24 }}
+              >
+                <Typography.Paragraph>如果添加失败:</Typography.Paragraph>
+                <ul>
+                  <li> 仔细检查每个步骤的填写内容 </li>
+                  <li> 确认所填写的内容正确无误 </li>
+                  <li> 刷新网页后重新填写内容 </li>
+                </ul>
+              </Typography>
+            </Result>
+          </div>
+        }
         <div>
           <Button
             type="secondary"
@@ -1245,13 +1011,18 @@ const AddTeacher = () => {
               formRef1.current.setFieldsValue(allData)
               setCurrent(current - 1)
             }}
-            style={{ paddingLeft: 8, marginLeft: 300, marginBottom: 40 }}
+            style={{
+              paddingLeft: 8,
+              marginLeft: 300,
+              marginBottom: 40,
+              display: current != 8 ? '' : 'none'
+            }}
           >
             <IconLeft />
             Back
           </Button>
           <Button
-            disabled={current >= 8}
+            disabled={current >= 9}
             onClick={async () => {
               if (current == 1) {
                 await formRef1.current.validate()
@@ -1301,7 +1072,7 @@ const AddTeacher = () => {
                 setCurrent(current + 1)
               } else if (current === 3) {
                 const oldD = allData
-                oldD.tea_archive = table6Data
+                oldD.tea_familys = table3Data
                 setAllData({
                   ...oldD
                 })
@@ -1352,11 +1123,55 @@ const AddTeacher = () => {
                 setAllData({
                   ...oldD
                 })
-                const result = await addTeacherDetails(allData)
-                // setCurrent(current + 1)
+                const res = await addTeacherDetails(allData)
+                if (res.success) {
+                  if (
+                    res.tea_msg != undefined ||
+                    res.res_msg != undefined ||
+                    res.fam_msg != undefined ||
+                    res.edu_msg != undefined ||
+                    res.work_msg != undefined ||
+                    res.arc_msg != undefined ||
+                    res.work_msg != undefined
+                  ) {
+                    setResultStatus('error')
+                    setResultTitle('部分信息填写错误')
+                    let t = ''
+                    if (res.tea_msg != undefined) {
+                      t += res.tea_msg
+                    }
+                    if (res.res_msg != undefined) {
+                      t = t + ',' + res.res_msg
+                    }
+                    if (res.fam_msg != undefined) {
+                      t = t + ',' + res.fam_msg
+                    }
+                    if (res.edu_msg != undefined) {
+                      t = t + ',' + res.edu_msg
+                    }
+                    if (res.work_msg != undefined) {
+                      t = t + ',' + res.work_msg
+                    }
+                    if (res.arc_msg != undefined) {
+                      t = t + ',' + res.arc_msg
+                    }
+                    if (res.work_msg != undefined) {
+                      t = t + ',' + res.work_msg
+                    }
+                    setResultSubTitle(t)
+                    setCurrent(current + 1)
+                  } else {
+                    setCurrent(current + 1)
+                    Notification.success({
+                      title: 'Success',
+                      content: '教师添加成功'
+                    })
+                  }
+                } else {
+                }
               }
             }}
-            style={{ marginLeft: 20, paddingRight: 8 }}
+            style={{ marginLeft: 20, paddingRight: 8, display: current != 8 ? '' : 'none' }}
             type="primary"
           >
             Next
