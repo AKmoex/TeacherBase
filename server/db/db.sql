@@ -102,11 +102,13 @@ create sequence arc_auto_inc
 drop table if exists Archive cascade;
 create table Archive(
     id integer primary key default nextval('arc_auto_inc'),
-    teacher char(8),
+    teacher_id char(8),
     title varchar(256),
+    obtain_date date,
     detail text,
-    type tinyint check (type in (0,1)),
-    foreign key (teacher) references Teacher(id)
+    -- 奖励为0,惩罚为1
+    type tinyint check (type in (0,1)) default 0,
+    foreign key (teacher_id) references Teacher(id)
 );
 alter sequence arc_auto_inc owned by Archive.id;
 

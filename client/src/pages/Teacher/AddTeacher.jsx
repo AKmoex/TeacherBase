@@ -16,6 +16,7 @@ import {
   Upload
 } from '@arco-design/web-react'
 import { IconDelete, IconLeft, IconPlus, IconRight } from '@arco-design/web-react/icon'
+import { cloneDeep, remove } from 'lodash'
 import React, {
   forwardRef,
   useCallback,
@@ -25,6 +26,7 @@ import React, {
   useRef,
   useState
 } from 'react'
+
 const Step = Steps.Step
 const TextArea = Input.TextArea
 const FormItem = Form.Item
@@ -303,6 +305,7 @@ const Table3 = forwardRef((props, ref) => {
 const AddTeacher = () => {
   const [current, setCurrent] = useState(1)
   const [forms, setForms] = useState([])
+  const [table6Data, setTable6Data] = useState([])
   const [allData, setAllData] = useState({
     tea_id: '',
     tea_name: '',
@@ -335,6 +338,155 @@ const AddTeacher = () => {
 
   function onChange(dateString, date) {
     console.log('onChange: ', dateString, date)
+  }
+
+  const Table6 = () => {
+    const [selectedRowKeys, setSelectedRowKeys] = useState([])
+    const [visible, setVisible] = useState(false)
+    const [confirmLoading, setConfirmLoading] = useState(false)
+
+    const [form] = Form.useForm()
+
+    const columns = [
+      {
+        title: '奖惩名称',
+        dataIndex: 'title'
+      },
+      {
+        title: '获得时间',
+        dataIndex: 'obtain_date'
+      },
+      {
+        title: '类型',
+        dataIndex: 'type'
+      },
+      {
+        title: '详细说明',
+        dataIndex: 'detail'
+      }
+    ]
+    const onOk = async () => {
+      await form.validate()
+      const d = form.getFieldsValue()
+      if (d.type == '1') {
+        d.type = 1
+      } else {
+        d.type = 0
+      }
+      if (d.detail == undefined) {
+        d.detail = ''
+      }
+      const d1 = table6Data
+      if (table6Data.length == 0) {
+        d.id = 0
+      } else {
+        d.id = table6Data[table6Data.length - 1].id + 1
+      }
+
+      d1.push(d)
+
+      setConfirmLoading(true)
+      await setTable6Data(d1)
+      setConfirmLoading(false)
+      setVisible(false)
+      console.log(d1)
+    }
+
+    const formItemLayout = {
+      labelCol: {
+        span: 4
+      },
+      wrapperCol: {
+        span: 20
+      }
+    }
+    return (
+      <div style={{ marginLeft: 40, marginRight: 40 }}>
+        <Button onClick={() => setVisible(true)} type="primary" icon={<IconPlus />}>
+          添加
+        </Button>
+        <Button
+          //disabled={true}
+          style={{ marginLeft: 20 }}
+          onClick={() => {
+            console.log(selectedRowKeys)
+            const d = cloneDeep(table6Data)
+
+            remove(d, function (n) {
+              for (let i = 0; i < selectedRowKeys.length; i++) {
+                if (n.id == selectedRowKeys[i]) {
+                  return true
+                }
+              }
+            })
+            setTable6Data(d)
+            //console.log(table6Data)
+          }}
+          status="danger"
+          icon={<IconDelete />}
+        >
+          删除
+        </Button>
+        <Table
+          style={{ marginTop: 20 }}
+          rowKey="id"
+          columns={columns}
+          data={table6Data}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: (selectedRowKeys, selectedRows) => {
+              console.log('onChange:', selectedRowKeys, selectedRows)
+              setSelectedRowKeys(selectedRowKeys)
+            },
+            onSelect: (selected, record, selectedRows) => {
+              //console.log(table6Data)
+              console.log('onSelect:', selected, record, selectedRows)
+            },
+            checkboxProps: (record) => {
+              return {
+                disabled: record.id === '4'
+              }
+            }
+          }}
+        />
+        <Modal
+          title="新增奖惩记录"
+          visible={visible}
+          onOk={onOk}
+          confirmLoading={confirmLoading}
+          onCancel={() => setVisible(false)}
+        >
+          <Form
+            {...formItemLayout}
+            form={form}
+            labelCol={{ style: { flexBasis: 90 } }}
+            wrapperCol={{ style: { flexBasis: 'calc(100% - 90px)' } }}
+          >
+            <FormItem label="奖惩名称" field="title" rules={[{ required: true }]}>
+              <Input placeholder="" />
+            </FormItem>
+            <FormItem label="获得时间" required field="obtain_date" rules={[{ required: true }]}>
+              <DatePicker />
+            </FormItem>
+            <FormItem label="类型" required field="type">
+              <Radio.Group>
+                <Radio value="0">奖励</Radio>
+                <Radio value="1">惩罚</Radio>
+              </Radio.Group>
+            </FormItem>
+            <FormItem label="详细说明" required field="detail">
+              <Input.TextArea
+                maxLength={{ length: 60, errorOnly: false }}
+                showWordLimit
+                placeholder="More than 50 letters will be error"
+                //wrapperStyle={{ width: 300,  }}
+                autoSize={{ minRows: 2, maxRows: 6 }}
+              />
+            </FormItem>
+          </Form>
+        </Modal>
+      </div>
+    )
   }
 
   const renderContent = (step) => {
@@ -781,6 +933,11 @@ const AddTeacher = () => {
             </Form>
           </div>
         }
+        {
+          <div style={{ maxWidth: 1000, marginBottom: 20, display: current === 6 ? '' : 'none' }}>
+            <Table6></Table6>
+          </div>
+        }
         <div>
           <Button
             type="secondary"
@@ -886,6 +1043,15 @@ const AddTeacher = () => {
                   })
                   setCurrent(current + 1)
                 }
+              } else if (current == 6) {
+                console.log(allData)
+
+                const oldD = allData
+                oldD.tea_archive = table6Data
+                setAllData({
+                  ...oldD
+                })
+                setCurrent(current + 1)
               }
             }}
             style={{ marginLeft: 20, paddingRight: 8 }}
