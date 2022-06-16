@@ -1161,6 +1161,8 @@ const AddTeacher = () => {
                     setResultSubTitle(t)
                     setCurrent(current + 1)
                   } else {
+                    setResultTitle('教师添加成功')
+                    setResultSubTitle('Add Teacher Success')
                     setCurrent(current + 1)
                     Notification.success({
                       title: 'Success',
