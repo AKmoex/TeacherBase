@@ -33,7 +33,7 @@ const columns = [
   },
   {
     title: '所属院系',
-    dataIndex: 'tea_department'
+    dataIndex: 'tea_department_name'
   },
   {
     title: '邮箱',
@@ -108,6 +108,7 @@ const Teacher = () => {
   const [data, setData] = useState([])
   const request = async (params, soter, filter) => {
     const result = await teacher(params)
+    console.log(result.data.teacher)
     setData(result.data.teacher)
     return {
       total: result.data.teacher.length,
