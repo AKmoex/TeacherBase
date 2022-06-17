@@ -620,16 +620,17 @@ const AddTeacher = () => {
                     { label: '中共党员', value: '中共党员' },
                     { label: '中共预备党员', value: '中共预备党员' },
                     { label: '共青团员', value: '共青团员' },
-                    { label: '民革党员', value: '民革党员' },
-                    { label: '民盟盟员', value: '民盟盟员' },
-                    { label: '民建会员', value: '民建会员' },
-                    { label: '民进会员', value: '民进会员' },
-                    { label: '农工党党员', value: '农工党党员' },
-                    { label: '致公党党员', value: '致公党党员' },
-                    { label: '九三学社社员', value: '九三学社社员' },
-                    { label: '台盟盟员', value: '台盟盟员' },
+                    // { label: '民革党员', value: '民革党员' },
+                    // { label: '民盟盟员', value: '民盟盟员' },
+                    // { label: '民建会员', value: '民建会员' },
+                    // { label: '民进会员', value: '民进会员' },
+                    // { label: '农工党党员', value: '农工党党员' },
+                    // { label: '致公党党员', value: '致公党党员' },
+                    // { label: '九三学社社员', value: '九三学社社员' },
+                    // { label: '台盟盟员', value: '台盟盟员' },
                     { label: '无党派人士', value: '无党派人士' },
-                    { label: '群众', value: '群众' }
+                    { label: '群众', value: '群众' },
+                    { label: '其他', value: '其他' }
                   ]}
                   allowClear
                 />
@@ -717,7 +718,7 @@ const AddTeacher = () => {
                   mode="multiple"
                   allowCreate
                   placeholder="please select"
-                  options={['教授', '副教授', '院士', '特任研究员', '特任教授', '讲师']}
+                  options={['教授', '副教授', '院士', '特任研究员', '特任教授', '助理教授', '讲师']}
                 />
               </FormItem>
               <FormItem label="所属院系" field="tea_department_id">
@@ -1161,6 +1162,7 @@ const AddTeacher = () => {
                     setResultSubTitle(t)
                     setCurrent(current + 1)
                   } else {
+                    setResultStatus('success')
                     setResultTitle('教师添加成功')
                     setResultSubTitle('Add Teacher Success')
                     setCurrent(current + 1)

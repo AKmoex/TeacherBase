@@ -29,7 +29,7 @@ drop table if exists Teacher cascade;
 create table Teacher(
     id char(8) primary key,-- 工号
     name varchar(32), -- 姓名
-    gender tinyint default 0 check (gender in (0,1,2)),
+    gender tinyint default 0 check (gender in (0,1,2)), -- 邮箱
     phone varchar(32), -- 手机号码
     email varchar(256), -- 邮箱
     birthday date, -- 出生日期
@@ -40,7 +40,7 @@ create table Teacher(
     department_id integer, -- 所属院系
     
     job varchar(256),
-    ethnicity varchar(256), -- 名族
+    ethnicity varchar(256), -- 民族
     political varchar(256), -- 政治面貌
     address varchar(256), -- 通讯地址
     

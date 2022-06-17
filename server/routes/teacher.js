@@ -5,6 +5,7 @@ const authMiddleware = require('../middlewares/auth')
 const util = require('util')
 const format = require('pg-format')
 const dayjs = require('dayjs')
+const { log } = require('console')
 
 const router = new Router()
 
@@ -18,7 +19,6 @@ router.get('/', authMiddleware(), async (req, res) => {
     try {
       const { rows } = await db.query('SELECT * FROM TeacherInfoView')
 
-      var array = [1, 2, 3, 4]
       remove(rows, function (n) {
         return n.id === '00000000'
       })
@@ -29,12 +29,13 @@ router.get('/', authMiddleware(), async (req, res) => {
         data.push({
           tea_id: elem.id,
           tea_name: elem.name,
-          tea_gender: elem.gendder,
+          tea_gender: elem.gender,
           tea_entry_date: elem.entry_date,
           tea_term_date: elem.term_date,
           tea_phone: elem.phone,
-          tea_department: elem.department,
-          tea_position: elem.position,
+          tea_department_id: elem.department_id,
+          tea_department_name: elem.department_name,
+          tea_title: elem.title,
           tea_job: elem.job,
           tea_email: elem.email,
           tea_ethnicity: elem.ethnicity,
@@ -76,7 +77,7 @@ router.get('/', authMiddleware(), async (req, res) => {
  * @param {*} tea_id
  * @returns
  */
-const insertEdu = async (data, tea_id) => {
+const insertEdu = async (data, tea_id, resdata) => {
   try {
     let edu_temp = []
     console.log(data)
@@ -97,11 +98,9 @@ const insertEdu = async (data, tea_id) => {
       ),
       []
     )
-    console.log(rows_edu)
-    return true
   } catch (err) {
-    console.log(err)
-    return false
+    console.log('err:', err)
+    resdata.edu_msg = '教师教育经历添加失败!'
   }
 }
 /**
@@ -110,7 +109,7 @@ const insertEdu = async (data, tea_id) => {
  * @param {*} tea_id
  * @returns
  */
-const insertFam = async (data, tea_id) => {
+const insertFam = async (data, tea_id, resdata) => {
   try {
     let fam_temp = []
     for (let i = 0; i < data.length; i++) {
@@ -120,14 +119,13 @@ const insertFam = async (data, tea_id) => {
       format('INSERT INTO family(teacher_id,name,relation,phone) VALUES %L returning *', fam_temp),
       []
     )
-    return true
   } catch (err) {
-    console.log(err)
-    return false
+    console.log('err:', err)
+    resdata.fam_msg = '教师家庭关系添加失败!'
   }
 }
 
-const insertArc = async (data, tea_id) => {
+const insertArc = async (data, tea_id, resdata) => {
   try {
     let arc_temp = []
 
@@ -141,13 +139,12 @@ const insertArc = async (data, tea_id) => {
       ),
       []
     )
-    return true
   } catch (err) {
     console.log('err', err)
-    return false
+    resdata.arc_msg = '教师奖惩记录添加失败!'
   }
 }
-const insertRes = async (data, tea_id) => {
+const insertRes = async (data, tea_id, resdata) => {
   try {
     let res_temp = []
 
@@ -161,14 +158,13 @@ const insertRes = async (data, tea_id) => {
       ),
       []
     )
-    return true
   } catch (err) {
     console.log('err', err)
-    return false
+    resdata.res_msg = '教师科研项目添加失败!'
   }
 }
 
-const insertWork = async (data, tea_id) => {
+const insertWork = async (data, tea_id, resdata) => {
   try {
     let work_temp = []
 
@@ -189,13 +185,12 @@ const insertWork = async (data, tea_id) => {
       ),
       []
     )
-    return true
   } catch (err) {
     console.log('err:', err)
-    return false
+    resdata.work_msg = '教师工作经历添加失败!'
   }
 }
-const insertTea = async (req) => {
+const insertTea = async (req, resdata) => {
   try {
     let {
       tea_id,
@@ -225,7 +220,7 @@ const insertTea = async (req) => {
       }
     }
     const { rows } = await db.query(
-      'INSERT INTO teacher(id, name,password,gender,phone,email,birthday,photo,term_date,department_id,job,ethnicity,political,address,title) VALUES($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15) returning *',
+      'INSERT INTO teacher(id, name,password,gender,phone,email,birthday,photo,entry_date,department_id,job,ethnicity,political,address,title) VALUES($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15) returning *',
       [
         tea_id,
         tea_name,
@@ -244,10 +239,9 @@ const insertTea = async (req) => {
         tea_title
       ]
     )
-    return true
   } catch (err) {
     console.log('err:', err)
-    return false
+    resdata.tea_msg = '教师添加失败!'
   }
 }
 /**
@@ -257,18 +251,13 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
   const id = req.id
   //console.log(req.body)
   const { tea_id, tea_name, tea_password } = req.body
-  let data = { success: true }
+  let resdata = { success: true }
 
   if (id === '00000000') {
     if (!isUndefined(tea_id) && !isUndefined(tea_name) && !isUndefined(tea_password)) {
       try {
         // 基本信息
-        if (!insertTea(req)) {
-          data.tea_msg = '教师添加失败!'
-          res.send({
-            ...data
-          })
-        }
+        await insertTea(req, resdata)
 
         // 奖惩记录
         let { tea_archive } = req.body
@@ -278,9 +267,7 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
           !isUndefined(tea_archive.length) &&
           tea_archive.length != 0
         ) {
-          if (!insertArc(tea_archive, tea_id)) {
-            data.arc_msg = '教师奖惩记录添加失败!'
-          }
+          await insertArc(tea_archive, tea_id, resdata)
         }
 
         // 家庭关系
@@ -290,18 +277,14 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
           !isUndefined(tea_familys.length) &&
           tea_familys.length != 0
         ) {
-          if (!insertFam(tea_familys, tea_id)) {
-            data.fam_msg = '教师家庭关系添加失败!'
-          }
+          await insertFam(tea_familys, tea_id)
         }
 
         // 教育经历
         let { tea_edu } = req.body
         if (!isUndefined(tea_edu) && !isUndefined(tea_edu.length) && tea_edu.length != 0) {
           tea_edu = tea_edu.tea_edu
-          if (!insertEdu(tea_edu, tea_id)) {
-            data.edu_msg = '教师教育经历添加失败!'
-          }
+          await insertEdu(tea_edu, tea_id)
         }
 
         // 科研项目
@@ -311,21 +294,17 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
           !isUndefined(tea_research.length) &&
           tea_research.length != 0
         ) {
-          if (!insertRes(tea_research, tea_id)) {
-            data.res_msg = '教师科研项目添加失败!'
-          }
+          await insertRes(tea_research, tea_id)
         }
 
         // 工作经历
         let { tea_work } = req.body
         if (!isUndefined(tea_work) && !isUndefined(tea_work.length) && tea_work.length != 0) {
           tea_work = tea_work.tea_work
-          if (!insertWork(tea_work, tea_id)) {
-            data.work_msg = '教师工作经历添加失败!'
-          }
+          await insertWork(tea_work, tea_id)
         }
         res.send({
-          ...data
+          ...resdata
         })
       } catch (err) {
         console.log(err)
