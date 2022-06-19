@@ -5,7 +5,7 @@ const authMiddleware = require('../middlewares/auth')
 const util = require('util')
 const format = require('pg-format')
 const dayjs = require('dayjs')
-const { log } = require('console')
+const includes = require('../utils')
 
 const router = new Router()
 
@@ -15,13 +15,72 @@ module.exports = router
  * 获取所有教师
  */
 router.get('/', authMiddleware(), async (req, res) => {
+  // [tea_name,tea_id,tea_gender,tea_phone,tea_department_name,tea_political]
+
   if (req.id === '00000000') {
     try {
-      const { rows } = await db.query('SELECT * FROM TeacherInfoView')
+      const selectParams = [`%${'%'}%`, `%${'%'}%`]
+      let text = 'SELECT * FROM TeacherInfoView WHERE name LIKE $1 AND id LIKE $2'
+      if (!isUndefined(req.query.tea_name)) {
+        selectParams[0] = `%${req.query.tea_name}%`
+      }
+      if (!isUndefined(req.query.tea_id)) {
+        selectParams[1] = `%${req.query.tea_id}%`
+      }
 
-      remove(rows, function (n) {
-        return n.id === '00000000'
-      })
+      if (req.query.tea_gender) {
+        if (req.query.tea_gender == '男') {
+          selectParams.push(`%${'1'}%`)
+          text = `${text} AND gender LIKE $${selectParams.length}`
+        } else if (req.query.tea_gender == '女') {
+          selectParams.push(`%${'2'}%`)
+          text = `${text} AND gender LIKE $${selectParams.length}`
+        }
+      }
+      if (req.query.tea_phone) {
+        selectParams.push(`%${req.query.tea_phone}%`)
+        text = `${text} AND phone LIKE $${selectParams.length}`
+      }
+      if (req.query.tea_department_name) {
+        if (req.query.tea_department_name != '全部') {
+          selectParams.push(`%${req.query.tea_department_name}%`)
+          text = `${text} AND department_name LIKE $${selectParams.length}`
+        }
+      }
+      if (req.query.tea_political) {
+        if (req.query.tea_political != '全部') {
+          selectParams.push(`%${req.query.tea_political}%`)
+          text = `${text} AND political LIKE $${selectParams.length}`
+        }
+      }
+      if (req.query.tea_status) {
+        if (req.query.tea_status == '已离职') {
+          text = `${text} AND term_date IS NOT NULL`
+        }
+      }
+      if (req.query.dateRange) {
+        selectParams.push(`${req.query.dateRange[0]}`)
+        selectParams.push(`${req.query.dateRange[1]}`)
+        text = `${text} AND entry_date BETWEEN $${selectParams.length - 1} AND $${
+          selectParams.length
+        }`
+      }
+
+      const { rows } = await db.query(text, selectParams)
+
+      if (req.query.tea_title && req.query.tea_title.length > 0) {
+        //req.query.tea_title = req.query.tea_title.split(',')
+        const x = req.query.tea_title.split(',')
+        console.log(x)
+        console.log(typeof x)
+        remove(rows, function (n) {
+          if (n.title == null || n.title.length <= 0) {
+            return true
+          }
+          let ts = n.title.split(',')
+          return !includes(ts, x)
+        })
+      }
 
       const data = []
 

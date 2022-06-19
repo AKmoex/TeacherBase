@@ -6,7 +6,7 @@ const { Pool, Client } = require('../openGauss-connector-nodejs/packages/pg')
  */
 const config = {
   // 连接数据库
-  host: '114.115.166.72', // 数据库主机名
+  host: '120.46.155.70', // 数据库主机名
   port: 26000, // 数据库端口
   user: 'akmoex', // 数据库用户名
   database: 'teacherbase', // 数据库名

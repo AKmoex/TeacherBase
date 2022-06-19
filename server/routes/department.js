@@ -9,6 +9,7 @@ const router = new Router()
 module.exports = router
 
 router.get('/', authMiddleware(), async (req, res) => {
+  console.log('getDepartment', req.query.keyword)
   if (req.id === '00000000') {
     try {
       const { rows } = await db.query('SELECT * FROM department WHERE name LIKE $1', [

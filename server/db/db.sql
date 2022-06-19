@@ -29,7 +29,7 @@ drop table if exists Teacher cascade;
 create table Teacher(
     id char(8) primary key,-- 工号
     name varchar(32), -- 姓名
-    gender tinyint default 0 check (gender in (0,1,2)), -- 邮箱
+    gender tinyint check (gender in (1,2)), -- 1男2女
     phone varchar(32), -- 手机号码
     email varchar(256), -- 邮箱
     birthday date, -- 出生日期
