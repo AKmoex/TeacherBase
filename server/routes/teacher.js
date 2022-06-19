@@ -278,6 +278,7 @@ const insertTea = async (req, resdata) => {
         tea_gender = 1
       }
     }
+    console.log(tea_gender)
     const { rows } = await db.query(
       'INSERT INTO teacher(id, name,password,gender,phone,email,birthday,photo,entry_date,department_id,job,ethnicity,political,address,title) VALUES($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15) returning *',
       [
@@ -362,6 +363,51 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
           tea_work = tea_work.tea_work
           await insertWork(tea_work, tea_id)
         }
+        res.send({
+          ...resdata
+        })
+      } catch (err) {
+        console.log(err)
+        res.send({
+          data: {
+            success: false,
+            message: '添加失败 !'
+          },
+          success: true
+        })
+      }
+    } else {
+      res.send({
+        success: false,
+        message: '添加失败, 工号、姓名、密码不能为空'
+      })
+    }
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
+      },
+      errorCode: '401',
+      errorMessage: '没有权限,请先登录！',
+      success: true
+    })
+  }
+})
+
+/**
+ * 添加教师
+ */
+router.post('/add', authMiddleware(), async (req, res) => {
+  const id = req.id
+  //console.log(req.body)
+  console.log(req.body)
+  const { tea_id, tea_name, tea_password } = req.body
+  let resdata = { success: true }
+  if (id === '00000000') {
+    if (!isUndefined(tea_id) && !isUndefined(tea_name) && !isUndefined(tea_password)) {
+      try {
+        // 基本信息
+        await insertTea(req, resdata)
         res.send({
           ...resdata
         })

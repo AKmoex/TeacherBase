@@ -5,8 +5,8 @@ import { ProTable, TableDropdown } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
 import { Button, Space } from '@arco-design/web-react'
 import { Select as AntdSelect } from 'antd'
-import React, { useEffect, useState } from 'react'
-
+import React, { useEffect, useRef, useState } from 'react'
+import AddTeacherModal from './components/AddTeacherModal'
 const Teacher = () => {
   const [data, setData] = useState([])
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
@@ -47,6 +47,8 @@ const Teacher = () => {
     })
     setDepartment(d)
   }, [])
+  const addTeacherModalRef = useRef()
+
   const request = async (params, soter, filter) => {
     console.log(params)
     if (params.tea_title && params.tea_title.length > 0) {
@@ -287,8 +289,10 @@ const Teacher = () => {
       ]
     }
   ]
+
   return (
     <PageContainer>
+      <AddTeacherModal cRef={addTeacherModalRef} />
       <ProTable
         columns={columns}
         request={request}
@@ -334,8 +338,12 @@ const Teacher = () => {
             导出数据
             <DownOutlined />
           </Button>,
-          <Button type="primary" key="primary">
-            创建应用
+          <Button
+            type="primary"
+            onClick={() => addTeacherModalRef.current.setAddTeacherVisible(true)}
+            key="primary"
+          >
+            添加教师
           </Button>
         ]}
       />
