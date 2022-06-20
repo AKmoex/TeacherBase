@@ -7,6 +7,7 @@ import { Button, Space } from '@arco-design/web-react'
 import { Select as AntdSelect } from 'antd'
 import React, { useEffect, useRef, useState } from 'react'
 import AddTeacherModal from './components/AddTeacherModal'
+import TeacherInfoModal from './components/TeacherInfoModal'
 const Teacher = () => {
   const [data, setData] = useState([])
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
@@ -48,6 +49,7 @@ const Teacher = () => {
     setDepartment(d)
   }, [])
   const addTeacherModalRef = useRef()
+  const teacherInfoModalRef = useRef()
 
   const request = async (params, soter, filter) => {
     console.log(params)
@@ -276,23 +278,34 @@ const Teacher = () => {
       key: 'option',
       valueType: 'option',
       fixed: 'right',
-      render: () => [
-        <a key="link">链路</a>,
-        <a key="link2">报警</a>,
-        <TableDropdown
-          key="actionGroup"
-          menus={[
-            { key: 'copy', name: '复制' },
-            { key: 'delete', name: '删除' }
-          ]}
-        />
-      ]
+      render: (_, record) => {
+        console.log(record)
+        return [
+          <a
+            key="link1"
+            onClick={() => {
+              teacherInfoModalRef.current.setTeacherInfoId(record.tea_id)
+            }}
+          >
+            查看
+          </a>,
+          <a key="link2">报警</a>,
+          <TableDropdown
+            key="actionGroup"
+            menus={[
+              { key: 'copy', name: '复制' },
+              { key: 'delete', name: '删除' }
+            ]}
+          />
+        ]
+      }
     }
   ]
 
   return (
     <PageContainer>
       <AddTeacherModal cRef={addTeacherModalRef} />
+      <TeacherInfoModal cRef={teacherInfoModalRef} />
       <ProTable
         columns={columns}
         request={request}

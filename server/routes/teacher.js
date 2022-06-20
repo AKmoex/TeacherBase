@@ -10,7 +10,61 @@ const includes = require('../utils')
 const router = new Router()
 
 module.exports = router
+router.get('/id', authMiddleware(), async (req, res) => {
+  const tea_id = req.query.tea_id
 
+  if (req.id === '00000000') {
+    try {
+      // 查询基本信息
+      const res_a = await db.query(format('SELECT * FROM TeacherInfoView WHERE id=%L', tea_id))
+      let data = {
+        ...res_a.rows[0]
+      }
+      // 查询教育经历
+      const res_b = await db.query(format('SELECT * FROM Education WHERE teacher_id=%L', tea_id))
+      data.edu = res_b.rows
+
+      // 查询家庭关系
+      const res_c = await db.query(format('SELECT * FROM Family WHERE teacher_id=%L', tea_id))
+      data.fam = res_c.rows
+
+      // 查询工作经历
+      const res_d = await db.query(format('SELECT * FROM Work WHERE teacher_id=%L', tea_id))
+      data.work = res_d.rows
+
+      // 查询奖惩记录
+      const res_e = await db.query(format('SELECT * FROM Archive WHERE teacher_id=%L', tea_id))
+      data.arc = res_e.rows
+
+      // 查询科研项目
+      const res_f = await db.query(format('SELECT * FROM Research WHERE teacher_id=%L', tea_id))
+      data.res = res_f.rows
+
+      console.log(data)
+      res.send({
+        success: true,
+        data
+      })
+    } catch (err) {
+      console.log(err)
+      res.send({
+        success: false,
+        data: {
+          teacher: []
+        }
+      })
+    }
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
+      },
+      errorCode: '401',
+      errorMessage: '没有权限,请先登录！',
+      success: true
+    })
+  }
+})
 /**
  * 获取所有教师
  */
@@ -342,9 +396,12 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
 
         // 教育经历
         let { tea_edu } = req.body
-        if (!isUndefined(tea_edu) && !isUndefined(tea_edu.length) && tea_edu.length != 0) {
+        console.log(tea_edu)
+        if (!isUndefined(tea_edu)) {
           tea_edu = tea_edu.tea_edu
-          await insertEdu(tea_edu, tea_id)
+          if (!isUndefined(tea_edu.length) && tea_edu.length != 0) {
+            await insertEdu(tea_edu, tea_id)
+          }
         }
 
         // 科研项目

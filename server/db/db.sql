@@ -24,7 +24,6 @@ alter sequence dep_auto_inc owned by department.id;
 
 
 
-
 drop table if exists Teacher cascade;
 create table Teacher(
     id char(8) primary key,-- 工号
@@ -35,8 +34,9 @@ create table Teacher(
     birthday date, -- 出生日期
     photo varchar(256), -- 照片
 
-    term_date date, -- 离职时间
     entry_date date, -- 入职时间
+    term_date date, -- 离职时间
+    
     department_id integer, -- 所属院系
     
     job varchar(256),
@@ -160,6 +160,8 @@ insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,politica
 insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
  values('00000002','金毛',1,'2000-01-30','18755005131','科研','akmoex@hfut.edu.com','维吾尔族','共青团员','安徽省合肥市翡翠湖公寓南楼503','123456');
 
+insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title,password)
+ values('66666666','王维新',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授,特任研究员','123456');
 
 
 
@@ -180,7 +182,50 @@ insert into Department(name,establish_date,phone,t_count,address)
  values('机械工程学院','2021-11-30','0551-62901326',25,'安徽省合肥市屯溪路193号');
   insert into Department(name,establish_date,phone,t_count,address)
  values('电气与自动化工程学院','2021-11-30','0551-6290-1408',25,'安徽省合肥市屯溪路193号逸夫科教楼');
+ 
 
+insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2016-06-01','2019-07-01','合肥工业大学','本科');
+insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2019-09-01','2022-07-01','合肥工业大学','硕士');
+insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2022-08-01','2025-07-01','中国科学技术大学','博士');
+
+
+insert into Work(teacher_id,start_date,end_date,location,content) values('66666666','2016-06-01','2019-07-01','字节跳动-后端开发部门','负责后端开发');
+insert into Work(teacher_id,start_date,end_date,location,content) values('66666666','2020-12-20','2021-07-01','阿里云平台','全栈开发工作');
+
+
+
+insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','合肥工业大学最受欢迎教师奖','2016-06-01','本奖励是由学生投票选取',0);
+insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','授课大赛一等奖','2016-06-01','',0);
+insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','最佳论文奖','2019-07-25','',0);
+insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','开会缺勤','2019-07-25','年级大会无故缺席',1);
+
+
+
+insert into Research(teacher_id,title,obtain_date,detail) values('66666666','基于机器学习的人脸识别项目','2019-01-06','国家基金项目');
+insert into Research(teacher_id,title,obtain_date,detail) values('66666666','机器人仿真实验研究','2009-01-06','国家重点实验室项目');
+
+
+
+-- 家庭关系
+drop sequence if exists fam_auto_inc cascade;
+create sequence fam_auto_inc
+    minvalue 1
+    maxvalue 9999999999999
+    start with 1
+    increment by 1;
+drop table if exists Family cascade;
+create table Family(
+    id integer primary key default nextval('fam_auto_inc'),
+    teacher_id char(8),
+    name varchar(32) not null ,
+    relation varchar(32)not null,
+    phone varchar(32),
+    foreign key (teacher_id) references Teacher(id)
+);
+alter sequence fam_auto_inc owned by Family.id;
+
+insert into Family(teacher_id,name,relation,phone) values('66666666','王富贵','父亲','13698745631');
+insert into Family(teacher_id,name,relation,phone) values('66666666','林莉心','母亲','15155068479');
 
 drop view if exists TeacherInfoView cascade;
 create view TeacherInfoView as select distinct T.*,D.name as department_name from Teacher T left outer join Department D on T.department_id=D.id  ;

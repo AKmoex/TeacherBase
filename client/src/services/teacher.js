@@ -28,6 +28,15 @@ export async function teacher(params, options) {
   })
 }
 
+export async function getTeacherById(params, options) {
+  console.log(params)
+  return request('/api/teacher/id', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {})
+  })
+}
+
 export async function addTeacherDetails(body, options) {
   return request('/api/teacher/add/details', {
     method: 'POST',
@@ -39,7 +48,6 @@ export async function addTeacherDetails(body, options) {
   })
 }
 export async function addTeacher(body, options) {
-  console.log('你')
   return request('/api/teacher/add', {
     method: 'POST',
     headers: {
