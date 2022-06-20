@@ -200,13 +200,14 @@ const insertEdu = async (data, tea_id, resdata) => {
         data[i].date[0] + '-01',
         data[i].date[1] + '-01',
         data[i].school,
-        data[i].type
+        data[i].type,
+        data[i].major
       ])
     }
     console.log(edu_temp)
     const { rows_edu } = await db.query(
       format(
-        'INSERT INTO education(teacher_id,start_date,end_date,school,degree) VALUES %L returning *',
+        'INSERT INTO education(teacher_id,start_date,end_date,school,degree,major) VALUES %L returning *',
         edu_temp
       ),
       []

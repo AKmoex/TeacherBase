@@ -64,7 +64,8 @@ create table Education(
     start_date date,
     end_date date,
     school varchar(256),
-    Degree varchar(32) check (Degree in ('本科','硕士','博士','博士后')),
+    degree varchar(32) check (degree in ('本科','硕士','博士','博士后')),
+    major varchar(256),
     foreign key (teacher_id) references Teacher(id),
     -- 日期约束
     check(end_date=null or start_date<end_date)
