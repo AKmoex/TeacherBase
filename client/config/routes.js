@@ -58,7 +58,7 @@ export default [
       },
       {
         path: '/teacher/edit/:id',
-        name: 'list.teacher-edit',
+        name: '编辑教师信息',
         icon: 'smile',
         component: './Teacher/EditTeacher',
         hideInMenu: true
@@ -72,7 +72,7 @@ export default [
     name: 'list.table-list',
     icon: 'table',
     path: '/list',
-    component: './TableList'
+    component: './Department'
   },
   {
     name: '院系管理',
