@@ -663,7 +663,7 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
 
         // 工作经历
         let { tea_work } = req.body
-        if (!isUndefined(tea_work) && !isUndefined(tea_work.length) && tea_work.length != 0) {
+        if (!isUndefined(tea_work)) {
           tea_work = tea_work.tea_work
           await insertWork(tea_work, tea_id)
         }
