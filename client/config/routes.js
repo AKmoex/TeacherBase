@@ -39,20 +39,20 @@ export default [
   },
   {
     path: '/teacher',
-    name: 'list.teacher-list',
+    name: '教师管理',
     icon: 'crown',
     access: 'canAdmin',
     //component: './Teacher',
     routes: [
       {
         path: '/teacher/list',
-        name: 'list.teacher-list',
+        name: '所有教师',
         icon: 'smile',
         component: './Teacher'
       },
       {
         path: '/teacher/add',
-        name: 'list.teacher-add',
+        name: '添加教师',
         icon: 'smile',
         component: './Teacher/AddTeacher'
       },
@@ -75,7 +75,7 @@ export default [
     component: './TableList'
   },
   {
-    name: 'list.department',
+    name: '院系管理',
     icon: 'table',
     path: '/department',
     component: './Department',

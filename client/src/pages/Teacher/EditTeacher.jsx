@@ -51,7 +51,7 @@ const EditTeacher = () => {
   const [table6Data, setTable6Data] = useState([])
   const [table7Data, setTable7Data] = useState([])
   const [resultStatus, setResultStatus] = useState('success')
-  const [resultTitle, setResultTitle] = useState('教师添加成功')
+  const [resultTitle, setResultTitle] = useState('教师信息更新成功成功')
   const [resultSubTitle, setResultSubTitle] = useState('Add Teacher Success')
   const [allData, setAllData] = useState({
     tea_id: '',
@@ -1223,12 +1223,12 @@ const EditTeacher = () => {
                     setCurrent(current + 1)
                   } else {
                     setResultStatus('success')
-                    setResultTitle('教师添加成功')
+                    setResultTitle('教师信息更新成功')
                     setResultSubTitle('Add Teacher Success')
                     setCurrent(current + 1)
                     Notification.success({
                       title: 'Success',
-                      content: '教师添加成功'
+                      content: '教师信息更新成功'
                     })
                   }
                 } else {
