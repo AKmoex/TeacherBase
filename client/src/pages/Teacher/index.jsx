@@ -6,8 +6,10 @@ import { PageContainer } from '@ant-design/pro-layout'
 import { Button, Space } from '@arco-design/web-react'
 import { Select as AntdSelect } from 'antd'
 import React, { useEffect, useRef, useState } from 'react'
+import { Link } from 'umi'
 import AddTeacherModal from './components/AddTeacherModal'
 import TeacherInfoModal from './components/TeacherInfoModal'
+
 const Teacher = () => {
   const [data, setData] = useState([])
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
@@ -280,6 +282,7 @@ const Teacher = () => {
       fixed: 'right',
       render: (_, record) => {
         console.log(record)
+        //p = `/teacher/edit/${record.tea_id}`
         return [
           <a
             key="link1"
@@ -289,7 +292,9 @@ const Teacher = () => {
           >
             查看
           </a>,
-          <a key="link2">报警</a>,
+          <a key="link2">
+            <Link to={`/teacher/edit/${record.tea_id}`}>编辑</Link>
+          </a>,
           <TableDropdown
             key="actionGroup"
             menus={[
@@ -346,7 +351,10 @@ const Teacher = () => {
         //dateFormatter="string"
         headerTitle="所有教师"
         toolBarRender={() => [
-          <Button key="show">查看日志</Button>,
+          <Button key="show">
+            你好
+            {/* <a href={`/teacher/edit/1`} target="_blank" /> */}
+          </Button>,
           <Button key="out">
             导出数据
             <DownOutlined />

@@ -1,5 +1,5 @@
 import { department as getAllDepartment } from '@/services/department'
-import { addTeacherDetails } from '@/services/teacher'
+import { editTeacher, getTeacherById } from '@/services/teacher'
 import { PageContainer } from '@ant-design/pro-layout'
 import {
   Alert,
@@ -20,8 +20,10 @@ import {
   Upload
 } from '@arco-design/web-react'
 import { IconDelete, IconLeft, IconPlus, IconRight } from '@arco-design/web-react/icon'
+import dayjs from 'dayjs'
 import { cloneDeep, remove } from 'lodash'
 import React, { useEffect, useRef, useState } from 'react'
+import { useParams } from 'umi'
 
 const Step = Steps.Step
 const TextArea = Input.TextArea
@@ -42,7 +44,7 @@ const noLabelLayout = {
   }
 }
 
-const AddTeacher = () => {
+const EditTeacher = () => {
   const [current, setCurrent] = useState(1)
   const [forms, setForms] = useState([])
   const [table3Data, setTable3Data] = useState([])
@@ -61,7 +63,11 @@ const AddTeacher = () => {
   const [department, setDepartment] = useState([])
   const childRef3 = useRef()
   const [file, setFile] = React.useState()
-
+  const params = useParams()
+  const formRef1 = useRef()
+  const formRef2 = useRef()
+  const formRef4 = useRef()
+  const formRef5 = useRef()
   useEffect(async () => {
     const res = await getAllDepartment({ keyword: '%' })
     const d = []
@@ -73,11 +79,74 @@ const AddTeacher = () => {
     }
     setForm2Department(d)
     setDepartment(res.data.department)
+    const { data } = await getTeacherById({ tea_id: params.id })
+    console.log(data)
+    formRef1.current.setFieldsValue({
+      tea_name: data.name,
+      tea_id: data.id,
+      tea_password: data.password
+    })
+    const f2t = {
+      tea_photo: data.photo,
+      tea_gender: data.gender,
+      tea_birthday: data.birthday,
+      tea_political: data.political,
+      tea_ethnicity: data.ethnicity,
+      tea_address: data.address,
+      tea_title: data.title.split(','),
+      tea_entry_date: data.entry_date,
+      tea_job: data.job,
+      tea_department_id: data.department_id
+    }
+    if (data.phone) {
+      f2t.tea_phone = data.phone
+    }
+    if (data.email) {
+      f2t.tea_email = data.email
+    }
+    formRef2.current.setFieldsValue(f2t)
+
+    // 家庭关系
+    const g1 = []
+    for (let i = 0; i < data.fam.length; i++) {
+      g1.push({
+        id: data.fam[i].id,
+        fam_name: data.fam[i].name,
+        fam_relation: data.fam[i].relation,
+        fam_phone: data.fam[i].phone,
+        key: i
+      })
+    }
+    setTable3Data(g1)
+
+    // 教育经历
+    for (let i = 0; i < data.edu.length; i++) {
+      data.edu[i].date = [
+        dayjs(data.edu[i].start_date).format('YYYY-MM'),
+        dayjs(data.edu[i].end_date).format('YYYY-MM')
+      ]
+    }
+    formRef4.current.setFieldsValue({ tea_edu: data.edu })
+
+    // 工作经历
+    for (let i = 0; i < data.work.length; i++) {
+      data.work[i].date = [data.work[i].start_date, data.work[i].end_date]
+    }
+    formRef5.current.setFieldsValue({ tea_work: data.work })
+
+    // 奖惩记录
+    for (let i = 0; i < data.arc.length; i++) {
+      data.arc[i].key = i
+    }
+    setTable6Data(data.arc)
+
+    // 科研项目
+    for (let i = 0; i < data.res.length; i++) {
+      data.res[i].key = i
+    }
+    setTable7Data(data.res)
   }, [])
-  const formRef1 = useRef()
-  const formRef2 = useRef()
-  const formRef4 = useRef()
-  const formRef5 = useRef()
+
   function onSelect(dateString, date) {
     console.log('onSelect', dateString, date)
   }
@@ -112,9 +181,9 @@ const AddTeacher = () => {
 
       const d1 = table3Data
       if (table3Data.length == 0) {
-        d.id = 0
+        d.key = 0
       } else {
-        d.id = table3Data[table3Data.length - 1].id + 1
+        d.key = table3Data[table3Data.length - 1].key + 1
       }
 
       d1.push(d)
@@ -143,17 +212,16 @@ const AddTeacher = () => {
           style={{ marginLeft: 20 }}
           onClick={() => {
             console.log(selectedRowKeys)
-            const d = cloneDeep(table6Data)
+            const d = cloneDeep(table3Data)
 
             remove(d, function (n) {
               for (let i = 0; i < selectedRowKeys.length; i++) {
-                if (n.id == selectedRowKeys[i]) {
+                if (n.key == selectedRowKeys[i]) {
                   return true
                 }
               }
             })
             setTable3Data(d)
-            //console.log(table6Data)
           }}
           status="danger"
           icon={<IconDelete />}
@@ -162,7 +230,7 @@ const AddTeacher = () => {
         </Button>
         <Table
           style={{ marginTop: 20 }}
-          rowKey="id"
+          rowKey="key"
           columns={columns}
           data={table3Data}
           rowSelection={{
@@ -172,13 +240,7 @@ const AddTeacher = () => {
               setSelectedRowKeys(selectedRowKeys)
             },
             onSelect: (selected, record, selectedRows) => {
-              //console.log(table6Data)
               console.log('onSelect:', selected, record, selectedRows)
-            },
-            checkboxProps: (record) => {
-              return {
-                disabled: record.id === '4'
-              }
             }
           }}
         />
@@ -256,9 +318,9 @@ const AddTeacher = () => {
       }
       const d1 = table6Data
       if (table6Data.length == 0) {
-        d.id = 0
+        d.key = 0
       } else {
-        d.id = table6Data[table6Data.length - 1].id + 1
+        d.key = table6Data[table6Data.length - 1].key + 1
       }
 
       d1.push(d)
@@ -396,9 +458,9 @@ const AddTeacher = () => {
       }
       const d1 = table7Data
       if (table7Data.length == 0) {
-        d.id = 0
+        d.key = 0
       } else {
-        d.id = table7Data[table7Data.length - 1].id + 1
+        d.key = table7Data[table7Data.length - 1].key + 1
       }
 
       d1.push(d)
@@ -427,18 +489,15 @@ const AddTeacher = () => {
           //disabled={true}
           style={{ marginLeft: 20 }}
           onClick={() => {
-            console.log(selectedRowKeys)
-            const d = cloneDeep(table6Data)
-
+            const d = cloneDeep(table7Data)
             remove(d, function (n) {
               for (let i = 0; i < selectedRowKeys.length; i++) {
-                if (n.id == selectedRowKeys[i]) {
+                if (n.key == selectedRowKeys[i]) {
                   return true
                 }
               }
             })
-            setTable6Data(d)
-            //console.log(table6Data)
+            setTable7Data(d)
           }}
           status="danger"
           icon={<IconDelete />}
@@ -447,7 +506,7 @@ const AddTeacher = () => {
         </Button>
         <Table
           style={{ marginTop: 20 }}
-          rowKey="id"
+          rowKey="key"
           columns={columns}
           data={table7Data}
           rowSelection={{
@@ -459,11 +518,6 @@ const AddTeacher = () => {
             onSelect: (selected, record, selectedRows) => {
               //console.log(table6Data)
               console.log('onSelect:', selected, record, selectedRows)
-            },
-            checkboxProps: (record) => {
-              return {
-                disabled: record.id === '4'
-              }
             }
           }}
         />
@@ -516,12 +570,12 @@ const AddTeacher = () => {
             <Alert
               style={{ marginBottom: 10, marginLeft: 200, width: 400 }}
               type="warning"
-              content="教师工号为 8 位且唯一"
+              content="教师工号默认不可修改"
             />
             <Alert
               style={{ marginBottom: 20, marginLeft: 200, width: 400 }}
               type="success"
-              content="初始登陆密码默认为123456"
+              content="登陆密码长度在6~15位之间"
             />
             <Form
               ref={formRef1}
@@ -535,7 +589,7 @@ const AddTeacher = () => {
               scrollToFirstError
             >
               <FormItem label="工号" field="tea_id" rules={[{ required: true }]}>
-                <Input placeholder="please enter..." />
+                <Input placeholder="please enter..." disabled />
               </FormItem>
               <FormItem label="姓名" field="tea_name" rules={[{ required: true }]}>
                 <Input placeholder="please enter..." />
@@ -790,6 +844,9 @@ const AddTeacher = () => {
                                     allowClear
                                   />
                                 </FormItem>
+                                <FormItem field={item.field + '.id'} style={{ display: 'none' }}>
+                                  <Input></Input>
+                                </FormItem>
                                 <Form.Item
                                   label="起止时间"
                                   layout="vertical"
@@ -897,6 +954,9 @@ const AddTeacher = () => {
                                     onSelect={onSelect}
                                   />
                                 </Form.Item>
+                                <FormItem field={item.field + '.id'} style={{ display: 'none' }}>
+                                  <Input></Input>
+                                </FormItem>
                                 <Form.Item
                                   layout="vertical"
                                   label="地点"
@@ -1010,7 +1070,6 @@ const AddTeacher = () => {
             onClick={() => {
               console.log('BACK', allData)
               formRef1.current.setFieldsValue(allData)
-              console.log(table3Data)
               setCurrent(current - 1)
             }}
             style={{
@@ -1037,8 +1096,7 @@ const AddTeacher = () => {
 
                 setCurrent(current + 1)
               } else if (current === 2) {
-                console.log(formRef2.current.getFieldsValue())
-
+                console.log('你好', formRef2.current.getFieldsValue())
                 await formRef2.current.validate()
                 const d2 = {
                   tea_photo:
@@ -1081,7 +1139,7 @@ const AddTeacher = () => {
                 //console.log(allData)
               } else if (current == 4) {
                 await formRef4.current.validate()
-                console.log(formRef4.current.getFieldsValue())
+
                 if (formRef4.current.getFieldsValue().tea_edu === undefined) {
                   setCurrent(current + 1)
                 } else {
@@ -1089,6 +1147,7 @@ const AddTeacher = () => {
                     tea_edu: formRef4.current.getFieldsValue().tea_edu
                   }
                   const oldD = allData
+
                   oldD.tea_edu = d2
                   setAllData({
                     ...oldD
@@ -1125,7 +1184,7 @@ const AddTeacher = () => {
                 setAllData({
                   ...oldD
                 })
-                const res = await addTeacherDetails(allData)
+                const res = await editTeacher(allData)
                 if (res.success) {
                   if (
                     res.tea_msg != undefined ||
@@ -1225,4 +1284,4 @@ const AddTeacher = () => {
   )
 }
 
-export default AddTeacher
+export default EditTeacher

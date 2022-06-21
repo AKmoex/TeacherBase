@@ -57,6 +57,13 @@ export default [
         component: './Teacher/AddTeacher'
       },
       {
+        path: '/teacher/edit/:id',
+        name: 'list.teacher-edit',
+        icon: 'smile',
+        component: './Teacher/EditTeacher',
+        hideInMenu: true
+      },
+      {
         component: './404'
       }
     ]

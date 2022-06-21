@@ -47,6 +47,18 @@ export async function addTeacherDetails(body, options) {
     ...(options || {})
   })
 }
+
+export async function editTeacher(body, options) {
+  return request('/api/teacher/edit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: body,
+    ...(options || {})
+  })
+}
+
 export async function addTeacher(body, options) {
   return request('/api/teacher/add', {
     method: 'POST',

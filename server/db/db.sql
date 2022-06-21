@@ -15,12 +15,8 @@ create table Department(
     t_count int default 0,
     address varchar(256)
 );
-
 -- 将自增学列 dep_auto_inc 与Department关联, 实现主键自增
 alter sequence dep_auto_inc owned by department.id;
-
-
-
 
 
 
@@ -152,6 +148,21 @@ create table Research(
 alter sequence res_auto_inc owned by Research.id;
 
 
+insert into Department(name,establish_date,phone,t_count,address)
+ values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380',120,'翡翠湖校区双子楼A做1107');
+insert into Department(name,establish_date,phone,t_count,address)
+ values('食品与生物工程学院','2021-01-30','0551- 62901362',150,'翡翠湖校区食品与生物工程大楼二楼');
+insert into Department(name,establish_date,phone,t_count,address)
+ values('材料科学与工程学院','2021-11-30','0551- 62901362',300,'安徽省合肥市屯溪路193号');
+
+ insert into Department(name,establish_date,phone,t_count,address)
+ values('外国语学院','2021-11-30','0551-62901716',25,'合肥工业大学翡翠湖校区科教楼A栋第15层');
+
+
+  insert into Department(name,establish_date,phone,t_count,address)
+ values('机械工程学院','2021-11-30','0551-62901326',25,'安徽省合肥市屯溪路193号');
+  insert into Department(name,establish_date,phone,t_count,address)
+ values('电气与自动化工程学院','2021-11-30','0551-6290-1408',25,'安徽省合肥市屯溪路193号逸夫科教楼');
 
 
 insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
@@ -168,21 +179,6 @@ insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_da
 
 
 
-insert into Department(name,establish_date,phone,t_count,address)
- values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380',120,'翡翠湖校区双子楼A做1107');
-insert into Department(name,establish_date,phone,t_count,address)
- values('食品与生物工程学院','2021-01-30','0551- 62901362',150,'翡翠湖校区食品与生物工程大楼二楼');
-insert into Department(name,establish_date,phone,t_count,address)
- values('材料科学与工程学院','2021-11-30','0551- 62901362',300,'安徽省合肥市屯溪路193号');
-
- insert into Department(name,establish_date,phone,t_count,address)
- values('外国语学院','2021-11-30','0551-62901716',25,'合肥工业大学翡翠湖校区科教楼A栋第15层');
-
-
-  insert into Department(name,establish_date,phone,t_count,address)
- values('机械工程学院','2021-11-30','0551-62901326',25,'安徽省合肥市屯溪路193号');
-  insert into Department(name,establish_date,phone,t_count,address)
- values('电气与自动化工程学院','2021-11-30','0551-6290-1408',25,'安徽省合肥市屯溪路193号逸夫科教楼');
  
 
 insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2016-06-01','2019-07-01','合肥工业大学','本科');
@@ -230,3 +226,160 @@ insert into Family(teacher_id,name,relation,phone) values('66666666','林莉心'
 
 drop view if exists TeacherInfoView cascade;
 create view TeacherInfoView as select distinct T.*,D.name as department_name from Teacher T left outer join Department D on T.department_id=D.id  ;
+
+
+
+
+--创建存储过程update_teacher
+CREATE OR REPLACE PROCEDURE update_teacher
+(
+    tea_id char(8),
+    tea_name varchar(32),
+    tea_password varchar(100),
+    tea_gender tinyint,
+    tea_phone varchar(32),
+    tea_email varchar(256), -- 邮箱
+    tea_birthday date, -- 出生日期
+    tea_photo varchar(256), -- 照片
+    tea_entry_date date, -- 入职时间
+    tea_department_id integer, -- 所属院系
+    tea_job varchar(256),
+    tea_ethnicity varchar(256), -- 民族
+    tea_political varchar(256), -- 政治面貌
+    tea_address varchar(256), -- 通讯地址
+    tea_title varchar(256)-- 职称
+)
+IS
+BEGIN
+if exists(select * from teacher where id=tea_id) then
+   UPDATE teacher SET name=tea_name,password=tea_password,gender=tea_gender,phone=tea_phone,email=tea_email,birthday=tea_birthday,
+   photo=tea_photo, entry_date=tea_entry_date,department_id=tea_department_id,job=tea_job, ethnicity=tea_ethnicity,
+   political=tea_political,address=tea_address,title=tea_title WHERE id = tea_id;
+end if;
+
+END;
+/
+
+
+
+
+--创建存储过程update_family
+CREATE OR REPLACE PROCEDURE update_family
+(
+    fam_id integer,
+    fam_teacher_id char(8),
+    fam_name varchar(32),
+    fam_relation varchar(32),
+    fam_phone varchar(32)
+)
+IS
+BEGIN
+-- 存在,则更新
+if exists(select * from Family where id=fam_id) then
+   UPDATE Family SET teacher_id=fam_teacher_id,name=fam_name,relation=fam_relation,phone=fam_phone WHERE id = fam_id;
+-- 没有则插入
+else
+   INSERT INTO family(teacher_id,name,relation,phone) VALUES(fam_teacher_id,fam_name,fam_relation,fam_phone);
+end if;
+
+END;
+/
+
+
+--创建存储过程update_archive
+CREATE OR REPLACE PROCEDURE update_archive
+(
+    arc_id integer,
+    arc_teacher_id char(8),
+    arc_title varchar(32),
+    arc_obtain_date date,
+    arc_detail text,
+    arc_type tinyint
+)
+IS
+BEGIN
+-- 存在,则更新
+if exists(select * from Archive where id=arc_id) then
+   UPDATE Archive SET teacher_id=arc_teacher_id,title=arc_title,obtain_date=arc_obtain_date,detail=arc_detail,type=arc_type WHERE id = arc_id;
+-- 没有则插入
+else
+   INSERT INTO Archive(teacher_id,title,obtain_date,detail,type) VALUES(arc_teacher_id,arc_title,arc_obtain_date,arc_detail,arc_type);
+end if;
+
+END;
+/
+
+
+--创建存储过程update_research
+CREATE OR REPLACE PROCEDURE update_research
+(
+    res_id integer ,
+    res_teacher_id char(8),
+    res_title varchar(256),
+    res_obtain_date date,
+    res_detail text
+)
+IS
+BEGIN
+-- 存在,则更新
+if exists(select * from Research where id=res_id) then
+   UPDATE Research SET teacher_id=res_teacher_id,title=res_title,obtain_date=res_obtain_date,detail=res_detail WHERE id = res_id;
+-- 没有则插入
+else
+   INSERT INTO Research(teacher_id,title,obtain_date,detail) VALUES(res_teacher_id,res_title,res_obtain_date,res_detail);
+end if;
+
+END;
+/
+
+
+
+--创建存储过程update_education
+CREATE OR REPLACE PROCEDURE update_education
+(
+    edu_id integer,
+    edu_teacher_id char(8),
+    edu_start_date date,
+    edu_end_date date,
+    edu_school varchar(256),
+    edu_degree varchar(32) ,
+    edu_major varchar(256)
+)
+IS
+BEGIN
+-- 存在,则更新
+if exists(select * from Education where id=edu_id) then
+   UPDATE Education SET teacher_id=edu_teacher_id, start_date=edu_start_date,end_date=edu_end_date,school=edu_school,
+   degree=edu_degree,major=edu_major WHERE id = edu_id;
+-- 没有则插入
+else
+   INSERT INTO Education(teacher_id,start_date,end_date,school,degree,major) VALUES(edu_teacher_id,edu_start_date,edu_end_date,edu_school,edu_degree,edu_major);
+end if;
+
+END;
+/
+
+
+
+--创建存储过程update_work
+CREATE OR REPLACE PROCEDURE update_work
+(
+    work_id integer,
+    work_teacher_id char(8),
+    work_start_date date,
+    work_end_date date,
+    work_location varchar(32),
+    work_content varchar(32)
+)
+IS
+BEGIN
+-- 存在,则更新
+if exists(select * from Work where id=work_id) then
+   UPDATE Work SET teacher_id=work_teacher_id,start_date=work_start_date,end_date=work_end_date,location=work_location,content=work_content WHERE id = work_id;
+-- 没有则插入
+else
+   INSERT INTO Work(teacher_id,start_date,end_date,location,content) VALUES(work_teacher_id,work_start_date,work_end_date,work_location,work_content);
+end if;
+
+END;
+/

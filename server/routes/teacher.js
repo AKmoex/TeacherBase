@@ -40,7 +40,6 @@ router.get('/id', authMiddleware(), async (req, res) => {
       const res_f = await db.query(format('SELECT * FROM Research WHERE teacher_id=%L', tea_id))
       data.res = res_f.rows
 
-      console.log(data)
       res.send({
         success: true,
         data
@@ -125,8 +124,7 @@ router.get('/', authMiddleware(), async (req, res) => {
       if (req.query.tea_title && req.query.tea_title.length > 0) {
         //req.query.tea_title = req.query.tea_title.split(',')
         const x = req.query.tea_title.split(',')
-        console.log(x)
-        console.log(typeof x)
+
         remove(rows, function (n) {
           if (n.title == null || n.title.length <= 0) {
             return true
@@ -164,7 +162,7 @@ router.get('/', authMiddleware(), async (req, res) => {
         }
       })
     } catch (err) {
-      console.log(err)
+      console.log('err:', err)
       res.send({
         success: false,
         data: {
@@ -193,18 +191,16 @@ router.get('/', authMiddleware(), async (req, res) => {
 const insertEdu = async (data, tea_id, resdata) => {
   try {
     let edu_temp = []
-    console.log(data)
     for (let i = 0; i < data.length; i++) {
       edu_temp.push([
         tea_id,
         data[i].date[0] + '-01',
         data[i].date[1] + '-01',
         data[i].school,
-        data[i].type,
+        data[i].degree,
         data[i].major
       ])
     }
-    console.log(edu_temp)
     const { rows_edu } = await db.query(
       format(
         'INSERT INTO education(teacher_id,start_date,end_date,school,degree,major) VALUES %L returning *',
@@ -244,11 +240,11 @@ const insertArc = async (data, tea_id, resdata) => {
     let arc_temp = []
 
     for (let i = 0; i < data.length; i++) {
-      arc_temp.push([tea_id, data[i].title, data[i].type, data[i].obtain_date, data[i].detail])
+      arc_temp.push([tea_id, data[i].title, data[i].obtain_date, data[i].detail, data[i].type])
     }
     const { rows_arc } = await db.query(
       format(
-        'INSERT INTO archive(teacher_id,title,type,obtain_date,detail) VALUES %L returning *',
+        'INSERT INTO archive(teacher_id,title,obtain_date,detail,type) VALUES %L returning *',
         arc_temp
       ),
       []
@@ -333,7 +329,6 @@ const insertTea = async (req, resdata) => {
         tea_gender = 1
       }
     }
-    console.log(tea_gender)
     const { rows } = await db.query(
       'INSERT INTO teacher(id, name,password,gender,phone,email,birthday,photo,entry_date,department_id,job,ethnicity,political,address,title) VALUES($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15) returning *',
       [
@@ -359,12 +354,264 @@ const insertTea = async (req, resdata) => {
     resdata.tea_msg = '教师添加失败!'
   }
 }
+
+const updateTea = async (req, resdata) => {
+  try {
+    let {
+      tea_id,
+      tea_name,
+      tea_password,
+      tea_birthday,
+      tea_photo,
+      tea_gender,
+      tea_phone,
+      tea_email,
+      tea_ethnicity,
+      tea_political,
+      tea_address,
+      tea_job,
+      tea_title,
+      tea_entry_date,
+      tea_department_id
+    } = req.body
+    if (!isUndefined(tea_title)) {
+      tea_title = tea_title.join(',')
+    }
+
+    if (!isUndefined(tea_gender)) {
+      if (tea_gender == '2') {
+        tea_gender = 2
+      } else if (tea_gender == '1') {
+        tea_gender = 1
+      }
+    }
+    const { rows } = await db.query(
+      'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15);',
+      [
+        tea_id,
+        tea_name,
+        tea_password,
+        tea_gender,
+        tea_phone,
+        tea_email,
+        tea_birthday,
+        tea_photo,
+        tea_entry_date,
+        tea_department_id,
+        tea_job,
+        tea_ethnicity,
+        tea_political,
+        tea_address,
+        tea_title
+      ]
+    )
+  } catch (err) {
+    console.log('err:', err)
+    resdata.tea_msg = '教师添加失败!'
+  }
+}
+
+const updateFam = async (data, tea_id, resdata) => {
+  try {
+    let fam_temp = []
+    for (let i = 0; i < data.length; i++) {
+      fam_temp.push([data[i].id, tea_id, data[i].fam_name, data[i].fam_relation, data[i].fam_phone])
+    }
+
+    // 删除数据
+    const { rows } = await db.query('select * from family where teacher_id=$1', [tea_id])
+    for (const e of rows) {
+      // 新数据中没有
+      flag = false
+      for (const e2 of fam_temp) {
+        if (e2[0] == e.id) {
+          // 有
+          flag = true
+          break
+        }
+      }
+      if (!flag) {
+        await db.query('delete from family where id=$1', [e.id])
+      }
+    }
+
+    // 更新或插入
+    for (let i = 0; i < fam_temp.length; i++) {
+      await db.query('CALL update_family($1,$2,$3,$4,$5)', fam_temp[i])
+    }
+  } catch (err) {
+    console.log('err:', err)
+    resdata.fam_msg = '教师家庭关系更新失败!'
+  }
+}
+
+const updateArc = async (data, tea_id, resdata) => {
+  try {
+    let arc_temp = []
+
+    for (let i = 0; i < data.length; i++) {
+      arc_temp.push([
+        data[i].id,
+        tea_id,
+        data[i].title,
+        data[i].obtain_date,
+        data[i].detail,
+        data[i].type
+      ])
+    }
+
+    // 删除数据
+    const { rows } = await db.query('select * from Archive where teacher_id=$1', [tea_id])
+    for (const e of rows) {
+      // 新数据中没有
+      flag = false
+      for (const e2 of arc_temp) {
+        if (e2[0] == e.id) {
+          // 有
+          flag = true
+          break
+        }
+      }
+      if (!flag) {
+        await db.query('delete from Archive where id=$1', [e.id])
+      }
+    }
+
+    // 更新或插入
+    for (let i = 0; i < arc_temp.length; i++) {
+      await db.query('CALL update_archive($1,$2,$3,$4,$5,$6)', arc_temp[i])
+    }
+  } catch (err) {
+    console.log('err', err)
+    resdata.arc_msg = '教师奖惩记录更新失败!'
+  }
+}
+
+const updateRes = async (data, tea_id, resdata) => {
+  try {
+    let res_temp = []
+
+    for (let i = 0; i < data.length; i++) {
+      res_temp.push([data[i].id, tea_id, data[i].title, data[i].obtain_date, data[i].detail])
+    }
+
+    // 删除数据
+    const { rows } = await db.query('select * from Research where teacher_id=$1', [tea_id])
+    for (const e of rows) {
+      // 新数据中没有
+      flag = false
+      for (const e2 of res_temp) {
+        if (e2[0] == e.id) {
+          // 有
+          flag = true
+          break
+        }
+      }
+      if (!flag) {
+        await db.query('delete from Research where id=$1', [e.id])
+      }
+    }
+
+    // 更新或插入
+    for (let i = 0; i < res_temp.length; i++) {
+      await db.query('CALL update_research($1,$2,$3,$4,$5)', res_temp[i])
+    }
+  } catch (err) {
+    console.log('err', err)
+    resdata.res_msg = '教师科研项目更新失败!'
+  }
+}
+
+const updateEdu = async (data, tea_id, resdata) => {
+  try {
+    let edu_temp = []
+    for (let i = 0; i < data.length; i++) {
+      edu_temp.push([
+        data[i].id,
+        tea_id,
+        data[i].date[0] + '-01',
+        data[i].date[1] + '-01',
+        data[i].school,
+        data[i].degree,
+        data[i].major
+      ])
+    }
+
+    // 删除数据
+    const { rows } = await db.query('select * from Education where teacher_id=$1', [tea_id])
+    for (const e of rows) {
+      // 新数据中没有
+      flag = false
+      for (const e2 of edu_temp) {
+        if (e2[0] == e.id) {
+          // 有
+          flag = true
+          break
+        }
+      }
+      if (!flag) {
+        await db.query('delete from Education where id=$1', [e.id])
+      }
+    }
+    // 更新或插入
+    for (let i = 0; i < edu_temp.length; i++) {
+      await db.query('CALL update_education($1,$2,$3,$4,$5,$6,$7)', edu_temp[i])
+    }
+  } catch (err) {
+    console.log('err:', err)
+    resdata.edu_msg = '教师教育经历更新失败!'
+  }
+}
+
+const updateWork = async (data, tea_id, resdata) => {
+  try {
+    let work_temp = []
+    for (let i = 0; i < data.length; i++) {
+      work_temp.push([
+        data[i].id,
+        tea_id,
+        dayjs(data[i].date[0]).format('YYYY-MMM-DD'),
+        dayjs(data[i].date[1]).format('YYYY-MMM-DD'),
+        // data[i].date[0] + '-01',
+        // data[i].date[1] + '-01',
+        data[i].location,
+        data[i].content
+      ])
+    }
+
+    // 删除数据
+    const { rows } = await db.query('select * from Work where teacher_id=$1', [tea_id])
+    for (const e of rows) {
+      // 新数据中没有
+      flag = false
+      for (const e2 of work_temp) {
+        if (e2[0] == e.id) {
+          // 有
+          flag = true
+          break
+        }
+      }
+      if (!flag) {
+        await db.query('delete from Work where id=$1', [e.id])
+      }
+    }
+
+    // 更新或插入
+    for (let i = 0; i < work_temp.length; i++) {
+      await db.query('CALL update_work($1,$2,$3,$4,$5,$6)', work_temp[i])
+    }
+  } catch (err) {
+    console.log('err:', err)
+    resdata.work_msg = '教师工作经历更新失败!'
+  }
+}
+
 /**
  * 添加教师-详细
  */
 router.post('/add/details', authMiddleware(), async (req, res) => {
   const id = req.id
-  //console.log(req.body)
+
   const { tea_id, tea_name, tea_password } = req.body
   let resdata = { success: true }
 
@@ -397,7 +644,6 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
 
         // 教育经历
         let { tea_edu } = req.body
-        console.log(tea_edu)
         if (!isUndefined(tea_edu)) {
           tea_edu = tea_edu.tea_edu
           if (!isUndefined(tea_edu.length) && tea_edu.length != 0) {
@@ -451,14 +697,11 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
     })
   }
 })
-
 /**
  * 添加教师
  */
 router.post('/add', authMiddleware(), async (req, res) => {
   const id = req.id
-  //console.log(req.body)
-  console.log(req.body)
   const { tea_id, tea_name, tea_password } = req.body
   let resdata = { success: true }
   if (id === '00000000') {
@@ -497,165 +740,91 @@ router.post('/add', authMiddleware(), async (req, res) => {
   }
 })
 
-router.post('/create', authMiddleware(), async (req, res) => {
+// 更新教师
+router.post('/edit', authMiddleware(), async (req, res) => {
   const id = req.id
-  const { dep_name, dep_date, dep_address, dep_phone } = req.body
+  const { tea_id, tea_name, tea_password } = req.body
+  let resdata = { success: true }
 
   if (id === '00000000') {
-    if (
-      !isUndefined(dep_name) &&
-      !isUndefined(dep_date) &&
-      !isUndefined(dep_address) &&
-      !isUndefined(dep_phone)
-    ) {
+    if (!isUndefined(tea_id) && !isUndefined(tea_name) && !isUndefined(tea_password)) {
       try {
-        let { rows } = await db.query(
-          'INSERT INTO department(name, establish_date,phone,address) VALUES($1, $2, $3, $4) returning *',
-          [dep_name, dep_date, dep_phone, dep_address]
-        )
+        // 基本信息
+        await updateTea(req, resdata)
 
-        res.send({
-          data: {
-            success: true,
-            message: '创建部门成功 !'
-          },
-          success: true
-        })
-      } catch (err) {
-        res.send({
-          data: {
-            success: false,
-            message: '创建部门失败,部门名称已存在 !'
-          },
-          success: true
-        })
-      }
-    } else {
-      res.send({
-        data: {
-          success: false,
-          message: '创建部门失败'
-        },
-        success: true
-      })
-    }
-  } else {
-    res.send({
-      data: {
-        success: false,
-        message: '创建部门失败'
-      },
-      success: true
-    })
-  }
-})
-
-router.post('/delete', authMiddleware(), async (req, res) => {
-  const id = req.id
-  const { dep_id } = req.body
-
-  if (id === '00000000') {
-    if (!isUndefined(dep_id)) {
-      try {
-        const client = await db.pool.connect()
-
-        await client.query('BEGIN')
-        const updateText = ' UPDATE teacher SET department=NULL WHERE department=$1'
-
-        await client.query(updateText, [dep_id])
-        const deleteText = 'DELETE FROM department WHERE id=$1'
-        await client.query(deleteText, [dep_id])
-
-        await client.query('COMMIT')
-        console.log(client)
-
-        res.send({
-          data: {
-            success: true,
-            message: '删除该部门成功!'
-          },
-          success: true
-        })
-      } catch (err) {
-        console.log(err)
-        res.send({
-          data: {
-            success: false,
-            message: '部门删除失败!'
-          },
-          success: true
-        })
-      }
-    } else {
-      res.send({
-        data: {
-          success: false,
-          message: '部门删除失败'
-        },
-        success: true
-      })
-    }
-  } else {
-    res.send({
-      data: {
-        success: false,
-        message: '删除部门失败'
-      },
-      success: true
-    })
-  }
-})
-
-router.post('/delete/multiple', authMiddleware(), async (req, res) => {
-  const id = req.id
-  const { dep_ids } = req.body
-
-  if (id === '00000000') {
-    if (!isUndefined(dep_ids)) {
-      try {
-        const client = await db.pool.connect()
-
-        await client.query('BEGIN')
-        for (let i = 0; i < dep_ids.length; i++) {
-          const updateText = ' UPDATE teacher SET department=NULL WHERE department=$1'
-          await client.query(updateText, [dep_ids[i]])
-          const deleteText = 'DELETE FROM department WHERE id=$1'
-          await client.query(deleteText, [dep_ids[i]])
+        // 家庭关系
+        let { tea_familys } = req.body
+        if (
+          !isUndefined(tea_familys) &&
+          !isUndefined(tea_familys.length) &&
+          tea_familys.length != 0
+        ) {
+          await updateFam(tea_familys, tea_id)
         }
-        await client.query('COMMIT')
+
+        // 奖惩记录
+        let { tea_archive } = req.body
+
+        if (
+          !isUndefined(tea_archive) &&
+          !isUndefined(tea_archive.length) &&
+          tea_archive.length != 0
+        ) {
+          await updateArc(tea_archive, tea_id, resdata)
+        }
+
+        // 科研项目
+        let { tea_research } = req.body
+        if (
+          !isUndefined(tea_research) &&
+          !isUndefined(tea_research.length) &&
+          tea_research.length != 0
+        ) {
+          await updateRes(tea_research, tea_id)
+        }
+
+        // 教育经历
+        let { tea_edu } = req.body
+        if (!isUndefined(tea_edu)) {
+          tea_edu = tea_edu.tea_edu
+          if (!isUndefined(tea_edu.length) && tea_edu.length != 0) {
+            await updateEdu(tea_edu, tea_id)
+          }
+        }
+
+        // 工作经历
+        let { tea_work } = req.body
+        if (!isUndefined(tea_work)) {
+          tea_work = tea_work.tea_work
+          await updateWork(tea_work, tea_id)
+        }
 
         res.send({
-          data: {
-            success: true,
-            message: util.format('成功删除 %d 个部门 !', dep_ids.length)
-          },
-          success: true
+          ...resdata
         })
       } catch (err) {
         console.log(err)
         res.send({
           data: {
             success: false,
-            message: '部门删除失败!'
+            message: '添加失败 !'
           },
           success: true
         })
       }
     } else {
       res.send({
-        data: {
-          success: false,
-          message: '部门删除失败'
-        },
-        success: true
+        success: false,
+        message: '更新失败, 工号、姓名、密码不能为空'
       })
     }
   } else {
-    res.send({
+    res.status(401).send({
       data: {
-        success: false,
-        message: '删除部门失败'
+        isLogin: false
       },
+      errorCode: '401',
+      errorMessage: '没有权限,请先登录！',
       success: true
     })
   }

@@ -125,8 +125,8 @@ const TeacherInfoModal = ({ cRef }) => {
     })
     // 教育经历
     for (let i = 0; i < data.edu.length; i++) {
-      data.edu[i].start_date = dayjs(data.edu[i].start_date).format('YYYY-MM-DD')
-      data.edu[i].end_date = dayjs(data.edu[i].end_date).format('YYYY-MM-DD')
+      data.edu[i].start_date = dayjs(data.edu[i].start_date).format('YYYY-MM')
+      data.edu[i].end_date = dayjs(data.edu[i].end_date).format('YYYY-MM')
     }
     setEdu(data.edu)
     // 工作经历
@@ -165,6 +165,10 @@ const TeacherInfoModal = ({ cRef }) => {
     {
       title: '学校',
       dataIndex: 'school'
+    },
+    {
+      title: '专业',
+      dataIndex: 'major'
     }
   ]
   const work_columns = [
