@@ -150,3 +150,38 @@ router.post('/edit', authMiddleware(), async (req, res) => {
     })
   }
 })
+
+router.post('/delete', authMiddleware(), async (req, res) => {
+  const { id } = req.body
+  if (req.id === '00000000') {
+    if (id) {
+      try {
+        await db.query('delete from research where id=$1', [id])
+        res.send({
+          message: '该科研项目已成功删除!',
+          success: true
+        })
+      } catch (err) {
+        console.log(err)
+        res.send({
+          success: false,
+          message: '删除失败!'
+        })
+      }
+    } else {
+      res.send({
+        message: '项目id不可为空',
+        success: false
+      })
+    }
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
+      },
+      errorCode: '401',
+      errorMessage: '没有权限,请先登录！',
+      success: true
+    })
+  }
+})

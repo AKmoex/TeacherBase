@@ -1,14 +1,17 @@
-import { research } from '@/services/research'
+import { deleteResearch, research } from '@/services/research'
 import { DownOutlined } from '@ant-design/icons'
-import { ProTable, TableDropdown } from '@ant-design/pro-components'
+import { ProTable } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
-import { Button } from '@arco-design/web-react'
+import { Button, Icon, Input, Message, Notification, Popconfirm } from '@arco-design/web-react'
 import { Menu } from 'antd'
 import dayjs from 'dayjs'
-import { useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import AddResearchModal from './components/AddResearchModal'
 import EditResearchModal from './components/EditResearchModal'
-
+const TextArea = Input.TextArea
+const IconFont = Icon.addFromIconFontCn({
+  src: '//at.alicdn.com/t/font_180975_26f1p759rvn.js'
+})
 const menu = (
   <Menu>
     <Menu.Item key="1">1st item</Menu.Item>
@@ -45,11 +48,13 @@ const Research = () => {
     {
       dataIndex: 'index',
       valueType: 'indexBorder',
-      width: 48
+      width: 48,
+      hideInSearch: true
     },
     {
       dataIndex: 'id',
-      hideInTable: true
+      hideInTable: true,
+      hideInSearch: true
     },
     {
       title: '项目名称',
@@ -115,20 +120,35 @@ const Research = () => {
         console.log(record)
         //p = `/teacher/edit/${record.tea_id}`
         return [
-          <a key="link1">查看</a>,
+          <Popconfirm
+            title="Are you sure you want to delete?"
+            onOk={async () => {
+              const res = await deleteResearch({ id: record.id })
+              if (res.success) {
+                Notification.success({
+                  icon: <IconFont type="icon-success" />,
+                  title: 'Success',
+                  content: res.message
+                })
+              } else {
+                Message.error(res.message)
+              }
+              tableReload()
+            }}
+            onCancel={() => {
+              Message.error({
+                content: 'cancel'
+              })
+            }}
+          >
+            <a key="link1">删除</a>
+          </Popconfirm>,
           <a
             key="link2"
             onClick={() => editResearchModalRef.current.setEditResearchVisible({ record })}
           >
             编辑
-          </a>,
-          <TableDropdown
-            key="actionGroup"
-            menus={[
-              { key: 'copy', name: '复制' },
-              { key: 'delete', name: '删除' }
-            ]}
-          />
+          </a>
         ]
       }
     }

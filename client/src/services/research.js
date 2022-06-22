@@ -48,3 +48,14 @@ export async function editResearch(body, options) {
     ...(options || {})
   })
 }
+/** 删除指定的某个部门 POST /api/department/delete */
+export async function deleteResearch(body, options) {
+  return request('/api/research/delete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: body,
+    ...(options || {})
+  })
+}
