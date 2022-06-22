@@ -230,6 +230,9 @@ create view TeacherInfoView as select distinct T.*,D.name as department_name fro
 drop view if exists ResearchInfoView cascade;
 create view ResearchInfoView as select distinct R.*,T.name as teacher_name from Research R,Teacher T where R.teacher_id=T.id  ;
 
+drop view if exists ArchiveInfoView cascade;
+create view ArchiveInfoView as select distinct A.*,T.name as teacher_name from Archive A,Teacher T where A.teacher_id=T.id  ;
+
 
 
 --创建存储过程update_teacher

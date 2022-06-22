@@ -12,7 +12,7 @@ router.get('/', authMiddleware(), async (req, res) => {
   if (req.id === '00000000') {
     try {
       const selectParams = [`%${'%'}%`]
-      let text = 'SELECT * FROM ResearchInfoView WHERE title LIKE $1'
+      let text = 'SELECT * FROM ArchiveInfoView WHERE title LIKE $1'
       if (!isUndefined(req.query.title)) {
         selectParams[0] = `%${req.query.title}%`
       }
@@ -33,6 +33,13 @@ router.get('/', authMiddleware(), async (req, res) => {
           selectParams.length
         }`
       }
+      if (req.query.type) {
+        if (req.query.type == '1') {
+          text = `${text} AND type=1`
+        } else if (req.query.type == '0') {
+          text = `${text} AND type=0`
+        }
+      }
       if (req.query.sort) {
         if (req.query.sort == 'ascend') {
           text = `${text} ORDER BY obtain_date ASC`
@@ -44,7 +51,7 @@ router.get('/', authMiddleware(), async (req, res) => {
       res.send({
         success: true,
         data: {
-          research: rows
+          archive: rows
         }
       })
     } catch (err) {
@@ -52,7 +59,7 @@ router.get('/', authMiddleware(), async (req, res) => {
       res.send({
         success: false,
         data: {
-          research: []
+          archive: []
         }
       })
     }
@@ -70,23 +77,22 @@ router.get('/', authMiddleware(), async (req, res) => {
 
 router.post('/add', authMiddleware(), async (req, res) => {
   const id = req.id
-  const { teacher_id, title, obtain_date, detail } = req.body
-
+  const { teacher_id, title, obtain_date, detail, type } = req.body
   if (id === '00000000') {
     if (!isUndefined(teacher_id) && !isUndefined(title) && !isUndefined(obtain_date)) {
       try {
         let { rows } = await db.query(
-          'INSERT INTO research(teacher_id, title,obtain_date,detail) VALUES($1, $2, $3, $4) returning *',
-          [teacher_id, title, obtain_date, detail]
+          'INSERT INTO archive(teacher_id, title,obtain_date,detail,type) VALUES($1, $2, $3, $4,$5) returning *',
+          [teacher_id, title, obtain_date, detail, type]
         )
         res.send({
-          message: '添加科研项目成功 !',
+          message: '添加奖惩记录成功 !',
           success: true
         })
       } catch (err) {
         console.log('err:', err)
         res.send({
-          message: '添加失败,请确定申报人是否存在 !',
+          message: '添加失败,请确定教师是否存在 !',
           success: false
         })
       }
@@ -109,20 +115,21 @@ router.post('/add', authMiddleware(), async (req, res) => {
 })
 
 router.post('/edit', authMiddleware(), async (req, res) => {
-  const { id, teacher_id, title, detail, obtain_date } = req.body
+  const { id, teacher_id, title, detail, obtain_date, type } = req.body
 
   if (req.id === '00000000') {
     if (id && teacher_id && title && obtain_date) {
       try {
-        let { rows } = await db.query('CALL update_research($1,$2,$3,$4,$5)', [
+        let { rows } = await db.query('CALL update_archive($1,$2,$3,$4,$5,$6)', [
           id,
           teacher_id,
           title,
           obtain_date,
-          detail
+          detail,
+          type
         ])
         res.send({
-          message: '科研项目更新成功 !',
+          message: '奖惩记录更新成功 !',
           success: true
         })
       } catch (err) {
@@ -155,9 +162,9 @@ router.post('/delete', authMiddleware(), async (req, res) => {
   if (req.id === '00000000') {
     if (id) {
       try {
-        await db.query('delete from research where id=$1', [id])
+        await db.query('delete from archive where id=$1', [id])
         res.send({
-          message: '该科研项目已成功删除!',
+          message: '该奖惩记录已成功删除!',
           success: true
         })
       } catch (err) {
@@ -169,7 +176,7 @@ router.post('/delete', authMiddleware(), async (req, res) => {
       }
     } else {
       res.send({
-        message: '项目id不可为空',
+        message: '奖惩记录id不可为空',
         success: false
       })
     }

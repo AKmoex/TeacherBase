@@ -1,4 +1,4 @@
-import { deleteResearch, research } from '@/services/research'
+import { archive, deleteArchive } from '@/services/archive'
 import { DownOutlined } from '@ant-design/icons'
 import { ProTable } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
@@ -6,8 +6,8 @@ import { Button, Icon, Input, Message, Notification, Popconfirm } from '@arco-de
 import { Menu } from 'antd'
 import dayjs from 'dayjs'
 import React, { useRef, useState } from 'react'
-import AddResearchModal from './components/AddResearchModal'
-import EditResearchModal from './components/EditResearchModal'
+import AddArchiveModal from './components/AddArchiveModal'
+import EditArchiveModal from './components/EditArchiveModal'
 const TextArea = Input.TextArea
 const IconFont = Icon.addFromIconFontCn({
   src: '//at.alicdn.com/t/font_180975_26f1p759rvn.js'
@@ -19,25 +19,25 @@ const menu = (
     <Menu.Item key="3">3rd item</Menu.Item>
   </Menu>
 )
-const Research = () => {
+const Archive = () => {
   const actionRef = useRef()
-  const addResearchModalRef = useRef()
-  const editResearchModalRef = useRef()
-  const [researchs, setResearchs] = useState([])
+  const addArchiveModalRef = useRef()
+  const editArchiveModalRef = useRef()
+  const [archives, setArchive] = useState([])
   const request = async (params, soter, filter) => {
     if (soter.obtain_date) {
       params.sort = soter.obtain_date
     }
     console.log('nihO', params)
-    const result = await research(params)
-    let d = result.data.research
+    const result = await archive(params)
+    let d = result.data.archive
 
     for (let i = 0; i < d.length; i++) {
       d[i].index = i + 1
       d[i].obtain_date = dayjs(d[i].obtain_date).format('YYYY-MM-DD')
     }
     // setData(d)
-    setResearchs(d)
+    setArchive(d)
     return {
       total: d.length,
       data: d,
@@ -58,7 +58,7 @@ const Research = () => {
       hideInSearch: true
     },
     {
-      title: '项目名称',
+      title: '奖惩名称',
       dataIndex: 'title',
       copyable: true,
       ellipsis: true,
@@ -73,12 +73,12 @@ const Research = () => {
       }
     },
     {
-      title: '申报人',
+      title: '人员',
       dataIndex: 'teacher_name',
       ellipsis: true
     },
     {
-      title: '申报人工号',
+      title: '人员工号',
       dataIndex: 'teacher_id',
       ellipsis: true
     },
@@ -114,6 +114,15 @@ const Research = () => {
       }
     },
     {
+      title: '类型',
+      key: 'type',
+      dataIndex: 'type',
+      valueEnum: {
+        0: { text: '奖励', status: 'Success' },
+        1: { text: '惩罚', status: 'Error' }
+      }
+    },
+    {
       title: '操作',
       valueType: 'option',
       key: 'option',
@@ -122,9 +131,9 @@ const Research = () => {
         //p = `/teacher/edit/${record.tea_id}`
         return [
           <Popconfirm
-            title="确定删除该科研项目吗?"
+            title="确定删除该条奖惩记录吗?"
             onOk={async () => {
-              const res = await deleteResearch({ id: record.id })
+              const res = await deleteArchive({ id: record.id })
               if (res.success) {
                 Notification.success({
                   icon: <IconFont type="icon-success" />,
@@ -142,7 +151,7 @@ const Research = () => {
           </Popconfirm>,
           <a
             key="link2"
-            onClick={() => editResearchModalRef.current.setEditResearchVisible({ record })}
+            onClick={() => editArchiveModalRef.current.setEditArchiveVisible({ record })}
           >
             编辑
           </a>
@@ -206,15 +215,15 @@ const Research = () => {
           <Button
             type="primary"
             key="primary"
-            onClick={() => addResearchModalRef.current.setAddResearchVisible(true)}
+            onClick={() => addArchiveModalRef.current.setAddArchiveVisible(true)}
           >
-            新增项目
+            新增奖惩记录
           </Button>
         ]}
       />
-      <AddResearchModal ref={addResearchModalRef} tableReload={tableReload} />
-      <EditResearchModal ref={editResearchModalRef} tableReload={tableReload} />
+      <AddArchiveModal ref={addArchiveModalRef} tableReload={tableReload} />
+      <EditArchiveModal ref={editArchiveModalRef} tableReload={tableReload} />
     </PageContainer>
   )
 }
-export default Research
+export default Archive

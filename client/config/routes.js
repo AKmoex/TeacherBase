@@ -88,6 +88,13 @@ export default [
     component: './Research',
     access: 'canAdmin'
   },
+  {
+    name: '奖惩管理',
+    icon: 'table',
+    path: '/archive',
+    component: './Archive',
+    access: 'canAdmin'
+  },
 
   {
     path: '/',

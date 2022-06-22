@@ -2,6 +2,7 @@
 
 /* eslint-disable */
 
+import * as archive from './archive'
 import * as department from './department'
 import * as login from './login'
 import * as research from './research'
@@ -10,5 +11,6 @@ export default {
   user,
   login,
   department,
-  research
+  research,
+  archive
 }
