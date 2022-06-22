@@ -33,6 +33,7 @@ const AddResearchModal = (props, ref) => {
   useImperativeHandle(ref, () => ({
     setAddResearchVisible: (vis) => {
       setVisible(vis)
+      form.resetFields()
     }
   }))
 
