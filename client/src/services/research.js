@@ -37,3 +37,14 @@ export async function addResearch(body, options) {
     ...(options || {})
   })
 }
+
+export async function editResearch(body, options) {
+  return request('/api/research/edit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: body,
+    ...(options || {})
+  })
+}

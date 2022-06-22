@@ -107,3 +107,46 @@ router.post('/add', authMiddleware(), async (req, res) => {
     })
   }
 })
+
+router.post('/edit', authMiddleware(), async (req, res) => {
+  const { id, teacher_id, title, detail, obtain_date } = req.body
+
+  if (req.id === '00000000') {
+    if (id && teacher_id && title && obtain_date) {
+      try {
+        let { rows } = await db.query('CALL update_research($1,$2,$3,$4,$5)', [
+          id,
+          teacher_id,
+          title,
+          obtain_date,
+          detail
+        ])
+        res.send({
+          message: '科研项目更新成功 !',
+          success: true
+        })
+        res.send({})
+      } catch (err) {
+        console.log(err)
+        res.send({
+          message: '更新失败, 请检查信息是否填写正确 !',
+          success: false
+        })
+      }
+    } else {
+      res.send({
+        success: false,
+        message: '更新失败, 部分信息不可为空 !'
+      })
+    }
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
+      },
+      errorCode: '401',
+      errorMessage: '没有权限,请先登录！',
+      success: true
+    })
+  }
+})

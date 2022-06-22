@@ -7,117 +7,8 @@ import { Menu } from 'antd'
 import dayjs from 'dayjs'
 import { useRef, useState } from 'react'
 import AddResearchModal from './components/AddResearchModal'
-const columns = [
-  {
-    dataIndex: 'index',
-    valueType: 'indexBorder',
-    width: 48
-  },
-  {
-    title: '项目名称',
-    dataIndex: 'title',
-    copyable: true,
-    ellipsis: true,
-    tip: '名称过长会自动收缩',
-    formItemProps: {
-      rules: [
-        {
-          required: true,
-          message: '此项为必填项'
-        }
-      ]
-    }
-  },
-  {
-    title: '申报人',
-    dataIndex: 'teacher_name',
-    ellipsis: true
-  },
-  {
-    title: '申报人工号',
-    dataIndex: 'teacher_id',
-    ellipsis: true
-  },
-  {
-    disable: true,
-    title: '状态',
-    dataIndex: 'state',
-    filters: true,
-    onFilter: true,
-    valueType: 'select',
-    valueEnum: {
-      all: { text: '全部', status: 'Default' },
-      open: {
-        text: '未解决',
-        status: 'Error'
-      },
-      closed: {
-        text: '已解决',
-        status: 'Success',
-        disabled: true
-      },
-      processing: {
-        text: '解决中',
-        status: 'Processing'
-      }
-    }
-  },
+import EditResearchModal from './components/EditResearchModal'
 
-  {
-    title: '时间',
-    key: 'obtain_date',
-    dataIndex: 'obtain_date',
-    valueType: 'date',
-    sorter: (a, b) => a.obtain_date - b.obtain_date,
-
-    hideInSearch: true,
-    onFilter: true
-  },
-  {
-    title: '时间范围',
-    dataIndex: 'created_at',
-    valueType: 'dateRange',
-    hideInTable: true,
-    search: {
-      transform: (value) => {
-        return {
-          startTime: value[0],
-          endTime: value[1]
-        }
-      }
-    }
-  },
-  {
-    title: '操作',
-    valueType: 'option',
-    key: 'option',
-    render: (text, record, _, action) => [
-      <a
-        key="editable"
-        onClick={() => {
-          var _a
-          ;(_a = action === null || action === void 0 ? void 0 : action.startEditable) === null ||
-          _a === void 0
-            ? void 0
-            : _a.call(action, record.id)
-        }}
-      >
-        编辑
-      </a>,
-      <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
-        查看
-      </a>,
-      <TableDropdown
-        key="actionGroup"
-        onSelect={() => (action === null || action === void 0 ? void 0 : action.reload())}
-        menus={[
-          { key: 'copy', name: '复制' },
-          { key: 'delete', name: '删除' }
-        ]}
-      />
-    ]
-  }
-]
 const menu = (
   <Menu>
     <Menu.Item key="1">1st item</Menu.Item>
@@ -128,6 +19,7 @@ const menu = (
 const Research = () => {
   const actionRef = useRef()
   const addResearchModalRef = useRef()
+  const editResearchModalRef = useRef()
   const [researchs, setResearchs] = useState([])
   const request = async (params, soter, filter) => {
     if (soter.obtain_date) {
@@ -149,6 +41,98 @@ const Research = () => {
       success: true
     }
   }
+  const columns = [
+    {
+      dataIndex: 'index',
+      valueType: 'indexBorder',
+      width: 48
+    },
+    {
+      dataIndex: 'id',
+      hideInTable: true
+    },
+    {
+      title: '项目名称',
+      dataIndex: 'title',
+      copyable: true,
+      ellipsis: true,
+      tip: '名称过长会自动收缩',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: '此项为必填项'
+          }
+        ]
+      }
+    },
+    {
+      title: '申报人',
+      dataIndex: 'teacher_name',
+      ellipsis: true
+    },
+    {
+      title: '申报人工号',
+      dataIndex: 'teacher_id',
+      ellipsis: true
+    },
+
+    {
+      title: '时间',
+      key: 'obtain_date',
+      dataIndex: 'obtain_date',
+      valueType: 'date',
+      sorter: (a, b) => a.obtain_date - b.obtain_date,
+      hideInSearch: true,
+      onFilter: true
+    },
+    {
+      title: '说明',
+      key: 'detail',
+      dataIndex: 'detail',
+      hideInSearch: true,
+      ellipsis: true
+    },
+    {
+      title: '时间范围',
+      dataIndex: 'created_at',
+      valueType: 'dateRange',
+      hideInTable: true,
+      search: {
+        transform: (value) => {
+          return {
+            startTime: value[0],
+            endTime: value[1]
+          }
+        }
+      }
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      key: 'option',
+      render: (_, record) => {
+        console.log(record)
+        //p = `/teacher/edit/${record.tea_id}`
+        return [
+          <a key="link1">查看</a>,
+          <a
+            key="link2"
+            onClick={() => editResearchModalRef.current.setEditResearchVisible({ record })}
+          >
+            编辑
+          </a>,
+          <TableDropdown
+            key="actionGroup"
+            menus={[
+              { key: 'copy', name: '复制' },
+              { key: 'delete', name: '删除' }
+            ]}
+          />
+        ]
+      }
+    }
+  ]
   const tableReload = () => {
     actionRef.current.reload()
   }
@@ -212,6 +196,7 @@ const Research = () => {
         ]}
       />
       <AddResearchModal ref={addResearchModalRef} tableReload={tableReload} />
+      <EditResearchModal ref={editResearchModalRef} tableReload={tableReload} />
     </PageContainer>
   )
 }
