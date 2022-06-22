@@ -139,8 +139,8 @@ create sequence res_auto_inc
 drop table if exists Research cascade;
 create table Research(
     id integer primary key default nextval('res_auto_inc'),
-    teacher_id char(8),
-    title varchar(256),
+    teacher_id char(8) not null,
+    title varchar(256) not null,
     obtain_date date,
     detail text,
     foreign key (teacher_id) references Teacher(id)
@@ -227,6 +227,8 @@ insert into Family(teacher_id,name,relation,phone) values('66666666','林莉心'
 drop view if exists TeacherInfoView cascade;
 create view TeacherInfoView as select distinct T.*,D.name as department_name from Teacher T left outer join Department D on T.department_id=D.id  ;
 
+drop view if exists ResearchInfoView cascade;
+create view ResearchInfoView as select distinct R.*,T.name as teacher_name from Research R,Teacher T where R.teacher_id=T.id  ;
 
 
 

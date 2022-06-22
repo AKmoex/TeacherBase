@@ -81,6 +81,13 @@ export default [
     component: './Department',
     access: 'canAdmin'
   },
+  {
+    name: '科研管理',
+    icon: 'table',
+    path: '/research',
+    component: './Research',
+    access: 'canAdmin'
+  },
 
   {
     path: '/',

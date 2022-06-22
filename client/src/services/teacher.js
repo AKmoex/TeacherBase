@@ -69,27 +69,3 @@ export async function addTeacher(body, options) {
     ...(options || {})
   })
 }
-
-/** 删除指定的某个部门 POST /api/department/delete */
-export async function deleteDepartment(body, options) {
-  return request('/api/department/delete', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    data: body,
-    ...(options || {})
-  })
-}
-
-/** 删除指定的多个部门 POST /api/department/delete */
-export async function deleteDepartmentMultiple(body, options) {
-  return request('/api/department/delete/multiple', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    data: body,
-    ...(options || {})
-  })
-}
