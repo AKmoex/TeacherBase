@@ -80,3 +80,26 @@ export async function addTeacherMultiple(body, options) {
     ...(options || {})
   })
 }
+
+export async function deleteTeacher(body, options) {
+  return request('/api/teacher/delete', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: body,
+    ...(options || {})
+  })
+}
+
+/** 删除指定的多个部门 POST /api/department/delete */
+export async function deleteTeacherMultiple(body, options) {
+  return request('/api/teacher/delete/multiple', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: body,
+    ...(options || {})
+  })
+}

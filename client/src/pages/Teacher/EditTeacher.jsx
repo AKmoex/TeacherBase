@@ -1099,7 +1099,6 @@ const EditTeacher = () => {
 
                 setCurrent(current + 1)
               } else if (current === 2) {
-                console.log('你好', formRef2.current.getFieldsValue())
                 await formRef2.current.validate()
                 const d2 = {
                   tea_photo:

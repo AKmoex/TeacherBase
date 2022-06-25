@@ -57,7 +57,7 @@ create table TUser(
     teacher_id char(8),
     password varchar(100) not null default '123456', --密码
     role varchar(16) default 'user',
-    foreign key (teacher_id) references Teacher(id)
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
 
 );
 alter sequence user_auto_inc owned by TUser.id;
@@ -78,7 +78,7 @@ create table Education(
     school varchar(256),
     degree varchar(32) check (degree in ('本科','硕士','博士','博士后')),
     major varchar(256),
-    foreign key (teacher_id) references Teacher(id),
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE,
     -- 日期约束
     check(end_date=null or start_date<end_date)
 );
@@ -99,7 +99,7 @@ create table Family(
     name varchar(32) not null ,
     relation varchar(32)not null,
     phone varchar(32),
-    foreign key (teacher_id) references Teacher(id)
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
 );
 alter sequence fam_auto_inc owned by Family.id;
 
@@ -119,7 +119,7 @@ create table Work(
     end_date date,
     location varchar(32),
     content varchar(32),
-    foreign key (teacher_id) references Teacher(id)
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
 );
 alter sequence work_auto_inc owned by Work.id;
 
@@ -140,7 +140,7 @@ create table Archive(
     detail text,
     -- 奖励为0,惩罚为1
     type tinyint check (type in (0,1)) default 0,
-    foreign key (teacher_id) references Teacher(id)
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
 );
 alter sequence arc_auto_inc owned by Archive.id;
 
@@ -159,7 +159,7 @@ create table Research(
     title varchar(256) not null,
     obtain_date date,
     detail text,
-    foreign key (teacher_id) references Teacher(id)
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
 );
 alter sequence res_auto_inc owned by Research.id;
 
@@ -225,24 +225,6 @@ insert into Research(teacher_id,title,obtain_date,detail) values('66666666','机
 
 
 
--- 家庭关系
-drop sequence if exists fam_auto_inc cascade;
-create sequence fam_auto_inc
-    minvalue 1
-    maxvalue 9999999999999
-    start with 1
-    increment by 1;
-drop table if exists Family cascade;
-create table Family(
-    id integer primary key default nextval('fam_auto_inc'),
-    teacher_id char(8),
-    name varchar(32) not null ,
-    relation varchar(32)not null,
-    phone varchar(32),
-    foreign key (teacher_id) references Teacher(id)
-);
-alter sequence fam_auto_inc owned by Family.id;
-
 insert into Family(teacher_id,name,relation,phone) values('66666666','王富贵','父亲','13698745631');
 insert into Family(teacher_id,name,relation,phone) values('66666666','林莉心','母亲','15155068479');
 
@@ -274,15 +256,23 @@ CREATE OR REPLACE PROCEDURE update_teacher
     tea_ethnicity varchar(256), -- 民族
     tea_political varchar(256), -- 政治面貌
     tea_address varchar(256), -- 通讯地址
-    tea_title varchar(256)-- 职称
+    tea_title varchar(256), -- 职称
+    tea_term_date date --离职时间
 )
 IS
 BEGIN
-if exists(select * from teacher where id=tea_id) then
+-- 存在, 则更新
+if exists(select * from tuser where teacher_id=tea_id) then
    UPDATE teacher SET name=tea_name,gender=tea_gender,phone=tea_phone,email=tea_email,birthday=tea_birthday,
    photo=tea_photo, entry_date=tea_entry_date,department_id=tea_department_id,job=tea_job, ethnicity=tea_ethnicity,
-   political=tea_political,address=tea_address,title=tea_title WHERE id = tea_id;
-   UPDATE TUser SET password=tea_password WHERE teacher_id=tea_id;
+   political=tea_political,address=tea_address,title=tea_title,term_date=tea_term_date WHERE id = tea_id;
+   if tea_password is not null then
+        UPDATE TUser SET password=tea_password WHERE teacher_id=tea_id;
+   end if; 
+else
+    -- 没有则插入
+    INSERT INTO teacher(id, name,gender,phone,email,birthday,photo,entry_date,department_id,job,ethnicity,political,address,title,term_date)
+     VALUES(tea_id,tea_name,tea_gender,tea_phone,tea_email,tea_birthday,tea_photo,tea_entry_date,tea_department_id,tea_job,tea_ethnicity,tea_political,tea_address,tea_title,tea_term_date);
 end if;
 
 END;

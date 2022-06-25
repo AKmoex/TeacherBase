@@ -172,6 +172,7 @@ router.get('/', authMiddleware(), async (req, res) => {
           data[i].tea_term_date = dayjs(data[i].tea_term_date).format('YYYY-MM-DD')
         }
       }
+
       res.send({
         success: true,
         data: {
@@ -392,7 +393,8 @@ const updateTea = async (req, resdata) => {
       tea_job,
       tea_title,
       tea_entry_date,
-      tea_department_id
+      tea_department_id,
+      tea_term_date
     } = req.body
     if (!isUndefined(tea_title)) {
       tea_title = tea_title.join(',')
@@ -406,7 +408,7 @@ const updateTea = async (req, resdata) => {
       }
     }
     const { rows } = await db.query(
-      'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15);',
+      'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',
       [
         tea_id,
         tea_name,
@@ -422,7 +424,8 @@ const updateTea = async (req, resdata) => {
         tea_ethnicity,
         tea_political,
         tea_address,
-        tea_title
+        tea_title,
+        tea_term_date
       ]
     )
   } catch (err) {
@@ -851,16 +854,197 @@ router.post('/edit', authMiddleware(), async (req, res) => {
 })
 
 router.post('/add/multiple', authMiddleware(), async (req, res) => {
-  const id = req.id
+  if (req.role === 'admin') {
+    const { rows } = await db.query('select * from department')
+    const d = req.body
+    const dd = []
+    const errD = []
+    for (let i = 0; i < d.length; i++) {
+      let flag = false
+      for (let j = 0; j < rows.length; j++) {
+        if (d[i].tea_department_name == rows[j].name) {
+          d[i].tea_department_id = rows[j].id
+          flag = true
+          break
+        }
+      }
+      if (!d[i].tea_department_name) {
+        flag = true
+      }
+      if (flag) {
+        if (d[i].tea_gender) {
+          if (d[i].tea_gender == '男') {
+            d[i].tea_gender = 1
+          } else if (d[i].tea_gender == '女') {
+            d[i].tea_gender = 2
+          }
+        }
+        dd.push(d[i])
+      } else {
+        errD.push(i)
+      }
+    }
+    for (let i = 0; i < dd.length; i++) {
+      let {
+        tea_id,
+        tea_name,
+        tea_password,
+        tea_birthday,
+        tea_photo,
+        tea_gender,
+        tea_phone,
+        tea_email,
+        tea_ethnicity,
+        tea_political,
+        tea_address,
+        tea_job,
+        tea_title,
+        tea_entry_date,
+        tea_department_id,
+        tea_term_date
+      } = dd[i]
+
+      const { rows } = await db.query(
+        'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',
+        [
+          tea_id,
+          tea_name,
+          tea_password,
+          tea_gender,
+          tea_phone,
+          tea_email,
+          tea_birthday,
+          tea_photo,
+          tea_entry_date,
+          tea_department_id,
+          tea_job,
+          tea_ethnicity,
+          tea_political,
+          tea_address,
+          tea_title,
+          tea_term_date
+        ]
+      )
+    }
+    res.send({
+      data: errD,
+      success: true
+    })
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
+      },
+      errorCode: '401',
+      errorMessage: '请先登录！',
+      success: true
+    })
+  }
+})
+
+router.post('/delete', authMiddleware(), async (req, res) => {
+  const { tea_id } = req.body
+  if (req.role === 'admin') {
+    if (tea_id) {
+      try {
+        const { rows } = await db.query('select role from tuser where teacher_id=$1 ', [tea_id])
+
+        if (rows[0].role == 'admin') {
+          res.send({
+            message: '管理员不可以被删除 !',
+            success: false
+          })
+        } else {
+          await db.query('delete from teacher where id=$1', [tea_id])
+          res.send({
+            message: '成功删除该教师 !',
+            success: true
+          })
+        }
+      } catch (err) {
+        console.log(err)
+        res.send({
+          message: '教师删除失败 !',
+          success: false
+        })
+      }
+    } else {
+      res.send({
+        messags: '删除失败, id 不可为空 !',
+        success: false
+      })
+    }
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
+      },
+      errorCode: '401',
+      errorMessage: '请先登录！',
+      success: true
+    })
+  }
+})
+
+router.post('/delete/multiple', authMiddleware(), async (req, res) => {
+  const { tea_ids } = req.body
 
   if (req.role === 'admin') {
-    console.log(req.body)
-  } else {
-    res.send({
-      data: {
+    const { rows } = await db.query('select teacher_id from tuser where role=$1', ['admin'])
+
+    const errData = []
+    if (tea_ids) {
+      try {
+        for (let i = 0; i < tea_ids.length; i++) {
+          let flag = false
+          for (let j = 0; j < rows.length; j++) {
+            if (tea_ids[i] == rows[j].teacher_id) {
+              flag = true
+              errData.push(tea_ids[i])
+              break
+            }
+          }
+          if (!flag) {
+            await db.query('delete from teacher where id=$1', [tea_ids[i]])
+          }
+        }
+
+        let t = ''
+
+        if (errData.length > 0) {
+          let x = errData.join(',')
+          t = `成功删除 ${
+            tea_ids.length - errData.length
+          } 位教师, 其中工号为 ${x} 的教师为管理员, 未能删除`
+        } else {
+          t = `成功删除 ${tea_ids.length - errData.length} 位教师 !`
+        }
+
+        res.send({
+          success: true,
+          message: t,
+          errData: errData
+        })
+      } catch (err) {
+        console.log(err)
+        res.send({
+          success: false,
+          message: '删除教师失败!'
+        })
+      }
+    } else {
+      res.send({
         success: false,
-        message: '删除部门失败'
+        message: '教师id不可为空'
+      })
+    }
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
       },
+      errorCode: '401',
+      errorMessage: '请先登录！',
       success: true
     })
   }

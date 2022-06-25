@@ -1,5 +1,5 @@
 import { department as getAllDepartment } from '@/services/department'
-import { teacher } from '@/services/teacher'
+import { deleteTeacher, deleteTeacherMultiple, teacher } from '@/services/teacher'
 import { DownOutlined } from '@ant-design/icons'
 import { ProTable, TableDropdown } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
@@ -11,8 +11,9 @@ import {
   Grid,
   Input,
   Message,
-  Space,
-  Upload
+  Modal,
+  Notification,
+  Space
 } from '@arco-design/web-react'
 import { Radio as SimeRadio, RadioGroup as SimeRadioGroup, Transfer } from '@douyinfe/semi-ui'
 import { Select as AntdSelect } from 'antd'
@@ -29,6 +30,7 @@ import TeacherInfoModal from './components/TeacherInfoModal'
 
 const { Col, Row } = Grid
 const Teacher = () => {
+  const tableRef = useRef()
   const [data, setData] = useState([])
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [columnsStateMap, setColumnsStateMap] = useState({
@@ -111,6 +113,62 @@ const Teacher = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys) => setSelectedRowKeys(keys)
+  }
+  const deleteConfirm = (tea_id) => {
+    Modal.confirm({
+      title: '删除确认',
+      content: `你确定要删除工号为 ${tea_id} 的教师吗? 删除该教师后, 其奖惩记录、科研项目、家庭关系、教育经历、工作经历等数据信息都会被一并删除 !`,
+      okButtonProps: {
+        status: 'danger'
+      },
+      onOk: async () => {
+        const res = await deleteTeacher({ tea_id: tea_id })
+        if (res.success) {
+          Notification.success({
+            title: 'Success',
+            content: res.message
+          })
+        } else {
+          Notification.error({
+            title: 'Error',
+            content: res.message
+          })
+        }
+        tableRef.current.reload()
+      }
+    })
+  }
+  const deleteConfirmMutiple = (tea_ids) => {
+    Modal.confirm({
+      title: '删除确认',
+      content: `你确定要删除这 ${tea_ids.length} 个教师吗? 删除这些教师后, 他们的奖惩记录、科研项目、家庭关系、教育经历、工作经历等数据信息都会被一并删除 !`,
+      okButtonProps: {
+        status: 'danger'
+      },
+      onOk: async () => {
+        const res = await deleteTeacherMultiple({ tea_ids: selectedRowKeys })
+        if (res.success) {
+          if (res.errData.length > 0) {
+            Notification.warning({
+              title: 'Success',
+              content: res.message
+            })
+          } else {
+            Notification.success({
+              title: 'Success',
+              content: res.message
+            })
+          }
+        } else {
+          Notification.error({
+            title: 'Error',
+            content: res.message
+          })
+        }
+        tableRef.current.reload()
+        setSelectedRowKeys([])
+      }
+    })
   }
   const MySelect = (props) => {
     const { state } = props
@@ -294,10 +352,16 @@ const Teacher = () => {
             <Link to={`/teacher/edit/${record.tea_id}`}>编辑</Link>
           </a>,
           <TableDropdown
+            onSelect={(key) => {
+              const t = key.split('-')
+              if (t[0] == 'delete') {
+                deleteConfirm(t[1])
+              }
+            }}
             key="actionGroup"
             menus={[
-              { key: 'copy', name: '复制' },
-              { key: 'delete', name: '删除' }
+              { key: `delete-${record.tea_id}`, name: '删除' },
+              { key: `term-${record.tea_id}`, name: '离职' }
             ]}
           />
         ]
@@ -309,6 +373,7 @@ const Teacher = () => {
       span: 24
     }
   }
+
   function getCellWidth(value) {
     // 判断是否为null或undefined
     if (value == null) {
@@ -403,34 +468,6 @@ const Teacher = () => {
       key: 14
     }
   ]
-  const onImportExcel = (file) => {
-    let data = [] // 存储获取到的数据 // 通过FileReader对象读取文件
-
-    const fileReader = new FileReader()
-
-    fileReader.readAsBinaryString(file) //二进制
-    fileReader.onload = (event) => {
-      try {
-        const { result } = event.target // 以二进制流方式读取得到整份excel表格对象
-
-        const workbook = XLSX.read(result, { type: 'binary' }) // 遍历每张工作表进行读取（这里默认只读取第一张表）
-
-        for (const sheet in workbook.Sheets) {
-          if (workbook.Sheets.hasOwnProperty(sheet)) {
-            // 利用 sheet_to_json 方法将 excel 转成 json 数据
-            data = data.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet])) // break; // 如果只取第一张表，就取消注释这行
-          }
-        }
-
-        console.log(data)
-      } catch (e) {
-        // 这里可以抛出文件类型错误不正确的相关提示
-        console.log('文件类型不正确')
-
-        return
-      }
-    }
-  }
 
   return (
     <PageContainer>
@@ -601,6 +638,7 @@ const Teacher = () => {
         columns={columns}
         request={request}
         rowKey="tea_id"
+        actionRef={tableRef}
         pagination={{
           showQuickJumper: true
         }}
@@ -629,7 +667,13 @@ const Teacher = () => {
         tableAlertOptionRender={() => {
           return (
             <Space size={16}>
-              <a>批量删除</a>
+              <a
+                onClick={async () => {
+                  deleteConfirmMutiple(selectedRowKeys)
+                }}
+              >
+                批量删除
+              </a>
               <a
                 onClick={() => {
                   setDownloadVisible(true)
@@ -650,7 +694,7 @@ const Teacher = () => {
           >
             数据导入
           </Button>,
-          <Upload action="/" accept="file" beforeUpload={onImportExcel} />,
+
           <Button
             key="out"
             onClick={() => {

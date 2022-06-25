@@ -1,6 +1,6 @@
 import { department as getAllDepartment } from '@/services/department'
 import { addTeacherMultiple } from '@/services/teacher'
-import { Message, Modal, Spin, Steps, Upload } from '@arco-design/web-react'
+import { Button, Message, Modal, Spin, Steps, Upload } from '@arco-design/web-react'
 import React, { useEffect, useImperativeHandle, useState } from 'react'
 import * as XLSX from 'xlsx'
 const Step = Steps.Step
@@ -90,6 +90,8 @@ const ImportDataModal = ({ cRef }) => {
   const [loading, setLoading] = useState(false)
   const [current, setCurrent] = useState(1)
   const [data, setData] = useState([])
+  const [errData, setErrData] = useState([])
+  const [errColumns, setErrColumns] = useState([])
 
   const [showUploadList, setShowUploadList] = useState(true)
   useImperativeHandle(cRef, () => ({
@@ -97,6 +99,7 @@ const ImportDataModal = ({ cRef }) => {
       setVisible(vis)
       setFile([])
       setCurrent(1)
+      setShowUploadList(true)
     }
   }))
   useEffect(async () => {
@@ -113,50 +116,53 @@ const ImportDataModal = ({ cRef }) => {
   }, [])
 
   const onImportExcel = async (file) => {
-    setLoading(true)
     let data = [] // 存储获取到的数据 // 通过FileReader对象读取文件
     const p = file.name.split('.')
     if (p[1] == 'xlsx') {
-      const fileReader = new FileReader()
+      const filePromise = (file) => {
+        return new Promise((resolve, reject) => {
+          const fileReader = new FileReader()
 
-      fileReader.readAsBinaryString(file) //二进制
-      fileReader.onload = async (event) => {
-        try {
-          const { result } = event.target // 以二进制流方式读取得到整份excel表格对象
+          fileReader.readAsBinaryString(file) //二进制
+          fileReader.onload = async (event) => {
+            try {
+              const { result } = event.target // 以二进制流方式读取得到整份excel表格对象
 
-          const workbook = XLSX.read(result, { type: 'binary' }) // 遍历每张工作表进行读取（这里默认只读取第一张表）
+              const workbook = XLSX.read(result, { type: 'binary' }) // 遍历每张工作表进行读取（这里默认只读取第一张表）
 
-          for (const sheet in workbook.Sheets) {
-            if (workbook.Sheets.hasOwnProperty(sheet)) {
-              // 利用 sheet_to_json 方法将 excel 转成 json 数据
-              data = data.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet])) // break; // 如果只取第一张表，就取消注释这行
-            }
-          }
-          let d = data.map((item) => {
-            let t = {}
-            for (var key in item) {
-              for (let i = 0; i < data1.length; i++) {
-                if (key == data1[i].label) {
-                  t[data1[i].value] = item[key]
-                  break
+              for (const sheet in workbook.Sheets) {
+                if (workbook.Sheets.hasOwnProperty(sheet)) {
+                  // 利用 sheet_to_json 方法将 excel 转成 json 数据
+                  data = data.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet])) // break; // 如果只取第一张表，就取消注释这行
                 }
               }
+              let d = data.map((item) => {
+                let t = {}
+                for (var key in item) {
+                  for (let i = 0; i < data1.length; i++) {
+                    if (key == data1[i].label) {
+                      t[data1[i].value] = item[key]
+                      break
+                    }
+                  }
+                }
+                return t
+              })
+
+              setData(d)
+              resolve(true)
+            } catch (e) {
+              console.log(e)
+              // 这里可以抛出文件类型错误不正确的相关提示
+              console.log('文件类型不正确')
+              Message.error('上传文件格式不正确 !')
+
+              reject(e)
             }
-            return t
-          })
-
-          setData(d)
-          const res = await addTeacherMultiple(d)
-          setLoading(false)
-        } catch (e) {
-          console.log(e)
-          // 这里可以抛出文件类型错误不正确的相关提示
-          console.log('文件类型不正确')
-          Message.error('上传文件格式不正确 !')
-
-          return
-        }
+          }
+        })
       }
+      await filePromise(file)
     } else if (p[1] == 'zip') {
     } else {
       Message.error('上传文件格式不正确 !')
@@ -173,11 +179,49 @@ const ImportDataModal = ({ cRef }) => {
           title="Modal Title"
           visible={visible}
           onOk={() => {
-            setCurrent(current + 1)
+            //setCurrent(current + 1)
           }}
           onCancel={() => setVisible(false)}
           autoFocus={false}
           focusLock={true}
+          footer={
+            <>
+              <div style={{ display: current === 1 ? '' : 'none' }}>
+                <Button
+                  onClick={() => {
+                    setVisible(false)
+                  }}
+                >
+                  取消
+                </Button>
+                <Button
+                  onClick={async () => {
+                    setLoading(true)
+                    const res = await addTeacherMultiple(data)
+                    const t = res.data
+                    if (t.length > 0) {
+                      const m = []
+                      for (let i = 0; i < t.length; t++) {
+                        m.push(data[t[i]])
+                      }
+                      setErrData(m)
+                    } else {
+                    }
+                    setLoading(false)
+                  }}
+                  type="primary"
+                  style={{ marginLeft: 12 }}
+                >
+                  确定
+                </Button>
+              </div>
+              <div style={{ display: current === 2 ? '' : 'none' }}>
+                <Button onClick={async () => {}} type="primary" style={{ marginLeft: 12 }}>
+                  确定
+                </Button>
+              </div>
+            </>
+          }
         >
           <Upload
             // key={Math.random()}

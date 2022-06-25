@@ -14,11 +14,10 @@ router.post('/login', async (req, res) => {
 
   if (!isUndefined(id) && !isUndefined(password)) {
     try {
-      let { rows } = await db.select('SELECT * FROM TUser where teacher_id=$1 and password=$2', [
+      let { rows } = await db.query('SELECT * FROM TUser where teacher_id=$1 and password=$2', [
         id,
         password
       ])
-      console.log(rows)
       const token = jwt.sign(
         {
           id: id
