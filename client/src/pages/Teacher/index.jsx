@@ -1,5 +1,5 @@
 import { department as getAllDepartment } from '@/services/department'
-import { deleteTeacher, deleteTeacherMultiple, teacher } from '@/services/teacher'
+import { deleteTeacher, deleteTeacherMultiple, teacher, termTeacher } from '@/services/teacher'
 import { DownOutlined } from '@ant-design/icons'
 import { ProTable, TableDropdown } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
@@ -167,6 +167,31 @@ const Teacher = () => {
         }
         tableRef.current.reload()
         setSelectedRowKeys([])
+      }
+    })
+  }
+
+  const termConfirm = (tea_id) => {
+    Modal.confirm({
+      title: '删除确认',
+      content: `你确定要为工号为 ${tea_id} 的教师办理离职吗? 该教师离职后将无法登陆系统 !`,
+      okButtonProps: {
+        status: 'danger'
+      },
+      onOk: async () => {
+        const res = await termTeacher({ tea_id: tea_id })
+        if (res.success) {
+          Notification.success({
+            title: 'Success',
+            content: res.message
+          })
+        } else {
+          Notification.error({
+            title: 'Error',
+            content: res.message
+          })
+        }
+        tableRef.current.reload()
       }
     })
   }
@@ -356,6 +381,8 @@ const Teacher = () => {
               const t = key.split('-')
               if (t[0] == 'delete') {
                 deleteConfirm(t[1])
+              } else if (t[0] == 'term') {
+                termConfirm(t[1])
               }
             }}
             key="actionGroup"

@@ -1049,3 +1049,48 @@ router.post('/delete/multiple', authMiddleware(), async (req, res) => {
     })
   }
 })
+
+router.post('/term', authMiddleware(), async (req, res) => {
+  const { tea_id } = req.body
+  if (req.role === 'admin') {
+    if (tea_id) {
+      try {
+        const { rows } = await db.query('select role from tuser where teacher_id=$1 ', [tea_id])
+
+        if (rows[0].role == 'admin') {
+          res.send({
+            message: '管理员不可以办理离职 !',
+            success: false
+          })
+        } else {
+          let x = `${dayjs().format('YYYY-MM-DD')}`
+          await db.query('update teacher set term_date=$1 where id=$2', [x, tea_id])
+          res.send({
+            message: '成功为该教师办理离职 !',
+            success: true
+          })
+        }
+      } catch (err) {
+        console.log(err)
+        res.send({
+          message: '办理离职失败 !',
+          success: false
+        })
+      }
+    } else {
+      res.send({
+        messags: '删除失败, id 不可为空 !',
+        success: false
+      })
+    }
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
+      },
+      errorCode: '401',
+      errorMessage: '请先登录！',
+      success: true
+    })
+  }
+})
