@@ -141,6 +141,7 @@ router.get('/', authMiddleware(), async (req, res) => {
           tea_id: elem.id,
           tea_name: elem.name,
           tea_gender: elem.gender,
+          tea_birthday: elem.birthday,
           tea_entry_date: elem.entry_date,
           tea_term_date: elem.term_date,
           tea_phone: elem.phone,
@@ -155,6 +156,17 @@ router.get('/', authMiddleware(), async (req, res) => {
           tea_address: elem.address
         })
       })
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].tea_birthday) {
+          data[i].tea_birthday = dayjs(data[i].tea_birthday).format('YYYY-MM-DD')
+        }
+        if (data[i].tea_entry_date) {
+          data[i].tea_entry_date = dayjs(data[i].tea_entry_date).format('YYYY-MM-DD')
+        }
+        if (data[i].tea_term_date) {
+          data[i].tea_term_date = dayjs(data[i].tea_term_date).format('YYYY-MM-DD')
+        }
+      }
       res.send({
         success: true,
         data: {

@@ -3,13 +3,17 @@ import { teacher } from '@/services/teacher'
 import { DownOutlined } from '@ant-design/icons'
 import { ProTable, TableDropdown } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
-import { Button, Space } from '@arco-design/web-react'
+import { Button, Divider, Drawer, Form, Grid, Space } from '@arco-design/web-react'
+import { Radio as SimeRadio, RadioGroup as SimeRadioGroup, Transfer } from '@douyinfe/semi-ui'
 import { Select as AntdSelect } from 'antd'
+import dayjs from 'dayjs'
+import { pick } from 'lodash'
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'umi'
+import * as XLSX from 'xlsx'
 import AddTeacherModal from './components/AddTeacherModal'
 import TeacherInfoModal from './components/TeacherInfoModal'
-
+const { Col, Row } = Grid
 const Teacher = () => {
   const [data, setData] = useState([])
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
@@ -36,14 +40,21 @@ const Teacher = () => {
       show: false
     }
   })
+  const [value, setValue] = useState('excel')
+
+  const [options, setOptions] = useState(['tea_id', 'tea_name'])
   const [department, setDepartment] = useState({})
+  const [downloadVisible, setDownloadVisible] = useState(false)
+  const [form] = Form.useForm()
+  const [confirmLoading, setConfirmLoading] = useState(false)
+
   useEffect(async () => {
     const res = await getAllDepartment({ keyword: '%' })
     const d = {}
     d['全部'] = {
       text: '全部'
     }
-    console.log(res.data.department)
+
     const temp = res.data.department.map((item, index) => {
       const text = item.dep_name
       d[item.dep_name] = { text }
@@ -54,7 +65,6 @@ const Teacher = () => {
   const teacherInfoModalRef = useRef()
 
   const request = async (params, soter, filter) => {
-    console.log(params)
     if (params.tea_title && params.tea_title.length > 0) {
       let ttt = params.tea_title.join(',')
       params.tea_title = ttt
@@ -62,7 +72,6 @@ const Teacher = () => {
     const result = await teacher(params)
     let d = result.data.teacher
     for (let i = 0; i < d.length; i++) {
-      console.log(d[i])
       if (d[i].tea_term_date == null) {
         d[i].tea_status = '在职'
       } else {
@@ -77,6 +86,7 @@ const Teacher = () => {
       }
     }
     setData(d)
+    console.log(d)
     return {
       total: d.length,
       data: d,
@@ -248,32 +258,7 @@ const Teacher = () => {
       hideInTable: true,
       hideInSetting: true
     },
-    // {
-    //   title: '容器数量',
-    //   dataIndex: 'containers',
-    //   align: 'right',
-    //   sorter: (a, b) => a.containers - b.containers
-    // },
 
-    // {
-    //   title: '状态',
-    //   width: 80,
-    //   dataIndex: 'status',
-    //   initialValue: 'all',
-    //   valueEnum: {
-    //     all: { text: '全部', status: 'Default' },
-    //     close: { text: '关闭', status: 'Default' },
-    //     running: { text: '运行中', status: 'Processing' },
-    //     online: { text: '已上线', status: 'Success' },
-    //     error: { text: '异常', status: 'Error' }
-    //   }
-    // },
-    // {
-    //   title: '备注',
-    //   dataIndex: 'memo',
-    //   ellipsis: true,
-    //   copyable: true
-    // },
     {
       title: '操作',
       width: 180,
@@ -281,8 +266,6 @@ const Teacher = () => {
       valueType: 'option',
       fixed: 'right',
       render: (_, record) => {
-        console.log(record)
-        //p = `/teacher/edit/${record.tea_id}`
         return [
           <a
             key="link1"
@@ -306,11 +289,218 @@ const Teacher = () => {
       }
     }
   ]
-
+  const formItemLayout = {
+    wrapperCol: {
+      span: 24
+    }
+  }
+  function getCellWidth(value) {
+    // 判断是否为null或undefined
+    if (value == null) {
+      return 10
+    } else if (/.*[\u4e00-\u9fa5]+.*$/.test(value)) {
+      // 判断是否包含中文
+      return value.toString().length * 2.1
+    } else {
+      return value.toString().length * 1.1
+      /* 另一种方案
+      value = value.toString()
+      return value.replace(/[\u0391-\uFFE5]/g, 'aa').length
+      */
+    }
+  }
+  const data1 = [
+    {
+      label: '工号',
+      value: 'tea_id',
+      key: 0,
+      disabled: true
+    },
+    {
+      label: '姓名',
+      value: 'tea_name',
+      key: 1,
+      disabled: true
+    },
+    {
+      label: '性别',
+      value: 'tea_gender',
+      key: 2
+    },
+    {
+      label: '手机号码',
+      value: 'tea_phone',
+      key: 3
+    },
+    {
+      label: '邮箱',
+      value: 'tea_email',
+      key: 4
+    },
+    {
+      label: '所属院系',
+      value: 'tea_department_name',
+      key: 5
+    },
+    {
+      label: '出生日期',
+      value: 'tea_birthday',
+      key: 6
+    },
+    {
+      label: '入职时间',
+      value: 'tea_entry_date',
+      key: 7
+    },
+    {
+      label: '离职时间',
+      value: 'tea_term_date',
+      key: 8
+    },
+    {
+      label: '职务',
+      value: 'tea_job',
+      key: 9
+    },
+    {
+      label: '民族',
+      value: 'tea_ethnicity',
+      key: 10
+    },
+    {
+      label: '政治面貌',
+      value: 'tea_political',
+      key: 11
+    },
+    {
+      label: '通讯地址',
+      value: 'tea_address',
+      key: 12
+    },
+    {
+      label: '职称',
+      value: 'tea_title',
+      key: 13
+    },
+    {
+      label: '状态',
+      value: 'tea_status',
+      key: 14
+    }
+  ]
   return (
     <PageContainer>
       <AddTeacherModal cRef={addTeacherModalRef} />
       <TeacherInfoModal cRef={teacherInfoModalRef} />
+      <Drawer
+        width={435}
+        title={<span>信息导出 </span>}
+        visible={downloadVisible}
+        confirmLoading={confirmLoading}
+        onOk={() => {
+          const selectData = []
+          for (let a of data) {
+            for (const b of selectedRowKeys) {
+              if (a.tea_id == b) {
+                if (a.tea_birthday) {
+                  a.tea_birthday = dayjs(a.tea_birthday).format('YYYY-MM-DD')
+                }
+
+                selectData.push(a)
+                break
+              }
+            }
+          }
+
+          for (let i = 0; i < selectData.length; i++) {
+            selectData[i] = pick(selectData[i], options)
+          }
+
+          const worksheet = XLSX.utils.json_to_sheet(selectData)
+          const workbook = XLSX.utils.book_new()
+          XLSX.utils.book_append_sheet(workbook, worksheet, '教师表')
+          const headers = []
+
+          for (const a of options) {
+            for (const b of data1) {
+              if (a == b.value) {
+                headers.push(b.label)
+                break
+              }
+            }
+          }
+
+          for (let i = 0; i < selectData.length; i++) {}
+
+          let colWidths = [],
+            colNames = Object.keys(selectData[0]) // 所有列的名称数组
+
+          // 计算每一列的所有单元格宽度
+          // 先遍历行
+          selectData.forEach((row) => {
+            // 列序号
+            let index = 0
+            // 遍历列
+            for (const key in row) {
+              if (colWidths[index] == null) colWidths[index] = []
+
+              switch (typeof row[key]) {
+                case 'string':
+                case 'number':
+                case 'boolean':
+                  colWidths[index].push(getCellWidth(row[key]))
+              }
+              index++
+            }
+          })
+
+          worksheet['!cols'] = []
+          // 每一列取最大值最为列宽
+          colWidths.forEach((widths, index) => {
+            // 计算列头的宽度
+            widths.push(getCellWidth(colNames[index]))
+            // 设置最大值为列宽
+            worksheet['!cols'].push({
+              wch: Math.max(...widths)
+            })
+          })
+
+          XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: 'A1' })
+
+          XLSX.writeFile(workbook, '教师信息表.xlsx')
+        }}
+        onCancel={() => {
+          setDownloadVisible(false)
+        }}
+      >
+        <div style={{ marginTop: 20, marginBottom: -10, fontSize: 16, fontWeight: 500 }}>
+          数据项选择
+        </div>
+        <Divider />
+
+        <Transfer
+          style={{ width: 400 }}
+          dataSource={data1}
+          defaultValue={['tea_id', 'tea_name']}
+          draggable
+          onChange={(values, items) => {
+            setOptions(values)
+          }}
+        />
+        <div style={{ marginTop: 30, marginBottom: -10, fontSize: 16, fontWeight: 500 }}>
+          打包方式
+        </div>
+        <Divider />
+        <SimeRadioGroup
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value)
+          }}
+        >
+          <SimeRadio value={'excel'}>Excel</SimeRadio>
+          <SimeRadio value={'zip'}>Zip</SimeRadio>
+        </SimeRadioGroup>
+      </Drawer>
       <ProTable
         columns={columns}
         request={request}
@@ -355,7 +545,12 @@ const Teacher = () => {
             你好
             {/* <a href={`/teacher/edit/1`} target="_blank" /> */}
           </Button>,
-          <Button key="out">
+          <Button
+            key="out"
+            onClick={() => {
+              setDownloadVisible(true)
+            }}
+          >
             导出数据
             <DownOutlined />
           </Button>,

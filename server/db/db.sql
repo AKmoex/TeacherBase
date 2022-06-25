@@ -35,7 +35,7 @@ create table Teacher(
     
     department_id integer, -- 所属院系
     
-    job varchar(256),
+    job varchar(256), --职务
     ethnicity varchar(256), -- 民族
     political varchar(256), -- 政治面貌
     address varchar(256), -- 通讯地址

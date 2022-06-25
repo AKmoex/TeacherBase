@@ -131,9 +131,7 @@ const Department = () => {
   }
 
   const request = async (params, soter, filter) => {
-    console.log(params)
     const result = await department(params)
-    console.log(result.data.department)
     setData(result.data.department)
     return {
       total: result.data.department.length,
