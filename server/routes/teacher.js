@@ -841,3 +841,19 @@ router.post('/edit', authMiddleware(), async (req, res) => {
     })
   }
 })
+
+router.post('/add/multiple', authMiddleware(), async (req, res) => {
+  const id = req.id
+
+  if (id === '00000000') {
+    console.log(req.body)
+  } else {
+    res.send({
+      data: {
+        success: false,
+        message: '删除部门失败'
+      },
+      success: true
+    })
+  }
+})

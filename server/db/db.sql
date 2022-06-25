@@ -20,6 +20,13 @@ alter sequence dep_auto_inc owned by department.id;
 
 
 
+
+
+
+
+
+
+
 drop table if exists Teacher cascade;
 create table Teacher(
     id char(8) primary key,-- 工号

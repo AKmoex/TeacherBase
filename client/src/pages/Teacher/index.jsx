@@ -3,7 +3,17 @@ import { teacher } from '@/services/teacher'
 import { DownOutlined } from '@ant-design/icons'
 import { ProTable, TableDropdown } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
-import { Button, Divider, Drawer, Form, Grid, Input, Message, Space } from '@arco-design/web-react'
+import {
+  Button,
+  Divider,
+  Drawer,
+  Form,
+  Grid,
+  Input,
+  Message,
+  Space,
+  Upload
+} from '@arco-design/web-react'
 import { Radio as SimeRadio, RadioGroup as SimeRadioGroup, Transfer } from '@douyinfe/semi-ui'
 import { Select as AntdSelect } from 'antd'
 import dayjs from 'dayjs'
@@ -14,6 +24,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'umi'
 import * as XLSX from 'xlsx'
 import AddTeacherModal from './components/AddTeacherModal'
+import ImportDataModal from './components/ImportDataModal'
 import TeacherInfoModal from './components/TeacherInfoModal'
 
 const { Col, Row } = Grid
@@ -67,7 +78,7 @@ const Teacher = () => {
   }, [])
   const addTeacherModalRef = useRef()
   const teacherInfoModalRef = useRef()
-
+  const importDataModalRef = useRef()
   const request = async (params, soter, filter) => {
     if (params.tea_title && params.tea_title.length > 0) {
       let ttt = params.tea_title.join(',')
@@ -392,10 +403,40 @@ const Teacher = () => {
       key: 14
     }
   ]
+  const onImportExcel = (file) => {
+    let data = [] // 存储获取到的数据 // 通过FileReader对象读取文件
+
+    const fileReader = new FileReader()
+
+    fileReader.readAsBinaryString(file) //二进制
+    fileReader.onload = (event) => {
+      try {
+        const { result } = event.target // 以二进制流方式读取得到整份excel表格对象
+
+        const workbook = XLSX.read(result, { type: 'binary' }) // 遍历每张工作表进行读取（这里默认只读取第一张表）
+
+        for (const sheet in workbook.Sheets) {
+          if (workbook.Sheets.hasOwnProperty(sheet)) {
+            // 利用 sheet_to_json 方法将 excel 转成 json 数据
+            data = data.concat(XLSX.utils.sheet_to_json(workbook.Sheets[sheet])) // break; // 如果只取第一张表，就取消注释这行
+          }
+        }
+
+        console.log(data)
+      } catch (e) {
+        // 这里可以抛出文件类型错误不正确的相关提示
+        console.log('文件类型不正确')
+
+        return
+      }
+    }
+  }
+
   return (
     <PageContainer>
       <AddTeacherModal cRef={addTeacherModalRef} />
       <TeacherInfoModal cRef={teacherInfoModalRef} />
+      <ImportDataModal cRef={importDataModalRef} />
       <Drawer
         width={435}
         title={<span>信息导出 </span>}
@@ -603,10 +644,13 @@ const Teacher = () => {
         //dateFormatter="string"
         headerTitle="所有教师"
         toolBarRender={() => [
-          <Button key="show">
-            你好
-            {/* <a href={`/teacher/edit/1`} target="_blank" /> */}
+          <Button
+            onClick={() => importDataModalRef.current.setImportDataVisible(true)}
+            key="import"
+          >
+            数据导入
           </Button>,
+          <Upload action="/" accept="file" beforeUpload={onImportExcel} />,
           <Button
             key="out"
             onClick={() => {

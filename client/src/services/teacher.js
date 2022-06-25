@@ -69,3 +69,14 @@ export async function addTeacher(body, options) {
     ...(options || {})
   })
 }
+
+export async function addTeacherMultiple(body, options) {
+  return request('/api/teacher/add/multiple', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: body,
+    ...(options || {})
+  })
+}
