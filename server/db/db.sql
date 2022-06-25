@@ -166,6 +166,16 @@ create table Research(
 alter sequence res_auto_inc owned by Research.id;
 
 
+drop view if exists TeacherInfoView cascade;
+create view TeacherInfoView as select distinct T.*,D.name as department_name from Teacher T left outer join Department D on T.department_id=D.id  ;
+
+drop view if exists ResearchInfoView cascade;
+create view ResearchInfoView as select distinct R.*,T.name as teacher_name from Research R,Teacher T where R.teacher_id=T.id  ;
+
+drop view if exists ArchiveInfoView cascade;
+create view ArchiveInfoView as select distinct A.*,T.name as teacher_name from Archive A,Teacher T where A.teacher_id=T.id  ;
+
+
 insert into Department(name,establish_date,phone,t_count,address)
  values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380',0,'翡翠湖校区双子楼A做1107');
 insert into Department(name,establish_date,phone,t_count,address)
@@ -181,62 +191,6 @@ insert into Department(name,establish_date,phone,t_count,address)
  values('机械工程学院','2021-11-30','0551-62901326',0,'安徽省合肥市屯溪路193号');
   insert into Department(name,establish_date,phone,t_count,address)
  values('电气与自动化工程学院','2021-11-30','0551-6290-1408',0,'安徽省合肥市屯溪路193号逸夫科教楼');
-
-insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
- values('00000000','张三',1,'2000-01-30','18755005131','掌管一切','akmoex@gmail.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503');
-insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
- values('00000001','李三光',2,'2000-01-30','18755005131','教书','akmoex@outlook.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503');
-insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
- values('00000002','金毛',1,'2000-01-30','18755005131','科研','akmoex@hfut.edu.com','维吾尔族','共青团员','安徽省合肥市翡翠湖公寓南楼503');
-
-insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('66666666','王维新',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授,特任研究员');
- 
- 
- insert into Tuser(teacher_id,password,role) values('00000000','123456','admin');
- insert into tuser(teacher_id,password,role) values('00000001','123456','user');
-  insert into tuser(teacher_id,password,role) values('00000002','123456','user');
-   insert into tuser(teacher_id,password,role) values('66666666','123456','user');
-
-
-
-
-
- 
-
-insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2016-06-01','2019-07-01','合肥工业大学','本科');
-insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2019-09-01','2022-07-01','合肥工业大学','硕士');
-insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2022-08-01','2025-07-01','中国科学技术大学','博士');
-
-
-insert into Work(teacher_id,start_date,end_date,location,content) values('66666666','2016-06-01','2019-07-01','字节跳动-后端开发部门','负责后端开发');
-insert into Work(teacher_id,start_date,end_date,location,content) values('66666666','2020-12-20','2021-07-01','阿里云平台','全栈开发工作');
-
-
-
-insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','合肥工业大学最受欢迎教师奖','2016-06-01','本奖励是由学生投票选取',0);
-insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','授课大赛一等奖','2016-06-01','',0);
-insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','最佳论文奖','2019-07-25','',0);
-insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','开会缺勤','2019-07-25','年级大会无故缺席',1);
-
-
-
-insert into Research(teacher_id,title,obtain_date,detail) values('66666666','基于机器学习的人脸识别项目','2019-01-06','国家基金项目');
-insert into Research(teacher_id,title,obtain_date,detail) values('66666666','机器人仿真实验研究','2009-01-06','国家重点实验室项目');
-
-
-
-insert into Family(teacher_id,name,relation,phone) values('66666666','王富贵','父亲','13698745631');
-insert into Family(teacher_id,name,relation,phone) values('66666666','林莉心','母亲','15155068479');
-
-drop view if exists TeacherInfoView cascade;
-create view TeacherInfoView as select distinct T.*,D.name as department_name from Teacher T left outer join Department D on T.department_id=D.id  ;
-
-drop view if exists ResearchInfoView cascade;
-create view ResearchInfoView as select distinct R.*,T.name as teacher_name from Research R,Teacher T where R.teacher_id=T.id  ;
-
-drop view if exists ArchiveInfoView cascade;
-create view ArchiveInfoView as select distinct A.*,T.name as teacher_name from Archive A,Teacher T where A.teacher_id=T.id  ;
 
 
 
@@ -278,7 +232,6 @@ end if;
 
 END;
 /
-
 
 
 
@@ -402,3 +355,89 @@ end if;
 
 END;
 /
+
+
+
+
+CREATE OR REPLACE FUNCTION updateDepNumFun() RETURNS TRIGGER AS 
+$$
+
+DECLARE
+    new_dep INTEGER;
+    old_dep INTEGER;
+    
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        new_dep = NEW.department_id;
+        UPDATE Department
+        SET t_count = t_count + 1
+        WHERE new_dep = Department.id;
+    ELSIF (TG_OP='UPDATE') THEN
+        new_dep = NEW.department_id;
+        old_dep =OLD.department_id;
+        UPDATE Department
+        SET t_count = t_count + 1
+        WHERE new_dep = Department.id;
+        UPDATE department SET t_count=t_count-1 WHERE old_dep=department.id;
+    ELSIF (TG_OP='DELETE') THEN
+        old_dep=OLD.department_id;
+        update department SET t_count=t_count-1 where old_dp=department.id;
+    END IF;
+RETURN NULL;    
+END
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE TRIGGER updateDepNum
+AFTER INSERT OR UPDATE OR DELETE ON Teacher
+FOR EACH ROW 
+EXECUTE PROCEDURE updateDepNumFun();
+
+
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
+ values('00000000','张三',1,'2000-01-30','18755005131','掌管一切','akmoex@gmail.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503');
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
+ values('00000001','李三光',2,'2000-01-30','18755005131','教书','akmoex@outlook.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503');
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
+ values('00000002','金毛',1,'2000-01-30','18755005131','科研','akmoex@hfut.edu.com','维吾尔族','共青团员','安徽省合肥市翡翠湖公寓南楼503');
+
+insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
+ values('66666666','王维新',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授,特任研究员');
+ 
+ 
+ insert into Tuser(teacher_id,password,role) values('00000000','123456','admin');
+ insert into tuser(teacher_id,password,role) values('00000001','123456','user');
+  insert into tuser(teacher_id,password,role) values('00000002','123456','user');
+   insert into tuser(teacher_id,password,role) values('66666666','123456','user');
+
+
+
+
+
+ 
+
+insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2016-06-01','2019-07-01','合肥工业大学','本科');
+insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2019-09-01','2022-07-01','合肥工业大学','硕士');
+insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2022-08-01','2025-07-01','中国科学技术大学','博士');
+
+
+insert into Work(teacher_id,start_date,end_date,location,content) values('66666666','2016-06-01','2019-07-01','字节跳动-后端开发部门','负责后端开发');
+insert into Work(teacher_id,start_date,end_date,location,content) values('66666666','2020-12-20','2021-07-01','阿里云平台','全栈开发工作');
+
+
+
+insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','合肥工业大学最受欢迎教师奖','2016-06-01','本奖励是由学生投票选取',0);
+insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','授课大赛一等奖','2016-06-01','',0);
+insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','最佳论文奖','2019-07-25','',0);
+insert into Archive(teacher_id,title,obtain_date,detail,type) values('66666666','开会缺勤','2019-07-25','年级大会无故缺席',1);
+
+
+
+insert into Research(teacher_id,title,obtain_date,detail) values('66666666','基于机器学习的人脸识别项目','2019-01-06','国家基金项目');
+insert into Research(teacher_id,title,obtain_date,detail) values('66666666','机器人仿真实验研究','2009-01-06','国家重点实验室项目');
+
+
+
+insert into Family(teacher_id,name,relation,phone) values('66666666','王富贵','父亲','13698745631');
+insert into Family(teacher_id,name,relation,phone) values('66666666','林莉心','母亲','15155068479');
