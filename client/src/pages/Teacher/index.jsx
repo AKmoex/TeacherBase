@@ -3,16 +3,19 @@ import { teacher } from '@/services/teacher'
 import { DownOutlined } from '@ant-design/icons'
 import { ProTable, TableDropdown } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
-import { Button, Divider, Drawer, Form, Grid, Space } from '@arco-design/web-react'
+import { Button, Divider, Drawer, Form, Grid, Input, Message, Space } from '@arco-design/web-react'
 import { Radio as SimeRadio, RadioGroup as SimeRadioGroup, Transfer } from '@douyinfe/semi-ui'
 import { Select as AntdSelect } from 'antd'
 import dayjs from 'dayjs'
+import { saveAs } from 'file-saver'
+import JSZip from 'jszip'
 import { pick } from 'lodash'
 import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'umi'
 import * as XLSX from 'xlsx'
 import AddTeacherModal from './components/AddTeacherModal'
 import TeacherInfoModal from './components/TeacherInfoModal'
+
 const { Col, Row } = Grid
 const Teacher = () => {
   const [data, setData] = useState([])
@@ -40,7 +43,8 @@ const Teacher = () => {
       show: false
     }
   })
-  const [value, setValue] = useState('excel')
+  const [zipValue, setZipValue] = useState('excel')
+  const [compressionValue, setCompressionValue] = useState(false)
 
   const [options, setOptions] = useState(['tea_id', 'tea_name'])
   const [department, setDepartment] = useState({})
@@ -397,8 +401,16 @@ const Teacher = () => {
         title={<span>信息导出 </span>}
         visible={downloadVisible}
         confirmLoading={confirmLoading}
-        onOk={() => {
+        onOk={async () => {
+          await form.validate()
+          const filename = form.getFieldValue('filename')
+
           const selectData = []
+          if (selectedRowKeys.length <= 0 || options.length <= 0) {
+            Message.warning('请选择数据或者数据项')
+            return
+          }
+
           for (let a of data) {
             for (const b of selectedRowKeys) {
               if (a.tea_id == b) {
@@ -418,7 +430,7 @@ const Teacher = () => {
 
           const worksheet = XLSX.utils.json_to_sheet(selectData)
           const workbook = XLSX.utils.book_new()
-          XLSX.utils.book_append_sheet(workbook, worksheet, '教师表')
+          XLSX.utils.book_append_sheet(workbook, worksheet, filename)
           const headers = []
 
           for (const a of options) {
@@ -429,8 +441,6 @@ const Teacher = () => {
               }
             }
           }
-
-          for (let i = 0; i < selectData.length; i++) {}
 
           let colWidths = [],
             colNames = Object.keys(selectData[0]) // 所有列的名称数组
@@ -467,7 +477,23 @@ const Teacher = () => {
 
           XLSX.utils.sheet_add_aoa(worksheet, [headers], { origin: 'A1' })
 
-          XLSX.writeFile(workbook, '教师信息表.xlsx')
+          if (zipValue == 'zip') {
+            let zip = new JSZip()
+            const workBookBuffer = XLSX.write(workbook, {
+              bookType: 'xlsx',
+              type: 'array',
+              compression: compressionValue
+            })
+            const fileData = new Blob([workBookBuffer], {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+            })
+            zip.file(`${filename}.xlsx`, fileData)
+            zip.generateAsync({ type: 'blob' }).then(function (blob) {
+              saveAs(blob, `${filename}.zip`)
+            })
+          } else {
+            XLSX.writeFile(workbook, `${filename}.xlsx`, { compression: compressionValue })
+          }
         }}
         onCancel={() => {
           setDownloadVisible(false)
@@ -487,19 +513,48 @@ const Teacher = () => {
             setOptions(values)
           }}
         />
-        <div style={{ marginTop: 30, marginBottom: -10, fontSize: 16, fontWeight: 500 }}>
-          打包方式
-        </div>
-        <Divider />
-        <SimeRadioGroup
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value)
-          }}
-        >
-          <SimeRadio value={'excel'}>Excel</SimeRadio>
-          <SimeRadio value={'zip'}>Zip</SimeRadio>
-        </SimeRadioGroup>
+        <Row>
+          <Col span={12}>
+            <div style={{ marginTop: 30, marginBottom: -8, fontSize: 16, fontWeight: 500 }}>
+              是否压缩
+            </div>
+            <Divider style={{ marginBottom: 8 }} />
+            <SimeRadioGroup
+              value={compressionValue}
+              onChange={(e) => {
+                setCompressionValue(e.target.value)
+              }}
+            >
+              <SimeRadio value={false}>不压缩</SimeRadio>
+              <SimeRadio value={true}>压缩</SimeRadio>
+            </SimeRadioGroup>
+          </Col>
+          <Col span={12}>
+            <div style={{ marginTop: 30, marginBottom: -8, fontSize: 16, fontWeight: 500 }}>
+              打包方式
+            </div>
+            <Divider style={{ marginBottom: 8 }} />
+            <SimeRadioGroup
+              value={zipValue}
+              onChange={(e) => {
+                setZipValue(e.target.value)
+              }}
+            >
+              <SimeRadio value={'excel'}>Excel</SimeRadio>
+              <SimeRadio value={'zip'}>Zip</SimeRadio>
+            </SimeRadioGroup>
+          </Col>
+        </Row>
+
+        <Form form={form} layout="vertical" style={{ marginTop: 20 }}>
+          <Form.Item
+            label="文件名/文件夹名"
+            field="filename"
+            rules={[{ required: true, message: '文件名或文件夹名不可为空' }]}
+          >
+            <Input placeholder="请输入文件名或文件夹名称" />
+          </Form.Item>
+        </Form>
       </Drawer>
       <ProTable
         columns={columns}
@@ -534,7 +589,14 @@ const Teacher = () => {
           return (
             <Space size={16}>
               <a>批量删除</a>
-              <a>导出数据</a>
+              <a
+                onClick={() => {
+                  setDownloadVisible(true)
+                  form.setFieldsValue({ filename: '教师信息表' })
+                }}
+              >
+                导出数据
+              </a>
             </Space>
           )
         }}
@@ -549,6 +611,7 @@ const Teacher = () => {
             key="out"
             onClick={() => {
               setDownloadVisible(true)
+              form.setFieldsValue({ filename: '教师信息表' })
             }}
           >
             导出数据
