@@ -11,9 +11,10 @@ let storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, __dirname + '/../../static')
   },
-  filename: (req, file, cb) => {
-    console.log(file.originalname)
-    cb(null, file.originalname)
+
+  filename: function (req, file, cb) {
+    var fileFormat = file.originalname.split('.')
+    cb(null, file.fieldname + '-' + Date.now() + '.' + fileFormat[fileFormat.length - 1])
   }
 })
 
@@ -25,4 +26,11 @@ router.post('/photo', upload.single('file'), async (req, res) => {
   file.url = '/static/' + file.filename
   console.log(file)
   res.send(file)
+})
+
+router.post('/zip', upload.single('file'), async (req, res) => {
+  const file = req.file
+  file.url = '/static/' + file.filename
+  console.log(file)
+  //res.send(file)
 })
