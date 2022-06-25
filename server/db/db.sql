@@ -26,7 +26,7 @@ create table Teacher(
     name varchar(32), -- 姓名
     gender tinyint check (gender in (1,2)), -- 1男2女
     phone varchar(32), -- 手机号码
-    email varchar(256), -- 邮箱
+    email varchar(256), 
     birthday date, -- 出生日期
     photo varchar(256), -- 照片
 
@@ -41,7 +41,9 @@ create table Teacher(
     address varchar(256), -- 通讯地址
     
     title varchar(256), -- 职称
-    foreign key (department_id) references department(id)
+    foreign key (department_id) references department(id),
+    CONSTRAINT emailCheck CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$')
+
 );
 
 drop sequence if exists user_auto_inc cascade;
@@ -165,21 +167,20 @@ alter sequence res_auto_inc owned by Research.id;
 
 
 insert into Department(name,establish_date,phone,t_count,address)
- values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380',120,'翡翠湖校区双子楼A做1107');
+ values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380',0,'翡翠湖校区双子楼A做1107');
 insert into Department(name,establish_date,phone,t_count,address)
- values('食品与生物工程学院','2021-01-30','0551- 62901362',150,'翡翠湖校区食品与生物工程大楼二楼');
+ values('食品与生物工程学院','2021-01-30','0551- 62901362',0,'翡翠湖校区食品与生物工程大楼二楼');
 insert into Department(name,establish_date,phone,t_count,address)
- values('材料科学与工程学院','2021-11-30','0551- 62901362',300,'安徽省合肥市屯溪路193号');
+ values('材料科学与工程学院','2021-11-30','0551- 62901362',0,'安徽省合肥市屯溪路193号');
 
  insert into Department(name,establish_date,phone,t_count,address)
- values('外国语学院','2021-11-30','0551-62901716',25,'合肥工业大学翡翠湖校区科教楼A栋第15层');
+ values('外国语学院','2021-11-30','0551-62901716',0,'合肥工业大学翡翠湖校区科教楼A栋第15层');
 
 
   insert into Department(name,establish_date,phone,t_count,address)
- values('机械工程学院','2021-11-30','0551-62901326',25,'安徽省合肥市屯溪路193号');
+ values('机械工程学院','2021-11-30','0551-62901326',0,'安徽省合肥市屯溪路193号');
   insert into Department(name,establish_date,phone,t_count,address)
- values('电气与自动化工程学院','2021-11-30','0551-6290-1408',25,'安徽省合肥市屯溪路193号逸夫科教楼');
-
+ values('电气与自动化工程学院','2021-11-30','0551-6290-1408',0,'安徽省合肥市屯溪路193号逸夫科教楼');
 
 insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
  values('00000000','张三',1,'2000-01-30','18755005131','掌管一切','akmoex@gmail.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503');
