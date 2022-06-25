@@ -9,7 +9,7 @@ const router = new Router()
 module.exports = router
 
 router.get('/', authMiddleware(), async (req, res) => {
-  if (req.id === '00000000') {
+  if (req.role === 'admin') {
     try {
       const selectParams = [`%${'%'}%`]
       let text = 'SELECT * FROM ResearchInfoView WHERE title LIKE $1'
@@ -72,7 +72,7 @@ router.post('/add', authMiddleware(), async (req, res) => {
   const id = req.id
   const { teacher_id, title, obtain_date, detail } = req.body
 
-  if (id === '00000000') {
+  if (req.role === 'admin') {
     if (!isUndefined(teacher_id) && !isUndefined(title) && !isUndefined(obtain_date)) {
       try {
         let { rows } = await db.query(
@@ -111,7 +111,7 @@ router.post('/add', authMiddleware(), async (req, res) => {
 router.post('/edit', authMiddleware(), async (req, res) => {
   const { id, teacher_id, title, detail, obtain_date } = req.body
 
-  if (req.id === '00000000') {
+  if (req.role === 'admin') {
     if (id && teacher_id && title && obtain_date) {
       try {
         let { rows } = await db.query('CALL update_research($1,$2,$3,$4,$5)', [
@@ -152,7 +152,7 @@ router.post('/edit', authMiddleware(), async (req, res) => {
 
 router.post('/delete', authMiddleware(), async (req, res) => {
   const { id } = req.body
-  if (req.id === '00000000') {
+  if (req.role === 'admin') {
     if (id) {
       try {
         await db.query('delete from research where id=$1', [id])

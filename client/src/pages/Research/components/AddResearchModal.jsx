@@ -23,12 +23,7 @@ const AddResearchModal = (props, ref) => {
   const [form2department, setForm2Department] = useState([])
   const [teacher, setTeacher] = useState([])
   const [confirmLoading, setConfirmLoading] = useState(false)
-  const [allData, setAllData] = useState({
-    tea_id: '',
-    tea_name: '',
-    tea_password: '',
-    tea_familys: []
-  })
+
   const [form] = Form.useForm()
   useImperativeHandle(ref, () => ({
     setAddResearchVisible: (vis) => {

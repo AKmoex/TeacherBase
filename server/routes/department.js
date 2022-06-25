@@ -10,7 +10,7 @@ module.exports = router
 
 router.get('/', authMiddleware(), async (req, res) => {
   console.log('getDepartment', req.query.keyword)
-  if (req.id === '00000000') {
+  if (req.role === 'admin') {
     try {
       const { rows } = await db.query('SELECT * FROM department WHERE name LIKE $1', [
         `%${req.query.keyword}%`
@@ -56,7 +56,7 @@ router.post('/create', authMiddleware(), async (req, res) => {
   const id = req.id
   const { dep_name, dep_date, dep_address, dep_phone } = req.body
 
-  if (id === '00000000') {
+  if (req.role === 'admin') {
     if (
       !isUndefined(dep_name) &&
       !isUndefined(dep_date) &&
@@ -109,13 +109,13 @@ router.post('/delete', authMiddleware(), async (req, res) => {
   const id = req.id
   const { dep_id } = req.body
 
-  if (id === '00000000') {
+  if (req.role === 'admin') {
     if (!isUndefined(dep_id)) {
       try {
         const client = await db.pool.connect()
 
         await client.query('BEGIN')
-        const updateText = ' UPDATE teacher SET department=NULL WHERE department=$1'
+        const updateText = ' UPDATE teacher SET department_id=NULL WHERE department_id=$1'
 
         await client.query(updateText, [dep_id])
         const deleteText = 'DELETE FROM department WHERE id=$1'
@@ -165,14 +165,14 @@ router.post('/delete/multiple', authMiddleware(), async (req, res) => {
   const id = req.id
   const { dep_ids } = req.body
 
-  if (id === '00000000') {
+  if (req.role === 'admin') {
     if (!isUndefined(dep_ids)) {
       try {
         const client = await db.pool.connect()
 
         await client.query('BEGIN')
         for (let i = 0; i < dep_ids.length; i++) {
-          const updateText = ' UPDATE teacher SET department=NULL WHERE department=$1'
+          const updateText = ' UPDATE teacher SET department_id=NULL WHERE department_id=$1'
           await client.query(updateText, [dep_ids[i]])
           const deleteText = 'DELETE FROM department WHERE id=$1'
           await client.query(deleteText, [dep_ids[i]])

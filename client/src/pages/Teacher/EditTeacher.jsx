@@ -81,6 +81,7 @@ const EditTeacher = () => {
     setDepartment(res.data.department)
     const { data } = await getTeacherById({ tea_id: params.id })
     console.log(data)
+
     formRef1.current.setFieldsValue({
       tea_name: data.name,
       tea_id: data.id,
@@ -93,10 +94,12 @@ const EditTeacher = () => {
       tea_political: data.political,
       tea_ethnicity: data.ethnicity,
       tea_address: data.address,
-      tea_title: data.title.split(','),
       tea_entry_date: data.entry_date,
       tea_job: data.job,
       tea_department_id: data.department_id
+    }
+    if (data.title) {
+      f2t.tea_title = data.title.split(',')
     }
     if (data.phone) {
       f2t.tea_phone = data.phone

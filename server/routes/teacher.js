@@ -13,10 +13,15 @@ module.exports = router
 router.get('/id', authMiddleware(), async (req, res) => {
   const tea_id = req.query.tea_id
 
-  if (req.id === '00000000') {
+  if ((req.role = 'admin')) {
     try {
       // 查询基本信息
       const res_a = await db.query(format('SELECT * FROM TeacherInfoView WHERE id=%L', tea_id))
+      const rrr = await db.query('SELECT * FROM TUser WHERE teacher_id=$1', [tea_id])
+      if (rrr.rows.length > 0) {
+        res_a.rows[0].password = rrr.rows[0].password
+      }
+
       let data = {
         ...res_a.rows[0]
       }
@@ -70,7 +75,7 @@ router.get('/id', authMiddleware(), async (req, res) => {
 router.get('/', authMiddleware(), async (req, res) => {
   // [tea_name,tea_id,tea_gender,tea_phone,tea_department_name,tea_political]
 
-  if (req.id === '00000000') {
+  if (req.role === 'admin') {
     try {
       const selectParams = [`%${'%'}%`, `%${'%'}%`]
       let text = 'SELECT * FROM TeacherInfoView WHERE name LIKE $1 AND id LIKE $2'
@@ -342,11 +347,10 @@ const insertTea = async (req, resdata) => {
       }
     }
     const { rows } = await db.query(
-      'INSERT INTO teacher(id, name,password,gender,phone,email,birthday,photo,entry_date,department_id,job,ethnicity,political,address,title) VALUES($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15) returning *',
+      'INSERT INTO teacher(id, name,gender,phone,email,birthday,photo,entry_date,department_id,job,ethnicity,political,address,title) VALUES($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14) returning *',
       [
         tea_id,
         tea_name,
-        tea_password,
         tea_gender,
         tea_phone,
         tea_email,
@@ -360,6 +364,10 @@ const insertTea = async (req, resdata) => {
         tea_address,
         tea_title
       ]
+    )
+    const { rows1 } = await db.query(
+      'INSERT INTO tuser(teacher_id, password) VALUES($1, $2) returning *',
+      [tea_id, tea_password]
     )
   } catch (err) {
     console.log('err:', err)
@@ -627,7 +635,7 @@ router.post('/add/details', authMiddleware(), async (req, res) => {
   const { tea_id, tea_name, tea_password } = req.body
   let resdata = { success: true }
 
-  if (id === '00000000') {
+  if (req.role === 'admin') {
     if (!isUndefined(tea_id) && !isUndefined(tea_name) && !isUndefined(tea_password)) {
       try {
         // 基本信息
@@ -716,7 +724,7 @@ router.post('/add', authMiddleware(), async (req, res) => {
   const id = req.id
   const { tea_id, tea_name, tea_password } = req.body
   let resdata = { success: true }
-  if (id === '00000000') {
+  if (req.role === 'admin') {
     if (!isUndefined(tea_id) && !isUndefined(tea_name) && !isUndefined(tea_password)) {
       try {
         // 基本信息
@@ -758,7 +766,7 @@ router.post('/edit', authMiddleware(), async (req, res) => {
   const { tea_id, tea_name, tea_password } = req.body
   let resdata = { success: true }
 
-  if (id === '00000000') {
+  if (req.role === 'admin') {
     if (!isUndefined(tea_id) && !isUndefined(tea_name) && !isUndefined(tea_password)) {
       try {
         // 基本信息
@@ -845,7 +853,7 @@ router.post('/edit', authMiddleware(), async (req, res) => {
 router.post('/add/multiple', authMiddleware(), async (req, res) => {
   const id = req.id
 
-  if (id === '00000000') {
+  if (req.role === 'admin') {
     console.log(req.body)
   } else {
     res.send({

@@ -20,13 +20,6 @@ alter sequence dep_auto_inc owned by department.id;
 
 
 
-
-
-
-
-
-
-
 drop table if exists Teacher cascade;
 create table Teacher(
     id char(8) primary key,-- 工号
@@ -48,10 +41,26 @@ create table Teacher(
     address varchar(256), -- 通讯地址
     
     title varchar(256), -- 职称
-    password varchar(100) not null default '', --密码
     foreign key (department_id) references department(id)
 );
 
+drop sequence if exists user_auto_inc cascade;
+create sequence user_auto_inc
+    minvalue 1
+    maxvalue 9999999999999
+    start with 1
+    increment by 1;
+
+drop table if exists TUser cascade;
+create table TUser(
+    id integer primary key default nextval('user_auto_inc'),
+    teacher_id char(8),
+    password varchar(100) not null default '123456', --密码
+    role varchar(16) default 'user',
+    foreign key (teacher_id) references Teacher(id)
+
+);
+alter sequence user_auto_inc owned by TUser.id;
 
 -- 教育经历
 drop sequence if exists edu_auto_inc cascade;
@@ -172,15 +181,21 @@ insert into Department(name,establish_date,phone,t_count,address)
  values('电气与自动化工程学院','2021-11-30','0551-6290-1408',25,'安徽省合肥市屯溪路193号逸夫科教楼');
 
 
-insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
- values('00000000','张三',1,'2000-01-30','18755005131','掌管一切','akmoex@gmail.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503','123456');
-insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
- values('00000001','李三光',2,'2000-01-30','18755005131','教书','akmoex@outlook.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503','123456');
-insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address,password)
- values('00000002','金毛',1,'2000-01-30','18755005131','科研','akmoex@hfut.edu.com','维吾尔族','共青团员','安徽省合肥市翡翠湖公寓南楼503','123456');
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
+ values('00000000','张三',1,'2000-01-30','18755005131','掌管一切','akmoex@gmail.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503');
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
+ values('00000001','李三光',2,'2000-01-30','18755005131','教书','akmoex@outlook.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503');
+insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
+ values('00000002','金毛',1,'2000-01-30','18755005131','科研','akmoex@hfut.edu.com','维吾尔族','共青团员','安徽省合肥市翡翠湖公寓南楼503');
 
-insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title,password)
- values('66666666','王维新',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授,特任研究员','123456');
+insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
+ values('66666666','王维新',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授,特任研究员');
+ 
+ 
+ insert into Tuser(teacher_id,password,role) values('00000000','123456','admin');
+ insert into tuser(teacher_id,password,role) values('00000001','123456','user');
+  insert into tuser(teacher_id,password,role) values('00000002','123456','user');
+   insert into tuser(teacher_id,password,role) values('66666666','123456','user');
 
 
 
@@ -264,9 +279,10 @@ CREATE OR REPLACE PROCEDURE update_teacher
 IS
 BEGIN
 if exists(select * from teacher where id=tea_id) then
-   UPDATE teacher SET name=tea_name,password=tea_password,gender=tea_gender,phone=tea_phone,email=tea_email,birthday=tea_birthday,
+   UPDATE teacher SET name=tea_name,gender=tea_gender,phone=tea_phone,email=tea_email,birthday=tea_birthday,
    photo=tea_photo, entry_date=tea_entry_date,department_id=tea_department_id,job=tea_job, ethnicity=tea_ethnicity,
    political=tea_political,address=tea_address,title=tea_title WHERE id = tea_id;
+   UPDATE TUser SET password=tea_password WHERE teacher_id=tea_id;
 end if;
 
 END;
