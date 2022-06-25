@@ -60,6 +60,32 @@ const EditTeacher = () => {
     tea_familys: []
   })
   const [form2department, setForm2Department] = useState([])
+  const [title, setTitle] = useState([
+    {
+      label: '教授',
+      value: '教授'
+    },
+    {
+      label: '副教授',
+      value: '副教授'
+    },
+    {
+      label: '院士',
+      value: '院士'
+    },
+    {
+      label: '特任研究员',
+      value: '特任研究员'
+    },
+    {
+      label: '助理教授',
+      value: '助理教授'
+    },
+    {
+      label: '讲师',
+      value: '讲师'
+    }
+  ])
   const [department, setDepartment] = useState([])
   const childRef3 = useRef()
   const [file, setFile] = React.useState()
@@ -99,7 +125,7 @@ const EditTeacher = () => {
       tea_department_id: data.department_id
     }
     if (data.title) {
-      f2t.tea_title = data.title.split(',')
+      f2t.tea_title = data.title
     }
     if (data.phone) {
       f2t.tea_phone = data.phone
@@ -761,22 +787,8 @@ const EditTeacher = () => {
               <FormItem label="入职时间" field="tea_entry_date">
                 <DatePicker />
               </FormItem>
-              <FormItem
-                label="职称"
-                field="tea_title"
-                rules={[
-                  {
-                    type: 'array',
-                    minLength: 0
-                  }
-                ]}
-              >
-                <Select
-                  mode="multiple"
-                  allowCreate
-                  placeholder="please select"
-                  options={['教授', '副教授', '院士', '特任研究员', '特任教授', '助理教授', '讲师']}
-                />
+              <FormItem label="职称" field="tea_title">
+                <Select allowClear placeholder="please select" options={title} />
               </FormItem>
               <FormItem label="所属院系" field="tea_department_id">
                 <Select placeholder="please select" options={form2department} allowClear />

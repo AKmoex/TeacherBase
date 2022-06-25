@@ -82,10 +82,10 @@ const Teacher = () => {
   const teacherInfoModalRef = useRef()
   const importDataModalRef = useRef()
   const request = async (params, soter, filter) => {
-    if (params.tea_title && params.tea_title.length > 0) {
-      let ttt = params.tea_title.join(',')
-      params.tea_title = ttt
-    }
+    // if (params.tea_title && params.tea_title.length > 0) {
+    //   let ttt = params.tea_title.join(',')
+    //   params.tea_title = ttt
+    // }
     const result = await teacher(params)
     let d = result.data.teacher
     for (let i = 0; i < d.length; i++) {

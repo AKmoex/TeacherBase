@@ -715,7 +715,6 @@ const AddTeacher = () => {
                 ]}
               >
                 <Select
-                  mode="multiple"
                   allowCreate
                   placeholder="please select"
                   options={['教授', '副教授', '院士', '特任研究员', '特任教授', '助理教授', '讲师']}

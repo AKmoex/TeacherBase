@@ -127,14 +127,13 @@ router.get('/', authMiddleware(), async (req, res) => {
       const { rows } = await db.query(text, selectParams)
 
       if (req.query.tea_title && req.query.tea_title.length > 0) {
-        //req.query.tea_title = req.query.tea_title.split(',')
-        const x = req.query.tea_title.split(',')
+        const x = req.query.tea_title
 
         remove(rows, function (n) {
           if (n.title == null || n.title.length <= 0) {
             return true
           }
-          let ts = n.title.split(',')
+          let ts = n.title
           return !includes(ts, x)
         })
       }
@@ -337,9 +336,9 @@ const insertTea = async (req, resdata) => {
       tea_entry_date,
       tea_department_id
     } = req.body
-    if (!isUndefined(tea_title)) {
-      tea_title = tea_title.join(',')
-    }
+    // if (!isUndefined(tea_title)) {
+    //   tea_title = tea_title.join(',')
+    // }
     if (!isUndefined(tea_gender)) {
       if (tea_gender == '2') {
         tea_gender = 2
@@ -396,9 +395,9 @@ const updateTea = async (req, resdata) => {
       tea_department_id,
       tea_term_date
     } = req.body
-    if (!isUndefined(tea_title)) {
-      tea_title = tea_title.join(',')
-    }
+    // if (!isUndefined(tea_title)) {
+    //   tea_title = tea_title.join(',')
+    // }
 
     if (!isUndefined(tea_gender)) {
       if (tea_gender == '2') {
