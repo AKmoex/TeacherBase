@@ -71,6 +71,13 @@ export default [
     component: './Archive',
     access: 'canAdmin'
   },
+  {
+    name: '备份恢复',
+    icon: 'table',
+    path: '/backup',
+    component: './Backup',
+    access: 'canAdmin'
+  },
 
   {
     path: '/',
