@@ -51,7 +51,16 @@ export async function deleteDepartment(body, options) {
     ...(options || {})
   })
 }
-
+export async function editDepartment(body, options) {
+  return request('/api/department/edit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: body,
+    ...(options || {})
+  })
+}
 /** 删除指定的多个部门 POST /api/department/delete */
 export async function deleteDepartmentMultiple(body, options) {
   return request('/api/department/delete/multiple', {
@@ -60,6 +69,13 @@ export async function deleteDepartmentMultiple(body, options) {
       'Content-Type': 'application/json'
     },
     data: body,
+    ...(options || {})
+  })
+}
+export async function getDepartmentById(params, options) {
+  return request('/api/department/id', {
+    method: 'GET',
+    params: { ...params },
     ...(options || {})
   })
 }

@@ -2,7 +2,8 @@ import {
   createDepartment,
   deleteDepartment,
   deleteDepartmentMultiple,
-  department
+  department,
+  getDepartmentById
 } from '@/services/department'
 import { ProList } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
@@ -20,6 +21,7 @@ import dayjs from 'dayjs'
 import { isNil } from 'lodash'
 import React, { useRef, useState } from 'react'
 import { BiMap, BiPhone } from 'react-icons/bi'
+import EditDepartmentModal from './components/EditDepartmentModal'
 const ExportJsonExcel = require('js-export-excel')
 
 const FormItem = Form.Item
@@ -125,7 +127,7 @@ const Department = () => {
   const tableRef = useRef()
 
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'))
-
+  const editDepartmentModalRef = useRef()
   const onValuesChange = (changeValue, values) => {
     console.log('onValuesChange: ', changeValue, values)
   }
@@ -138,6 +140,9 @@ const Department = () => {
       data: result.data.department,
       success: true
     }
+  }
+  const tableReload = () => {
+    tableRef.current.reload()
   }
   const rowSelection = {
     selectedRowKeys,
@@ -265,7 +270,7 @@ const Department = () => {
           filterType: 'light'
         }}
         rowKey="dep_id"
-        headerTitle="所有部门"
+        headerTitle="所有院系"
         request={request}
         pagination={{
           pageSize: 8
@@ -346,6 +351,18 @@ const Department = () => {
 
                 <a href={row.url} target="_blank" rel="noopener noreferrer" key="view">
                   查看
+                </a>,
+                <a
+                  href={row.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key="view1"
+                  onClick={async () => {
+                    const res = await getDepartmentById({ dep_id: row.dep_id })
+                    editDepartmentModalRef.current.setEditDepartmentVisible(res)
+                  }}
+                >
+                  编辑
                 </a>
               ]
             },
@@ -463,6 +480,7 @@ const Department = () => {
           </Form>
         </div>
       </Modal>
+      <EditDepartmentModal ref={editDepartmentModalRef} tableReload={tableReload} />
     </PageContainer>
   )
 }

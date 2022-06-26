@@ -77,7 +77,7 @@ const EditArchiveModal = (props, ref) => {
   return (
     <div>
       <Modal
-        title="新增奖惩记录"
+        title="编辑奖惩记录"
         visible={visible}
         onOk={onOk}
         confirmLoading={confirmLoading}
