@@ -434,6 +434,15 @@ insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_da
   insert into tuser(teacher_id,password,role) values('00000002','123456','user');
    insert into tuser(teacher_id,password,role) values('66666666','123456','user');
 
+   insert into tuser(teacher_id,password,role) values('20192146','123456','user');
+   insert into tuser(teacher_id,password,role) values('20192147','123456','user');
+   insert into tuser(teacher_id,password,role) values('20192149','123456','user');
+   insert into tuser(teacher_id,password,role) values('20192186','123456','user');
+   insert into tuser(teacher_id,password,role) values('30192146','123456','user');
+   insert into tuser(teacher_id,password,role) values('20199146','123456','user');
+   insert into tuser(teacher_id,password,role) values('20112146','123456','user');
+
+
 
 
 

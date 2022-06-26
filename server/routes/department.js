@@ -302,3 +302,60 @@ router.post('/edit', authMiddleware(), async (req, res) => {
     })
   }
 })
+
+router.get('/detail/id', authMiddleware(), async (req, res) => {
+  const dep_id = req.query.dep_id
+
+  if ((req.role = 'admin')) {
+    if (dep_id) {
+      try {
+        const res_a = await db.query('SELECT * FROM department WHERE id=$1', [dep_id])
+        const base_data = res_a.rows[0]
+        base_data.establish_date = dayjs(base_data.establish_date).format('YYYY-MM-DD')
+        //'教授', '副教授', '院士', '特任研究员', '特任教授', '助理教授', '讲师'
+        const res_b = await db.query(
+          'SELECT T.title,count(*) FROM department D,Teacher T WHERE D.id=T.department_id AND D.id=$1  group by T.title',
+          [dep_id]
+        )
+        console.log(res_b.rows)
+
+        const d = []
+        for (let i = 0; i < res_b.rows.length; i++) {
+          if (!res_b.rows[i].title) {
+            d.push({
+              type: '其他',
+              value: res_b.rows[i].count
+            })
+          } else {
+            d.push({ type: res_b.rows[i].title, value: parseInt(res_b.rows[i].count) })
+          }
+        }
+        res.send({
+          ...base_data,
+          teacher_data: d,
+          success: true
+        })
+      } catch (err) {
+        console.log('err:', err)
+        res.send({
+          message: '服务器异常, 请重试 !',
+          success: false
+        })
+      }
+    } else {
+      res.send({
+        messags: '院系 id 不可为空 !',
+        success: false
+      })
+    }
+  } else {
+    res.status(401).send({
+      data: {
+        isLogin: false
+      },
+      errorCode: '401',
+      errorMessage: '没有权限,请先登录！',
+      success: true
+    })
+  }
+})

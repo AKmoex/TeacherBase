@@ -3,7 +3,8 @@ import {
   deleteDepartment,
   deleteDepartmentMultiple,
   department,
-  getDepartmentById
+  getDepartmentById,
+  getDepartmentDetailById
 } from '@/services/department'
 import { ProList } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
@@ -21,6 +22,7 @@ import dayjs from 'dayjs'
 import { isNil } from 'lodash'
 import React, { useRef, useState } from 'react'
 import { BiMap, BiPhone } from 'react-icons/bi'
+import DepartmentInfoModal from './components/DepartmentInfoModal'
 import EditDepartmentModal from './components/EditDepartmentModal'
 const ExportJsonExcel = require('js-export-excel')
 
@@ -128,6 +130,7 @@ const Department = () => {
 
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'))
   const editDepartmentModalRef = useRef()
+  const departmentInfoModalRef = useRef()
   const onValuesChange = (changeValue, values) => {
     console.log('onValuesChange: ', changeValue, values)
   }
@@ -349,7 +352,16 @@ const Department = () => {
                   </a>
                 </Popconfirm>,
 
-                <a href={row.url} target="_blank" rel="noopener noreferrer" key="view">
+                <a
+                  href={row.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  key="view2"
+                  onClick={async () => {
+                    const res = await getDepartmentDetailById({ dep_id: row.dep_id })
+                    departmentInfoModalRef.current.setDepartmentInfoVisible(res)
+                  }}
+                >
                   查看
                 </a>,
                 <a
@@ -481,6 +493,7 @@ const Department = () => {
         </div>
       </Modal>
       <EditDepartmentModal ref={editDepartmentModalRef} tableReload={tableReload} />
+      <DepartmentInfoModal ref={departmentInfoModalRef} tableReload={tableReload} />
     </PageContainer>
   )
 }

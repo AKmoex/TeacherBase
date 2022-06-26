@@ -79,3 +79,10 @@ export async function getDepartmentById(params, options) {
     ...(options || {})
   })
 }
+export async function getDepartmentDetailById(params, options) {
+  return request('/api/department/detail/id', {
+    method: 'GET',
+    params: { ...params },
+    ...(options || {})
+  })
+}

@@ -1060,7 +1060,7 @@ const EditTeacher = () => {
                     window.location.reload()
                   }}
                 >
-                  再次添加
+                  返回
                 </Button>
               }
             >
@@ -1068,7 +1068,7 @@ const EditTeacher = () => {
                 className="result-content"
                 style={{ background: 'var(--color-fill-2)', padding: 24 }}
               >
-                <Typography.Paragraph>如果添加失败:</Typography.Paragraph>
+                <Typography.Paragraph>如果更新失败:</Typography.Paragraph>
                 <ul>
                   <li> 仔细检查每个步骤的填写内容 </li>
                   <li> 确认所填写的内容正确无误 </li>
