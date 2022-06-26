@@ -2,7 +2,6 @@ const Router = require('express-promise-router')
 const { isUndefined, remove, set } = require('lodash')
 const db = require('../db')
 const authMiddleware = require('../middlewares/auth')
-const util = require('util')
 const format = require('pg-format')
 const dayjs = require('dayjs')
 const includes = require('../utils')
@@ -14,6 +13,8 @@ const remoteDir = '/home/omm/backup'
 const curPath = path.join('../static/backup')
 const SSH2Promise = require('ssh2-promise')
 const stream = require('stream')
+const util = require('util')
+const multer = require('multer')
 
 module.exports = router
 const sshconfig = {
@@ -223,4 +224,74 @@ router.get('/system', async (req, res) => {
   }
 
   //console.log(typeof stream)
+})
+
+let storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, __dirname + '/../../static')
+  },
+
+  filename: function (req, file, cb) {
+    var fileFormat = file.originalname.split('.')
+    cb(null, file.fieldname + '-' + Date.now() + '.' + fileFormat[fileFormat.length - 1])
+  }
+})
+const upload = multer({
+  storage: storage
+})
+router.post('/restore', upload.single('file'), async (req, res) => {
+  try {
+    const file = req.file
+    file.url = '/static/' + file.filename
+    if (file.filename.split('.').pop() == 'sql') {
+      const ssh = new SSH2Promise(sshconfig)
+      const sftp = ssh.sftp()
+      await sftp.fastPut(file.path, `/home/omm/restore/${file.filename}`)
+      const config = {
+        host: '120.46.155.70',
+        port: 22,
+        username: 'omm',
+        password: 'qwerQWER228'
+      }
+      await ssh.exec('chown -R omm /home/omm/\n')
+      const ssh2 = new SSH2Promise(config)
+
+      const dropCmd = 'gsql -d postgres -p 26000  -f /home/omm/scripts/drop.sql'
+      const createCmd = 'gsql -d postgres -p 26000  -f /home/omm/scripts/create.sql'
+      const restoreCmd = `gsql -p 26000 -f /home/omm/restore/${file.filename} teacherbase`
+      //console.log(restoreCmd)
+      var data = await ssh2.exec(`${dropCmd}\n${createCmd}\n${restoreCmd}\n`)
+      // var data = await ssh2.exec(`${restoreCmd}\n`)
+
+      console.log(data) //
+
+      res.send(file)
+    } else if (file.filename.split('.').pop() == 'tar') {
+      const ssh = new SSH2Promise(sshconfig)
+      const sftp = ssh.sftp()
+      await sftp.fastPut(file.path, `/home/omm/restore/${file.filename}`)
+      const config = {
+        host: '120.46.155.70',
+        port: 22,
+        username: 'omm',
+        password: 'qwerQWER228'
+      }
+      await ssh.exec('chown -R omm /home/omm/\n')
+
+      const ssh2 = new SSH2Promise(config)
+
+      const dropCmd = 'gsql -d postgres -p 26000  -f /home/omm/scripts/drop.sql'
+      const createCmd = 'gsql -d postgres -p 26000  -f /home/omm/scripts/create.sql'
+      console.log(file.filename)
+      const restoreCmd = `gs_restore -p 26000  /home/omm/restore/${file.filename} -d teacherbase -U akmoex -W AKmoex@123`
+      //console.log(restoreCmd)
+      var data = await ssh2.exec(`${dropCmd}\n${createCmd}\n${restoreCmd}\n`)
+      // var data = await ssh2.exec(`${restoreCmd}\n`)
+
+      console.log(data) //
+      res.send(file)
+    }
+  } catch (err) {}
+  // f(file)
+  //res.send(file)
 })

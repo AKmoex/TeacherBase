@@ -1,7 +1,7 @@
 import { backup, backupSystem } from '@/services/backup'
 import { ProCard } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
-import { Button, Descriptions, Radio } from '@arco-design/web-react'
+import { Button, Descriptions, Modal, Radio, Upload } from '@arco-design/web-react'
 import { Typography } from 'antd'
 import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
@@ -98,7 +98,25 @@ const Backup = () => {
               </Button>
             </div>
           </ProCard>
-          <ProCard>你好</ProCard>
+          <ProCard>
+            <div>
+              <Upload
+                multiple
+                action="api/backup/restore"
+                name="file"
+                beforeUpload={(file) => {
+                  return new Promise((resolve, reject) => {
+                    Modal.confirm({
+                      title: '恢复确认',
+                      content: `确认用 ${file.name} 文件来恢复数据库吗? 该操作可能造成严重后果, 请务必先备份数据库 !`,
+                      onConfirm: () => resolve(true),
+                      onCancel: () => reject('cancel')
+                    })
+                  })
+                }}
+              />
+            </div>
+          </ProCard>
         </ProCard>
       </ProCard>
     </PageContainer>

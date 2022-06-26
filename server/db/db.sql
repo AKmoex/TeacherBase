@@ -381,7 +381,7 @@ BEGIN
         UPDATE department SET t_count=t_count-1 WHERE old_dep=department.id;
     ELSIF (TG_OP='DELETE') THEN
         old_dep=OLD.department_id;
-        update department SET t_count=t_count-1 where old_dp=department.id;
+        update department SET t_count=t_count-1 where old_dep=department.id;
     END IF;
 RETURN NULL;    
 END
