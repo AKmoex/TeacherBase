@@ -20,24 +20,6 @@ export default [
     component: './Welcome'
   },
   {
-    path: '/admin',
-    name: 'admin',
-    icon: 'crown',
-    access: 'canAdmin',
-    component: './Admin',
-    routes: [
-      {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        icon: 'smile',
-        component: './Welcome'
-      },
-      {
-        component: './404'
-      }
-    ]
-  },
-  {
     path: '/teacher',
     name: '教师管理',
     icon: 'crown',
@@ -67,12 +49,6 @@ export default [
         component: './404'
       }
     ]
-  },
-  {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './Department'
   },
   {
     name: '院系管理',
