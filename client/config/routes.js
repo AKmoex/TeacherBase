@@ -64,10 +64,16 @@ export default [
         component: './TUser/EditTeacher'
       },
       {
+        path: '/tuser/archive',
+        name: '个人奖惩',
+        icon: 'smile',
+        component: './TUser/ArchiveList'
+      },
+      {
         path: '/tuser/research',
         name: '个人科研',
         icon: 'smile',
-        component: './TUser/ArchiveList'
+        component: './TUser/ResearchList'
       },
 
       {

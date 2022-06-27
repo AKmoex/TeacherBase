@@ -9,61 +9,50 @@ const router = new Router()
 module.exports = router
 
 router.get('/', authMiddleware(), async (req, res) => {
-  if (req.role === 'admin') {
-    try {
-      const selectParams = [`%${'%'}%`]
-      let text = 'SELECT * FROM ResearchInfoView WHERE title LIKE $1'
-      if (!isUndefined(req.query.title)) {
-        selectParams[0] = `%${req.query.title}%`
-      }
-      if (req.query.teacher_id) {
-        selectParams.push(`%${req.query.teacher_id}%`)
-        text = `${text} AND teacher_id LIKE $${selectParams.length}`
-      }
-
-      if (req.query.teacher_name) {
-        selectParams.push(`%${req.query.teacher_name}%`)
-        text = `${text} AND teacher_name LIKE $${selectParams.length}`
-      }
-
-      if (req.query.startTime && req.query.endTime) {
-        selectParams.push(`${req.query.startTime}`)
-        selectParams.push(`${req.query.endTime}`)
-        text = `${text} AND obtain_date BETWEEN $${selectParams.length - 1} AND $${
-          selectParams.length
-        }`
-      }
-      if (req.query.sort) {
-        if (req.query.sort == 'ascend') {
-          text = `${text} ORDER BY obtain_date ASC`
-        } else if (req.query.sort == 'descend') {
-          text = `${text} ORDER BY obtain_date DESC`
-        }
-      }
-      const { rows } = await db.query(text, selectParams)
-      res.send({
-        success: true,
-        data: {
-          research: rows
-        }
-      })
-    } catch (err) {
-      console.log('err:', err)
-      res.send({
-        success: false,
-        data: {
-          research: []
-        }
-      })
+  try {
+    const selectParams = [`%${'%'}%`]
+    let text = 'SELECT * FROM ResearchInfoView WHERE title LIKE $1'
+    if (!isUndefined(req.query.title)) {
+      selectParams[0] = `%${req.query.title}%`
     }
-  } else {
-    res.status(401).send({
+    if (req.query.teacher_id) {
+      selectParams.push(`%${req.query.teacher_id}%`)
+      text = `${text} AND teacher_id LIKE $${selectParams.length}`
+    }
+
+    if (req.query.teacher_name) {
+      selectParams.push(`%${req.query.teacher_name}%`)
+      text = `${text} AND teacher_name LIKE $${selectParams.length}`
+    }
+
+    if (req.query.startTime && req.query.endTime) {
+      selectParams.push(`${req.query.startTime}`)
+      selectParams.push(`${req.query.endTime}`)
+      text = `${text} AND obtain_date BETWEEN $${selectParams.length - 1} AND $${
+        selectParams.length
+      }`
+    }
+    if (req.query.sort) {
+      if (req.query.sort == 'ascend') {
+        text = `${text} ORDER BY obtain_date ASC`
+      } else if (req.query.sort == 'descend') {
+        text = `${text} ORDER BY obtain_date DESC`
+      }
+    }
+    const { rows } = await db.query(text, selectParams)
+    res.send({
+      success: true,
       data: {
-        isLogin: false
-      },
-      errorCode: '401',
-      errorMessage: '没有权限,请先登录！',
-      success: true
+        research: rows
+      }
+    })
+  } catch (err) {
+    console.log('err:', err)
+    res.send({
+      success: false,
+      data: {
+        research: []
+      }
     })
   }
 })
