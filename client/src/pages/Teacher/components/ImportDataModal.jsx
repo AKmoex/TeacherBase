@@ -1,6 +1,6 @@
 import { department as getAllDepartment } from '@/services/department'
 import { addTeacherMultiple } from '@/services/teacher'
-import { Button, Message, Modal, Spin, Steps, Upload } from '@arco-design/web-react'
+import { Button, Message, Modal, Notification, Steps, Upload } from '@arco-design/web-react'
 import React, { useEffect, useImperativeHandle, useState } from 'react'
 import * as XLSX from 'xlsx'
 const Step = Steps.Step
@@ -174,71 +174,80 @@ const ImportDataModal = ({ cRef }) => {
 
   return (
     <div>
-      <Spin tip="This may take a while..." loading={loading}>
-        <Modal
-          title="导入数据"
-          visible={visible}
-          onOk={() => {
-            //setCurrent(current + 1)
-          }}
-          onCancel={() => setVisible(false)}
-          autoFocus={false}
-          focusLock={true}
-          footer={
-            <>
-              <div style={{ display: current === 1 ? '' : 'none' }}>
-                <Button
-                  onClick={() => {
-                    setVisible(false)
-                  }}
-                >
-                  取消
-                </Button>
-                <Button
-                  onClick={async () => {
-                    setLoading(true)
-                    const res = await addTeacherMultiple(data)
-                    const t = res.data
-                    if (t.length > 0) {
-                      const m = []
-                      for (let i = 0; i < t.length; t++) {
-                        m.push(data[t[i]])
-                      }
-                      setErrData(m)
-                    } else {
+      <Modal
+        title="导入数据"
+        visible={visible}
+        onOk={() => {
+          //setCurrent(current + 1)
+        }}
+        onCancel={() => setVisible(false)}
+        autoFocus={false}
+        focusLock={true}
+        footer={
+          <>
+            <div style={{ display: current === 1 ? '' : 'none' }}>
+              <Button
+                onClick={() => {
+                  setVisible(false)
+                }}
+              >
+                取消
+              </Button>
+              <Button
+                onClick={async () => {
+                  setLoading(true)
+                  const res = await addTeacherMultiple(data)
+                  let t = res.data
+                  if (t.length > 0) {
+                    const m = []
+                    let x = t.join(',')
+                    for (let i = 0; i < t.length; t++) {
+                      m.push(data[t[i]])
                     }
-                    setLoading(false)
-                  }}
-                  type="primary"
-                  style={{ marginLeft: 12 }}
-                >
-                  确定
-                </Button>
-              </div>
-              <div style={{ display: current === 2 ? '' : 'none' }}>
-                <Button onClick={async () => {}} type="primary" style={{ marginLeft: 12 }}>
-                  确定
-                </Button>
-              </div>
-            </>
-          }
-        >
-          <Upload
-            // key={Math.random()}
-            showUploadList={showUploadList}
-            style={{ display: current == 1 ? '' : 'none' }}
-            // style={{ visibility: current == 2 ? 'hidden' : '' }}
-            drag
-            multiple
-            accept=".zip,.xlsx"
-            // action="/api/file/zip"
-            action="/"
-            tip="Only zip, xlsx can be uploaded, and the size does not exceed 100MB"
-            beforeUpload={onImportExcel}
-          />
-          <div style={{ display: current == 2 ? '' : 'none' }}></div>
-        </Modal>
-      </Spin>
+
+                    setErrData(m)
+                    Notification.warning({
+                      title: 'Warning',
+                      content: `数据部分导入成功,第 ${x} 行数据导入失败 !`
+                    })
+                  } else {
+                    Notification.success({
+                      title: 'Success',
+                      content: '数据全部导入成功 !'
+                    })
+                  }
+                  setLoading(false)
+                  setVisible(false)
+                }}
+                type="primary"
+                style={{ marginLeft: 12 }}
+              >
+                确定
+              </Button>
+            </div>
+            <div style={{ display: current === 2 ? '' : 'none' }}>
+              <Button onClick={async () => {}} type="primary" style={{ marginLeft: 12 }}>
+                确定
+              </Button>
+            </div>
+          </>
+        }
+      >
+        <Upload
+          // key={Math.random()}
+          showUploadList={showUploadList}
+          style={{ display: current == 1 ? '' : 'none' }}
+          // style={{ visibility: current == 2 ? 'hidden' : '' }}
+          drag
+          multiple
+          accept=".zip,.xlsx"
+          // action="/api/file/zip"
+          action="/"
+          tip="Only zip, xlsx can be uploaded, and the size does not exceed 100MB"
+          beforeUpload={onImportExcel}
+        />
+        <div style={{ display: current == 2 ? '' : 'none' }}></div>
+      </Modal>
     </div>
   )
 }
