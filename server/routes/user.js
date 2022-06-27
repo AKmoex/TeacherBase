@@ -3,6 +3,7 @@ const { isUndefined } = require('lodash')
 const db = require('../db')
 const jwt = require('jsonwebtoken')
 const authMiddleware = require('../middlewares/auth')
+const { md5Crypto } = require('../utils')
 
 const router = new Router()
 
@@ -16,7 +17,7 @@ router.post('/login', async (req, res) => {
     try {
       let { rows } = await db.query('SELECT * FROM TUser where teacher_id=$1 and password=$2', [
         id,
-        password
+        md5Crypto(password)
       ])
       const token = jwt.sign(
         {

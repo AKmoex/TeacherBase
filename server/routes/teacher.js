@@ -5,7 +5,7 @@ const authMiddleware = require('../middlewares/auth')
 const util = require('util')
 const format = require('pg-format')
 const dayjs = require('dayjs')
-const includes = require('../utils')
+const { md5Crypto, includes } = require('../utils')
 
 const router = new Router()
 
@@ -19,7 +19,7 @@ router.get('/id', authMiddleware(), async (req, res) => {
       const res_a = await db.query(format('SELECT * FROM TeacherInfoView WHERE id=%L', tea_id))
       const rrr = await db.query('SELECT * FROM TUser WHERE teacher_id=$1', [tea_id])
       if (rrr.rows.length > 0) {
-        res_a.rows[0].password = rrr.rows[0].password
+        res_a.rows[0].password = md5Crypto(rrr.rows[0].password)
       }
 
       let data = {
@@ -128,13 +128,21 @@ router.get('/', authMiddleware(), async (req, res) => {
 
       if (req.query.tea_title && req.query.tea_title.length > 0) {
         const x = req.query.tea_title
+        let t = ''
+        if (typeof x == 'object') {
+          t = x.join(',')
+        } else {
+          t = x
+        }
+        console.log(t)
 
         remove(rows, function (n) {
           if (n.title == null || n.title.length <= 0) {
             return true
           }
           let ts = n.title
-          return !includes(ts, x)
+
+          return t.indexOf(ts) == -1
         })
       }
 
@@ -367,7 +375,7 @@ const insertTea = async (req, resdata) => {
     )
     const { rows1 } = await db.query(
       'INSERT INTO tuser(teacher_id, password) VALUES($1, $2) returning *',
-      [tea_id, tea_password]
+      [tea_id, md5Crypto(tea_password)]
     )
   } catch (err) {
     console.log('err:', err)
@@ -411,7 +419,7 @@ const updateTea = async (req, resdata) => {
       [
         tea_id,
         tea_name,
-        tea_password,
+        md5Crypto(tea_password),
         tea_gender,
         tea_phone,
         tea_email,
@@ -908,7 +916,7 @@ router.post('/add/multiple', authMiddleware(), async (req, res) => {
         [
           tea_id,
           tea_name,
-          tea_password,
+          md5Crypto(tea_password),
           tea_gender,
           tea_phone,
           tea_email,
