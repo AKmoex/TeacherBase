@@ -54,44 +54,33 @@ router.get('/id', authMiddleware(), async (req, res) => {
 
 router.get('/', authMiddleware(), async (req, res) => {
   console.log('getDepartment', req.query.keyword)
-  if (req.role === 'admin') {
-    try {
-      const { rows } = await db.query('SELECT * FROM department WHERE name LIKE $1', [
-        `%${req.query.keyword}%`
-      ])
-      const data = []
-      rows.forEach((elem, index) => {
-        data.push({
-          dep_id: elem.id,
-          dep_name: elem.name,
-          dep_date: elem.establish_date,
-          dep_count: elem.t_count,
-          dep_address: elem.address,
-          dep_phone: elem.phone
-        })
+  try {
+    const { rows } = await db.query('SELECT * FROM department WHERE name LIKE $1', [
+      `%${req.query.keyword}%`
+    ])
+    const data = []
+    rows.forEach((elem, index) => {
+      data.push({
+        dep_id: elem.id,
+        dep_name: elem.name,
+        dep_date: elem.establish_date,
+        dep_count: elem.t_count,
+        dep_address: elem.address,
+        dep_phone: elem.phone
       })
-      res.send({
-        success: true,
-        data: {
-          department: data
-        }
-      })
-    } catch (err) {
-      res.send({
-        success: false,
-        data: {
-          department: []
-        }
-      })
-    }
-  } else {
-    res.status(401).send({
+    })
+    res.send({
+      success: true,
       data: {
-        isLogin: false
-      },
-      errorCode: '401',
-      errorMessage: '没有权限,请先登录！',
-      success: true
+        department: data
+      }
+    })
+  } catch (err) {
+    res.send({
+      success: false,
+      data: {
+        department: []
+      }
     })
   }
 })

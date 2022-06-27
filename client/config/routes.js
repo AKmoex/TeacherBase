@@ -51,6 +51,31 @@ export default [
     ]
   },
   {
+    path: '/tuser',
+    name: '个人设置',
+    icon: 'crown',
+
+    //component: './Teacher',
+    routes: [
+      {
+        path: '/tuser/edit/',
+        name: '个人信息',
+        icon: 'smile',
+        component: './TUser/EditTeacher'
+      },
+      {
+        path: '/tuser/research',
+        name: '个人科研',
+        icon: 'smile',
+        component: './TUser/ArchiveList'
+      },
+
+      {
+        component: './404'
+      }
+    ]
+  },
+  {
     name: '院系管理',
     icon: 'table',
     path: '/department',

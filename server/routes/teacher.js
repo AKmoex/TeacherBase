@@ -13,59 +13,48 @@ module.exports = router
 router.get('/id', authMiddleware(), async (req, res) => {
   const tea_id = req.query.tea_id
 
-  if ((req.role = 'admin')) {
-    try {
-      // 查询基本信息
-      const res_a = await db.query(format('SELECT * FROM TeacherInfoView WHERE id=%L', tea_id))
-      const rrr = await db.query('SELECT * FROM TUser WHERE teacher_id=$1', [tea_id])
-      if (rrr.rows.length > 0) {
-        res_a.rows[0].password = md5Crypto(rrr.rows[0].password)
-      }
-
-      let data = {
-        ...res_a.rows[0]
-      }
-      // 查询教育经历
-      const res_b = await db.query(format('SELECT * FROM Education WHERE teacher_id=%L', tea_id))
-      data.edu = res_b.rows
-
-      // 查询家庭关系
-      const res_c = await db.query(format('SELECT * FROM Family WHERE teacher_id=%L', tea_id))
-      data.fam = res_c.rows
-
-      // 查询工作经历
-      const res_d = await db.query(format('SELECT * FROM Work WHERE teacher_id=%L', tea_id))
-      data.work = res_d.rows
-
-      // 查询奖惩记录
-      const res_e = await db.query(format('SELECT * FROM Archive WHERE teacher_id=%L', tea_id))
-      data.arc = res_e.rows
-
-      // 查询科研项目
-      const res_f = await db.query(format('SELECT * FROM Research WHERE teacher_id=%L', tea_id))
-      data.res = res_f.rows
-
-      res.send({
-        success: true,
-        data
-      })
-    } catch (err) {
-      console.log(err)
-      res.send({
-        success: false,
-        data: {
-          teacher: []
-        }
-      })
+  try {
+    // 查询基本信息
+    const res_a = await db.query(format('SELECT * FROM TeacherInfoView WHERE id=%L', tea_id))
+    const rrr = await db.query('SELECT * FROM TUser WHERE teacher_id=$1', [tea_id])
+    if (rrr.rows.length > 0) {
+      res_a.rows[0].password = md5Crypto(rrr.rows[0].password)
     }
-  } else {
-    res.status(401).send({
+
+    let data = {
+      ...res_a.rows[0]
+    }
+    // 查询教育经历
+    const res_b = await db.query(format('SELECT * FROM Education WHERE teacher_id=%L', tea_id))
+    data.edu = res_b.rows
+
+    // 查询家庭关系
+    const res_c = await db.query(format('SELECT * FROM Family WHERE teacher_id=%L', tea_id))
+    data.fam = res_c.rows
+
+    // 查询工作经历
+    const res_d = await db.query(format('SELECT * FROM Work WHERE teacher_id=%L', tea_id))
+    data.work = res_d.rows
+
+    // 查询奖惩记录
+    const res_e = await db.query(format('SELECT * FROM Archive WHERE teacher_id=%L', tea_id))
+    data.arc = res_e.rows
+
+    // 查询科研项目
+    const res_f = await db.query(format('SELECT * FROM Research WHERE teacher_id=%L', tea_id))
+    data.res = res_f.rows
+
+    res.send({
+      success: true,
+      data
+    })
+  } catch (err) {
+    console.log(err)
+    res.send({
+      success: false,
       data: {
-        isLogin: false
-      },
-      errorCode: '401',
-      errorMessage: '没有权限,请先登录！',
-      success: true
+        teacher: []
+      }
     })
   }
 })
@@ -783,86 +772,75 @@ router.post('/edit', authMiddleware(), async (req, res) => {
   const { tea_id, tea_name, tea_password } = req.body
   let resdata = { success: true }
 
-  if (req.role === 'admin') {
-    if (!isUndefined(tea_id) && !isUndefined(tea_name)) {
-      try {
-        // 基本信息
-        await updateTea(req, resdata)
+  if (!isUndefined(tea_id) && !isUndefined(tea_name)) {
+    try {
+      // 基本信息
+      await updateTea(req, resdata)
 
-        // 家庭关系
-        let { tea_familys } = req.body
-        if (
-          !isUndefined(tea_familys) &&
-          !isUndefined(tea_familys.length) &&
-          tea_familys.length != 0
-        ) {
-          await updateFam(tea_familys, tea_id)
-        }
-
-        // 奖惩记录
-        let { tea_archive } = req.body
-
-        if (
-          !isUndefined(tea_archive) &&
-          !isUndefined(tea_archive.length) &&
-          tea_archive.length != 0
-        ) {
-          await updateArc(tea_archive, tea_id, resdata)
-        }
-
-        // 科研项目
-        let { tea_research } = req.body
-        if (
-          !isUndefined(tea_research) &&
-          !isUndefined(tea_research.length) &&
-          tea_research.length != 0
-        ) {
-          await updateRes(tea_research, tea_id)
-        }
-
-        // 教育经历
-        let { tea_edu } = req.body
-        if (!isUndefined(tea_edu)) {
-          tea_edu = tea_edu.tea_edu
-          if (!isUndefined(tea_edu.length) && tea_edu.length != 0) {
-            await updateEdu(tea_edu, tea_id)
-          }
-        }
-
-        // 工作经历
-        let { tea_work } = req.body
-        if (!isUndefined(tea_work)) {
-          tea_work = tea_work.tea_work
-          await updateWork(tea_work, tea_id)
-        }
-
-        res.send({
-          ...resdata
-        })
-      } catch (err) {
-        console.log(err)
-        res.send({
-          data: {
-            success: false,
-            message: '添加失败 !'
-          },
-          success: true
-        })
+      // 家庭关系
+      let { tea_familys } = req.body
+      if (
+        !isUndefined(tea_familys) &&
+        !isUndefined(tea_familys.length) &&
+        tea_familys.length != 0
+      ) {
+        await updateFam(tea_familys, tea_id)
       }
-    } else {
+
+      // 奖惩记录
+      let { tea_archive } = req.body
+
+      if (
+        !isUndefined(tea_archive) &&
+        !isUndefined(tea_archive.length) &&
+        tea_archive.length != 0
+      ) {
+        await updateArc(tea_archive, tea_id, resdata)
+      }
+
+      // 科研项目
+      let { tea_research } = req.body
+      if (
+        !isUndefined(tea_research) &&
+        !isUndefined(tea_research.length) &&
+        tea_research.length != 0
+      ) {
+        await updateRes(tea_research, tea_id)
+      }
+
+      // 教育经历
+      let { tea_edu } = req.body
+      if (!isUndefined(tea_edu)) {
+        tea_edu = tea_edu.tea_edu
+        if (!isUndefined(tea_edu.length) && tea_edu.length != 0) {
+          await updateEdu(tea_edu, tea_id)
+        }
+      }
+
+      // 工作经历
+      let { tea_work } = req.body
+      if (!isUndefined(tea_work)) {
+        tea_work = tea_work.tea_work
+        await updateWork(tea_work, tea_id)
+      }
+
       res.send({
-        success: false,
-        message: '更新失败, 工号、姓名、密码不能为空'
+        ...resdata
+      })
+    } catch (err) {
+      console.log(err)
+      res.send({
+        data: {
+          success: false,
+          message: '添加失败 !'
+        },
+        success: true
       })
     }
   } else {
-    res.status(401).send({
-      data: {
-        isLogin: false
-      },
-      errorCode: '401',
-      errorMessage: '没有权限,请先登录！',
-      success: true
+    res.send({
+      success: false,
+      message: '更新失败, 工号、姓名、密码不能为空'
     })
   }
 })
