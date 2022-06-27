@@ -534,7 +534,29 @@ const AddTeacher = () => {
               // }}
               scrollToFirstError
             >
-              <FormItem label="工号" field="tea_id" rules={[{ required: true }]}>
+              <FormItem
+                label="工号"
+                field="tea_id"
+                rules={[
+                  { required: true, message: '工号不可为空' },
+                  { type: 'number', message: '工号必须为8位纯数字' },
+                  {
+                    validator: async (value, callback) => {
+                      return new Promise((resolve) => {
+                        value = value.toString()
+                        if (value.length != 8) {
+                          setTimeout(() => {
+                            callback('工号必须为8位纯数字')
+                            resolve()
+                          }, 10)
+                        } else {
+                          resolve()
+                        }
+                      })
+                    }
+                  }
+                ]}
+              >
                 <Input placeholder="please enter..." />
               </FormItem>
               <FormItem label="姓名" field="tea_name" rules={[{ required: true }]}>
