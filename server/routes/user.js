@@ -15,9 +15,11 @@ router.post('/login', async (req, res) => {
 
   if (!isUndefined(id) && !isUndefined(password)) {
     try {
+      const x = md5Crypto(password)
+      console.log(x)
       let { rows } = await db.query('SELECT * FROM TUser where teacher_id=$1 and password=$2', [
         id,
-        md5Crypto(password)
+        x
       ])
       const token = jwt.sign(
         {
@@ -25,6 +27,7 @@ router.post('/login', async (req, res) => {
         },
         process.env.jwtSecret
       )
+      console.log(rows)
       // admin用户
       if (rows[0].role == 'admin') {
         res.send({
@@ -44,7 +47,8 @@ router.post('/login', async (req, res) => {
           token: token
         })
       }
-    } catch {
+    } catch (err) {
+      console.log(err)
       res.send({
         status: 'error',
         type: 'account',
