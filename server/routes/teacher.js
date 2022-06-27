@@ -414,6 +414,9 @@ const updateTea = async (req, resdata) => {
         tea_gender = 1
       }
     }
+    if (!tea_password) {
+      tea_password = ''
+    }
     const { rows } = await db.query(
       'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',
       [
@@ -777,7 +780,7 @@ router.post('/edit', authMiddleware(), async (req, res) => {
   let resdata = { success: true }
 
   if (req.role === 'admin') {
-    if (!isUndefined(tea_id) && !isUndefined(tea_name) && !isUndefined(tea_password)) {
+    if (!isUndefined(tea_id) && !isUndefined(tea_name)) {
       try {
         // 基本信息
         await updateTea(req, resdata)

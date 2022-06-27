@@ -110,8 +110,8 @@ const EditTeacher = () => {
 
     formRef1.current.setFieldsValue({
       tea_name: data.name,
-      tea_id: data.id,
-      tea_password: data.password
+      tea_id: data.id
+      //tea_password: data.password
     })
     const f2t = {
       tea_photo: data.photo,
@@ -645,7 +645,7 @@ const EditTeacher = () => {
               <FormItem label="姓名" field="tea_name" rules={[{ required: true }]}>
                 <Input placeholder="please enter..." />
               </FormItem>
-              <FormItem label="登陆密码" field="tea_password" rules={[{ required: true }]}>
+              <FormItem label="登陆密码" field="tea_password">
                 <Input.Password placeholder="please enter..." />
               </FormItem>
             </Form>
