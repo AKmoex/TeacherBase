@@ -176,7 +176,7 @@ const ImportDataModal = ({ cRef }) => {
     <div>
       <Spin tip="This may take a while..." loading={loading}>
         <Modal
-          title="Modal Title"
+          title="导入数据"
           visible={visible}
           onOk={() => {
             //setCurrent(current + 1)

@@ -913,6 +913,9 @@ router.post('/add/multiple', authMiddleware(), async (req, res) => {
         tea_department_id,
         tea_term_date
       } = dd[i]
+      if (!tea_password) {
+        tea_password = ''
+      }
 
       const { rows } = await db.query(
         'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',
