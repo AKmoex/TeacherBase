@@ -5,15 +5,16 @@ create sequence dep_auto_inc
     maxvalue 9999999999999
     start with 1
     increment by 1;
-
 drop table if exists Department cascade;
 create table Department(
     id integer primary key default nextval('dep_auto_inc'),
     name varchar(128) unique,
     establish_date date,
-    phone varchar(32),
+    phone varchar(20),
     t_count int default 0,
-    address varchar(256)
+    address varchar(255),
+    -- 成立时间约束
+    CONSTRAINT dateCheck CHECK (establish_date is null or establish_date<=now())
 );
 -- 将自增学列 dep_auto_inc 与Department关联, 实现主键自增
 alter sequence dep_auto_inc owned by department.id;
@@ -23,46 +24,55 @@ alter sequence dep_auto_inc owned by department.id;
 drop table if exists Teacher cascade;
 create table Teacher(
     id char(8) primary key,-- 工号
-    name varchar(32), -- 姓名
-    gender tinyint check (gender in (1,2)), -- 1男2女
-    phone varchar(32), -- 手机号码
-    email varchar(256), 
+    name varchar(32) not null, -- 姓名
+    gender tinyint, -- 1男2女
+    phone varchar(20), -- 手机号码
+    email varchar(127), --邮箱
     birthday date, -- 出生日期
-    photo varchar(256), -- 照片
-
+    photo varchar(255), -- 照片
     entry_date date, -- 入职时间
     term_date date, -- 离职时间
-    
     department_id integer, -- 所属院系
-    
-    job varchar(256), --职务
-    ethnicity varchar(256), -- 民族
-    political varchar(256), -- 政治面貌
-    address varchar(256), -- 通讯地址
-    
-    title varchar(256), -- 职称
+    job varchar(255), --职务
+    ethnicity varchar(16), -- 民族
+    political varchar(16), -- 政治面貌
+    address varchar(255), -- 通讯地址
+    title varchar(16), -- 职称
     foreign key (department_id) references department(id),
-    CONSTRAINT emailCheck CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$')
-
+    -- 邮箱约束
+    CONSTRAINT emailCheck CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
+    -- 入职离职时间的约束
+    CONSTRAINT dateCheck CHECK (not(
+        (entry_date is null and term_date is not null) or 
+        (entry_date>term_date) or
+        (entry_date>now()) or 
+        (term_date >now())
+    )),
+    -- 性别约束 1男2女
+    CONSTRAINT genderCheck CHECK (gender in (1,2))
 );
 
+
+
+--TUser表
 drop sequence if exists user_auto_inc cascade;
 create sequence user_auto_inc
     minvalue 1
     maxvalue 9999999999999
     start with 1
     increment by 1;
-
 drop table if exists TUser cascade;
 create table TUser(
     id integer primary key default nextval('user_auto_inc'),
-    teacher_id char(8),
-    password varchar(100) not null default '123456', --密码
+    teacher_id char(8) not null,
+    password varchar(40) not null , --密码
     role varchar(16) default 'user',
     foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
-
 );
 alter sequence user_auto_inc owned by TUser.id;
+
+
+
 
 -- 教育经历
 drop sequence if exists edu_auto_inc cascade;
@@ -74,15 +84,16 @@ create sequence edu_auto_inc
 drop table if exists Education cascade;
 create table Education(
     id integer primary key default nextval('edu_auto_inc'),
-    teacher_id char(8),
-    start_date date,
-    end_date date,
-    school varchar(256),
-    degree varchar(32) check (degree in ('本科','硕士','博士','博士后')),
-    major varchar(256),
+    teacher_id char(8) not null,
+    start_date date not null,
+    end_date date not null,
+    school varchar(64) not null,
+    degree varchar(16) not null,
+    major varchar(32),
     foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE,
-    -- 日期约束
-    check(end_date=null or start_date<end_date)
+    CONSTRAINT degreeCheck CHECK (degree in ('本科','硕士','博士','博士后')),
+    CONSTRAINT dateCheck CHECK (start_date<end_date and start_date<=now()),
+    CONSTRAINT uniqueCheck UNIQUE (teacher_id,degree)
 );
 alter sequence edu_auto_inc owned by Education.id;
 
@@ -97,11 +108,13 @@ create sequence fam_auto_inc
 drop table if exists Family cascade;
 create table Family(
     id integer primary key default nextval('fam_auto_inc'),
-    teacher_id char(8),
+    teacher_id char(8) not null,
     name varchar(32) not null ,
-    relation varchar(32)not null,
-    phone varchar(32),
-    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
+    relation varchar(32) not null,
+    phone varchar(20),
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE,
+    CONSTRAINT uniqueCheck1 UNIQUE (teacher_id,name),
+    CONSTRAINT uniqueCheck2 UNIQUE (teacher_id,relation)
 );
 alter sequence fam_auto_inc owned by Family.id;
 
@@ -116,14 +129,17 @@ create sequence work_auto_inc
 drop table if exists Work cascade;
 create table Work(
     id integer primary key default nextval('work_auto_inc'),
-    teacher_id char(8),
-    start_date date,
-    end_date date,
-    location varchar(32),
-    content varchar(32),
-    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
+    teacher_id char(8) not null,
+    start_date date not null,
+    end_date date not null,
+    location varchar(32) not null,
+    content varchar(255),
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE,
+    CONSTRAINT dateCheck CHECK (start_date<end_date and start_date<=now())
 );
 alter sequence work_auto_inc owned by Work.id;
+
+
 
 
 -- 奖惩记录
@@ -136,13 +152,15 @@ create sequence arc_auto_inc
 drop table if exists Archive cascade;
 create table Archive(
     id integer primary key default nextval('arc_auto_inc'),
-    teacher_id char(8),
-    title varchar(256),
+    teacher_id char(8) not null,
+    title varchar(128) not null,
     obtain_date date,
     detail text,
     -- 奖励为0,惩罚为1
-    type tinyint check (type in (0,1)) default 0,
-    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
+    type tinyint default 0,
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE,
+    CONSTRAINT typeCheck CHECK( type in (0,1)),
+    CONSTRAINT dateCheck CHECK (obtain_date is null or obtain_date<=now())
 );
 alter sequence arc_auto_inc owned by Archive.id;
 
@@ -158,12 +176,14 @@ drop table if exists Research cascade;
 create table Research(
     id integer primary key default nextval('res_auto_inc'),
     teacher_id char(8) not null,
-    title varchar(256) not null,
+    title varchar(128) not null,
     obtain_date date,
     detail text,
-    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE,
+    CONSTRAINT dateCheck CHECK (obtain_date is null or obtain_date<=now())
 );
 alter sequence res_auto_inc owned by Research.id;
+
 
 
 drop view if exists TeacherInfoView cascade;
@@ -176,21 +196,25 @@ drop view if exists ArchiveInfoView cascade;
 create view ArchiveInfoView as select distinct A.*,T.name as teacher_name from Archive A,Teacher T where A.teacher_id=T.id  ;
 
 
-insert into Department(name,establish_date,phone,t_count,address)
- values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380',0,'翡翠湖校区双子楼A做1107');
-insert into Department(name,establish_date,phone,t_count,address)
- values('食品与生物工程学院','2021-01-30','0551- 62901362',0,'翡翠湖校区食品与生物工程大楼二楼');
-insert into Department(name,establish_date,phone,t_count,address)
- values('材料科学与工程学院','2021-11-30','0551- 62901362',0,'安徽省合肥市屯溪路193号');
-
- insert into Department(name,establish_date,phone,t_count,address)
- values('外国语学院','2021-11-30','0551-62901716',0,'合肥工业大学翡翠湖校区科教楼A栋第15层');
 
 
-  insert into Department(name,establish_date,phone,t_count,address)
- values('机械工程学院','2021-11-30','0551-62901326',0,'安徽省合肥市屯溪路193号');
-  insert into Department(name,establish_date,phone,t_count,address)
- values('电气与自动化工程学院','2021-11-30','0551-6290-1408',0,'安徽省合肥市屯溪路193号逸夫科教楼');
+
+
+insert into Department(name,establish_date,phone,address)
+ values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380','翡翠湖校区双子楼A做1107');
+insert into Department(name,establish_date,phone,address)
+ values('食品与生物工程学院','2021-01-30','0551-62901362','翡翠湖校区食品与生物工程大楼二楼');
+insert into Department(name,establish_date,phone,address)
+ values('材料科学与工程学院','2021-11-30','0551-62901362','安徽省合肥市屯溪路193号');
+
+ insert into Department(name,establish_date,phone,address)
+ values('外国语学院','2021-11-30','0551-62901716','合肥工业大学翡翠湖校区科教楼A栋第15层');
+
+
+  insert into Department(name,establish_date,phone,address)
+ values('机械工程学院','2021-11-30','0551-62901326','安徽省合肥市屯溪路193号');
+  insert into Department(name,establish_date,phone,address)
+ values('电气与自动化工程学院','2021-11-30','0551-6290-1408','安徽省合肥市屯溪路193号逸夫科教楼');
 
 
 
@@ -199,19 +223,19 @@ CREATE OR REPLACE PROCEDURE update_teacher
 (
     tea_id char(8),
     tea_name varchar(32),
-    tea_password varchar(100),
+    tea_password varchar(40),
     tea_gender tinyint,
-    tea_phone varchar(32),
-    tea_email varchar(256), -- 邮箱
+    tea_phone varchar(20),
+    tea_email varchar(127), -- 邮箱
     tea_birthday date, -- 出生日期
-    tea_photo varchar(256), -- 照片
+    tea_photo varchar(255), -- 照片
     tea_entry_date date, -- 入职时间
     tea_department_id integer, -- 所属院系
-    tea_job varchar(256),
-    tea_ethnicity varchar(256), -- 民族
-    tea_political varchar(256), -- 政治面貌
-    tea_address varchar(256), -- 通讯地址
-    tea_title varchar(256), -- 职称
+    tea_job varchar(255),
+    tea_ethnicity varchar(16), -- 民族
+    tea_political varchar(16), -- 政治面貌
+    tea_address varchar(255), -- 通讯地址
+    tea_title varchar(16), -- 职称
     tea_term_date date --离职时间
 )
 IS
@@ -242,7 +266,7 @@ CREATE OR REPLACE PROCEDURE update_family
     fam_teacher_id char(8),
     fam_name varchar(32),
     fam_relation varchar(32),
-    fam_phone varchar(32)
+    fam_phone varchar(20)
 )
 IS
 BEGIN
@@ -258,12 +282,14 @@ END;
 /
 
 
+
+
 --创建存储过程update_archive
 CREATE OR REPLACE PROCEDURE update_archive
 (
     arc_id integer,
     arc_teacher_id char(8),
-    arc_title varchar(32),
+    arc_title varchar(128),
     arc_obtain_date date,
     arc_detail text,
     arc_type tinyint
@@ -287,7 +313,7 @@ CREATE OR REPLACE PROCEDURE update_research
 (
     res_id integer ,
     res_teacher_id char(8),
-    res_title varchar(256),
+    res_title varchar(128),
     res_obtain_date date,
     res_detail text
 )
@@ -313,9 +339,9 @@ CREATE OR REPLACE PROCEDURE update_education
     edu_teacher_id char(8),
     edu_start_date date,
     edu_end_date date,
-    edu_school varchar(256),
-    edu_degree varchar(32) ,
-    edu_major varchar(256)
+    edu_school varchar(64),
+    edu_degree varchar(16) ,
+    edu_major varchar(32)
 )
 IS
 BEGIN
@@ -341,7 +367,7 @@ CREATE OR REPLACE PROCEDURE update_work
     work_start_date date,
     work_end_date date,
     work_location varchar(32),
-    work_content varchar(32)
+    work_content varchar(255)
 )
 IS
 BEGIN
@@ -444,15 +470,9 @@ insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_da
 
 
 
-
-
-
- 
-
 insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2016-06-01','2019-07-01','合肥工业大学','本科');
-insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2019-09-01','2022-07-01','合肥工业大学','硕士');
-insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2022-08-01','2025-07-01','中国科学技术大学','博士');
-
+insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2019-09-01','2020-07-01','合肥工业大学','硕士');
+insert into Education(teacher_id,start_date,end_date,school,degree) values('66666666','2021-08-01','2022-06-01','中国科学技术大学','博士');
 
 insert into Work(teacher_id,start_date,end_date,location,content) values('66666666','2016-06-01','2019-07-01','字节跳动-后端开发部门','负责后端开发');
 insert into Work(teacher_id,start_date,end_date,location,content) values('66666666','2020-12-20','2021-07-01','阿里云平台','全栈开发工作');
@@ -473,3 +493,20 @@ insert into Research(teacher_id,title,obtain_date,detail) values('66666666','机
 
 insert into Family(teacher_id,name,relation,phone) values('66666666','王富贵','父亲','13698745631');
 insert into Family(teacher_id,name,relation,phone) values('66666666','林莉心','母亲','15155068479');
+
+
+
+
+
+
+
+create type dt_type as (name varchar(128),title varchar(16),cnt integer);
+create or replace function departmentTitleFun()
+returns setof dt_type as 
+$$
+declare
+   r dt_type%rowtype;
+begin
+   return query select D.name,title,count(*) from teacher T right outer join Department D on T.department_id=D.id group by D.name,T.title;
+end;
+$$ language plpgsql;
