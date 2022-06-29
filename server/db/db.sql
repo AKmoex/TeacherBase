@@ -469,11 +469,11 @@ CREATE OR REPLACE FUNCTION encrypt_password()
   RETURNS TRIGGER AS
 $func$
 BEGIN  
- IF (TG_OP='UPDATE')THEN
-    NEW.password := gs_encrypt_aes128(OLD.password, 'Asdf1234'); 
- ELSE 
+ --IF (TG_OP='UPDATE')THEN
+ --   NEW.password := gs_encrypt_aes128(OLD.password, 'Asdf1234'); 
+ --ELSE 
     NEW.password := gs_encrypt_aes128(NEW.password, 'Asdf1234'); 
- END IF;
+ --END IF;
  RETURN NEW;
 END
 $func$ LANGUAGE plpgsql;
@@ -484,17 +484,22 @@ FOR EACH ROW
 EXECUTE PROCEDURE encrypt_password();
 
 
+create type user_type as (tea_role varchar(16),tea_status tinyint);
 create or replace function getUser(
     tea_id char(8),
     tea_password text
 )
-returns varchar as 
+returns user_type as 
 $$
 declare
+   result_record user_type;
 begin
-    return (select role from tuser where teacher_id=tea_id and gs_decrypt_aes128(password,'Asdf1234')=tea_password);
+    select  role,status from tuser into result_record.tea_role,result_record.tea_status  
+    where teacher_id=tea_id and gs_decrypt_aes128(password,'Asdf1234')=tea_password;
+    return result_record;
 end;
 $$ language plpgsql;
+
 
 
 

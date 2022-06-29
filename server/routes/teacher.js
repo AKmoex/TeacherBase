@@ -409,7 +409,7 @@ const updateTea = async (req, resdata) => {
     // } else {
     //   ttt = md5Crypto(tea_password)
     // }
-
+    console.log(tea_password)
     const { rows } = await db.query(
       'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',
       [
