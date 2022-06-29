@@ -474,25 +474,20 @@ FOR EACH ROW
 EXECUTE PROCEDURE autoDeleteUserFun();
 
 
-/*
-CREATE OR REPLACE FUNCTION autoInsertUserFun() RETURNS TRIGGER AS 
+create type sys_type as (tea_cnt bigint,dep_cnt bigint,res_cnt bigint,arc_cnt bigint);
+create or replace function getSys()
+returns sys_type as 
 $$
-DECLARE
-BEGIN
-    IF NEW.term_date is not null then
-        INSERT INTO TUser(teacher_id,password,role,status) values(NEW.id,NEW.password,NEW.role,1);
-    else 
-        INSERT INTO TUser(teacher_id,password,role,status) values(NEW.id,NEW.password,NEW.role,1);
-    end if;
-RETURN NULL;    
-END
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER autoInsertUser
-AFTER INSERT ON Teacher
-FOR EACH ROW 
-EXECUTE PROCEDURE autoInsertUserFun();
-*/
+declare
+   result_record sys_type;
+begin
+    select count(*) from teacher into result_record.tea_cnt;
+    select count(*) from department into result_record.dep_cnt;
+    select count(*) from Archive INTO result_record.arc_cnt;
+    select count(*) from Research into result_record.res_cnt;
+    return result_record;
+end;
+$$ language plpgsql;
 
 
 

@@ -17,10 +17,12 @@ router.get('/', authMiddleware(), async (req, res) => {
         rows[i].title = '其他'
       }
     }
-    console.log(rows)
+    const r = await db.query('call getSys();')
+    console.log(r.rows)
     res.send({
       success: true,
-      data: rows
+      data: rows,
+      cnt_data: r.rows[0]
     })
   } catch (err) {
     console.log('err:', err)
