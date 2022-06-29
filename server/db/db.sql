@@ -43,7 +43,7 @@ create table Teacher(
     CONSTRAINT emailCheck CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
     -- 入职离职时间的约束
     CONSTRAINT dateCheck CHECK (not(
-        (entry_date is null and term_date is not null) or 
+       
         (entry_date>term_date) or
         (entry_date>now()) or 
         (term_date >now())
@@ -65,9 +65,11 @@ drop table if exists TUser cascade;
 create table TUser(
     id integer primary key default nextval('user_auto_inc'),
     teacher_id char(8) not null,
-    password varchar(40) not null , --密码
+    password text not null , --密码
     role varchar(16) default 'user',
-    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE
+    status tinyint default 1, -- 1有效在职,0无效离职
+    foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE,
+    CONSTRAINT statusCheck CHECK (status in (1,0))
 );
 alter sequence user_auto_inc owned by TUser.id;
 
@@ -223,7 +225,7 @@ CREATE OR REPLACE PROCEDURE update_teacher
 (
     tea_id char(8),
     tea_name varchar(32),
-    tea_password varchar(40),
+    tea_password text,
     tea_gender tinyint,
     tea_phone varchar(20),
     tea_email varchar(127), -- 邮箱
@@ -421,6 +423,93 @@ FOR EACH ROW
 EXECUTE PROCEDURE updateDepNumFun();
 
 
+
+-- 改变TUser状态
+CREATE OR REPLACE FUNCTION autoUserStatusFun() RETURNS TRIGGER AS 
+$$
+DECLARE
+BEGIN
+    IF NEW.term_date is not null THEN
+    UPDATE TUser
+    SET status = 0
+    WHERE NEW.id = TUser.teacher_id;
+    END IF;
+RETURN NULL;    
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER autoUserStatus
+AFTER UPDATE of term_date ON Teacher
+FOR EACH ROW 
+EXECUTE PROCEDURE autoUserStatusFun();
+
+
+
+CREATE OR REPLACE FUNCTION autoDeleteUserFun() RETURNS TRIGGER AS 
+$$
+DECLARE
+    old_id char(8);
+BEGIN
+    old_id = OLD.id;
+    DELETE FROM TUser WHERE old_id=TUser.teacher_id;
+RETURN NULL;    
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER autoDeleteUser
+AFTER DELETE ON Teacher
+FOR EACH ROW 
+EXECUTE PROCEDURE autoDeleteUserFun();
+
+
+
+
+
+CREATE OR REPLACE FUNCTION encrypt_password()
+  RETURNS TRIGGER AS
+$func$
+BEGIN  
+ IF (TG_OP='UPDATE')THEN
+    NEW.password := gs_encrypt_aes128(OLD.password, 'Asdf1234'); 
+ ELSE 
+    NEW.password := gs_encrypt_aes128(NEW.password, 'Asdf1234'); 
+ END IF;
+ RETURN NEW;
+END
+$func$ LANGUAGE plpgsql;
+
+CREATE TRIGGER encrypt_userdata
+BEFORE INSERT OR UPDATE  ON tuser
+FOR EACH ROW
+EXECUTE PROCEDURE encrypt_password();
+
+
+create or replace function getUser(
+    tea_id char(8),
+    tea_password text
+)
+returns varchar as 
+$$
+declare
+begin
+    return (select role from tuser where teacher_id=tea_id and gs_decrypt_aes128(password,'Asdf1234')=tea_password);
+end;
+$$ language plpgsql;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
  values('00000000','张三',1,'2000-01-30','18755005131','掌管一切','akmoex@gmail.com','汉族','中共党员','安徽省合肥市翡翠湖公寓南楼503');
 insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,political,address)
@@ -500,8 +589,8 @@ insert into Family(teacher_id,name,relation,phone) values('66666666','林莉心'
 
 
 
-create type dt_type as (name varchar(128),title varchar(16),cnt integer);
-create or replace function departmentTitleFun()
+create type dt_type as (name varchar(128),title varchar(16),cnt bigint);
+create or replace function departmentTitle()
 returns setof dt_type as 
 $$
 declare

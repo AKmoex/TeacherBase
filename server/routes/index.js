@@ -6,6 +6,7 @@ const file = require('./file')
 const research = require('./research')
 const archive = require('./archive')
 const backup = require('./backup')
+const welcome = require('./welcome')
 module.exports = (app) => {
   app.use('/api/user', user)
   app.use('/api/department', department)
@@ -14,5 +15,6 @@ module.exports = (app) => {
   app.use('/api/research', research)
   app.use('/api/archive', archive)
   app.use('/api/backup', backup)
+  app.use('/api/welcome', welcome)
   // etc..
 }

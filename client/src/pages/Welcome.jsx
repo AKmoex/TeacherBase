@@ -1,5 +1,7 @@
+import { welcome } from '@/services/welcome'
 import { PageContainer } from '@ant-design/pro-layout'
 import { Alert, Card, Typography } from 'antd'
+import { useEffect } from 'react'
 import { FormattedMessage, useIntl } from 'umi'
 import styles from './Welcome.less'
 
@@ -13,6 +15,10 @@ const CodePreview = ({ children }) => (
 
 const Welcome = () => {
   const intl = useIntl()
+  useEffect(async () => {
+    const res = await welcome({ keyword: '%' })
+    console.log(res)
+  }, [])
   return (
     <PageContainer>
       <Card>

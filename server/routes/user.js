@@ -15,12 +15,9 @@ router.post('/login', async (req, res) => {
 
   if (!isUndefined(id) && !isUndefined(password)) {
     try {
-      const x = md5Crypto(password)
-      console.log(x)
-      let { rows } = await db.query('SELECT * FROM TUser where teacher_id=$1 and password=$2', [
-        id,
-        x
-      ])
+      //const x = md5Crypto(password)
+      //console.log(x)
+      let { rows } = await db.query('call getUser($1,$2);', [id, password])
       const token = jwt.sign(
         {
           id: id

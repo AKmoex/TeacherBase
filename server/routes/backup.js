@@ -253,6 +253,7 @@ router.post('/restore', upload.single('file'), async (req, res) => {
         username: 'omm',
         password: 'qwerQWER228'
       }
+
       await ssh.exec('chown -R omm /home/omm/\n')
       const ssh2 = new SSH2Promise(config)
 

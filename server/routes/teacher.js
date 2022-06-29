@@ -17,9 +17,9 @@ router.get('/id', authMiddleware(), async (req, res) => {
     // 查询基本信息
     const res_a = await db.query(format('SELECT * FROM TeacherInfoView WHERE id=%L', tea_id))
     const rrr = await db.query('SELECT * FROM TUser WHERE teacher_id=$1', [tea_id])
-    if (rrr.rows.length > 0) {
-      res_a.rows[0].password = md5Crypto(rrr.rows[0].password)
-    }
+    // if (rrr.rows.length > 0) {
+    //   res_a.rows[0].password = md5Crypto(rrr.rows[0].password)
+    // }
 
     let data = {
       ...res_a.rows[0]
@@ -364,7 +364,7 @@ const insertTea = async (req, resdata) => {
     )
     const { rows1 } = await db.query(
       'INSERT INTO tuser(teacher_id, password) VALUES($1, $2) returning *',
-      [tea_id, md5Crypto(tea_password)]
+      [tea_id, tea_password]
     )
   } catch (err) {
     console.log('err:', err)
@@ -404,18 +404,18 @@ const updateTea = async (req, resdata) => {
       }
     }
     let ttt
-    if (!tea_password) {
-      ttt = null
-    } else {
-      ttt = md5Crypto(tea_password)
-    }
+    // if (!tea_password) {
+    //   ttt = null
+    // } else {
+    //   ttt = md5Crypto(tea_password)
+    // }
 
     const { rows } = await db.query(
       'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',
       [
         tea_id,
         tea_name,
-        ttt,
+        tea_password,
         tea_gender,
         tea_phone,
         tea_email,
@@ -899,7 +899,7 @@ router.post('/add/multiple', authMiddleware(), async (req, res) => {
       if (!tea_password) {
         ttt = null
       } else {
-        ttt = md5Crypto(tea_password)
+        ttt = tea_password
       }
       const { rows } = await db.query(
         'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',

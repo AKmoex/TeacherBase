@@ -213,8 +213,8 @@ const Teacher = () => {
           value: '院士'
         },
         {
-          label: '特任研究院',
-          value: '特任研究院'
+          label: '特任研究员',
+          value: '特任研究员'
         },
         {
           label: '特任教授',
