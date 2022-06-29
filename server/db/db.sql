@@ -249,11 +249,13 @@ if exists(select * from tuser where teacher_id=tea_id) then
    political=tea_political,address=tea_address,title=tea_title,term_date=tea_term_date WHERE id = tea_id;
    if tea_password is not null then
         UPDATE TUser SET password=tea_password WHERE teacher_id=tea_id;
+  
    end if; 
 else
     -- 没有则插入
     INSERT INTO teacher(id, name,gender,phone,email,birthday,photo,entry_date,department_id,job,ethnicity,political,address,title,term_date)
      VALUES(tea_id,tea_name,tea_gender,tea_phone,tea_email,tea_birthday,tea_photo,tea_entry_date,tea_department_id,tea_job,tea_ethnicity,tea_political,tea_address,tea_title,tea_term_date);
+    insert into tuser(teacher_id,password) values(tea_id,tea_password);
 end if;
 
 END;
@@ -460,6 +462,27 @@ CREATE TRIGGER autoDeleteUser
 AFTER DELETE ON Teacher
 FOR EACH ROW 
 EXECUTE PROCEDURE autoDeleteUserFun();
+
+
+/*
+CREATE OR REPLACE FUNCTION autoInsertUserFun() RETURNS TRIGGER AS 
+$$
+DECLARE
+BEGIN
+    IF NEW.term_date is not null then
+        INSERT INTO TUser(teacher_id,password,role,status) values(NEW.id,NEW.password,NEW.role,1);
+    else 
+        INSERT INTO TUser(teacher_id,password,role,status) values(NEW.id,NEW.password,NEW.role,1);
+    end if;
+RETURN NULL;    
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER autoInsertUser
+AFTER INSERT ON Teacher
+FOR EACH ROW 
+EXECUTE PROCEDURE autoInsertUserFun();
+*/
 
 
 

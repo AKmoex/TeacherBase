@@ -403,12 +403,7 @@ const updateTea = async (req, resdata) => {
         tea_gender = 1
       }
     }
-    let ttt
-    // if (!tea_password) {
-    //   ttt = null
-    // } else {
-    //   ttt = md5Crypto(tea_password)
-    // }
+
     console.log(tea_password)
     const { rows } = await db.query(
       'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',
@@ -895,18 +890,15 @@ router.post('/add/multiple', authMiddleware(), async (req, res) => {
         tea_department_id,
         tea_term_date
       } = dd[i]
-      let ttt
       if (!tea_password) {
-        ttt = null
-      } else {
-        ttt = tea_password
+        tea_password = '123456'
       }
       const { rows } = await db.query(
         'CALL update_teacher($1, $2, $3, $4,$5,$6, $7, $8, $9,$10,$11, $12, $13, $14,$15,$16);',
         [
           tea_id,
           tea_name,
-          ttt,
+          tea_password,
           tea_gender,
           tea_phone,
           tea_email,
