@@ -41,6 +41,8 @@ create table Teacher(
     foreign key (department_id) references department(id),
     -- 邮箱约束
     CONSTRAINT emailCheck CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
+    CONSTRAINT idCheck CHECK (id ~* '^\d{8}'),
+    
     -- 入职离职时间的约束
     CONSTRAINT dateCheck CHECK (not(
        
@@ -49,9 +51,12 @@ create table Teacher(
         (term_date >now())
     )),
     -- 性别约束 1男2女
-    CONSTRAINT genderCheck CHECK (gender in (1,2))
+    CONSTRAINT genderCheck CHECK (gender in (1,2)),
+    
 );
-
+CREATE INDEX  pol_index ON Teacher(political);
+CREATE INDEX dep_index ON Teacher(department_id);
+CREATE INDEX tit_index ON Teacher(title);
 
 
 --TUser表
@@ -69,9 +74,10 @@ create table TUser(
     role varchar(16) default 'user',
     status tinyint default 1, -- 1有效在职,0无效离职
     foreign key (teacher_id) references Teacher(id) ON DELETE CASCADE,
-    CONSTRAINT statusCheck CHECK (status in (1,0))
+    CONSTRAINT statusCheck CHECK (status in (1,0)),
+    CONSTRAINT passwordCheck CHECK(password ~* '^(?=.*[0-9].*)(?=.*[A-Z].*)(?=.*[a-z].*).{6,16}$')
 );
-alter sequence user_auto_inc owned by TUser.id;
+CREATE UNIQUE INDEX tuser_tea_index ON TUser(teacher_id);
 
 
 
@@ -98,6 +104,7 @@ create table Education(
     CONSTRAINT uniqueCheck UNIQUE (teacher_id,degree)
 );
 alter sequence edu_auto_inc owned by Education.id;
+CREATE INDEX edu_tea_index ON Education(teacher_id);
 
 
 -- 家庭关系
@@ -119,7 +126,7 @@ create table Family(
     CONSTRAINT uniqueCheck2 UNIQUE (teacher_id,relation)
 );
 alter sequence fam_auto_inc owned by Family.id;
-
+CREATE INDEX fam_tea_index ON Family(teacher_id);
 
 -- 工作经历
 drop sequence if exists work_auto_inc cascade;
@@ -140,7 +147,7 @@ create table Work(
     CONSTRAINT dateCheck CHECK (start_date<end_date and start_date<=now())
 );
 alter sequence work_auto_inc owned by Work.id;
-
+CREATE INDEX work_tea_index ON Work(teacher_id);
 
 
 
@@ -165,6 +172,7 @@ create table Archive(
     CONSTRAINT dateCheck CHECK (obtain_date is null or obtain_date<=now())
 );
 alter sequence arc_auto_inc owned by Archive.id;
+CREATE INDEX work_tea_index ON Work(teacher_id);
 
 
 -- 科研项目
@@ -185,6 +193,8 @@ create table Research(
     CONSTRAINT dateCheck CHECK (obtain_date is null or obtain_date<=now())
 );
 alter sequence res_auto_inc owned by Research.id;
+CREATE INDEX res_tea_index ON Research(teacher_id);
+
 
 
 
