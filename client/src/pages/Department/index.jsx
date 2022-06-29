@@ -6,13 +6,16 @@ import {
   getDepartmentById,
   getDepartmentDetailById
 } from '@/services/department'
+import { welcome } from '@/services/welcome'
 import { ProList } from '@ant-design/pro-components'
 import { PageContainer } from '@ant-design/pro-layout'
 import {
   Button,
+  Collapse,
   DatePicker,
   Form,
   Input,
+  List,
   Modal,
   Notification,
   Popconfirm
@@ -20,13 +23,14 @@ import {
 import { Button as AButton, Space, Tag } from 'antd'
 import dayjs from 'dayjs'
 import { isNil } from 'lodash'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { BiMap, BiPhone } from 'react-icons/bi'
 import DepartmentInfoModal from './components/DepartmentInfoModal'
 import EditDepartmentModal from './components/EditDepartmentModal'
-const ExportJsonExcel = require('js-export-excel')
 
+const ExportJsonExcel = require('js-export-excel')
 const FormItem = Form.Item
+const CollapseItem = Collapse.Item
 
 const formItemLayout = {
   labelCol: {
@@ -124,9 +128,11 @@ const Department = () => {
   const [createVisible, setCreateVisible] = React.useState(false)
   const [createLoading, setCreateLoading] = React.useState(false)
   const [data, setData] = useState([])
+  const [visible, setVisible] = React.useState(false)
 
   const formRef = useRef()
   const tableRef = useRef()
+  const [td, setTD] = useState([])
 
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'))
   const editDepartmentModalRef = useRef()
@@ -134,6 +140,38 @@ const Department = () => {
   const onValuesChange = (changeValue, values) => {
     console.log('onValuesChange: ', changeValue, values)
   }
+  useEffect(async () => {
+    const { data } = await welcome({})
+    console.log(data)
+    const d = []
+    for (let i = 0; i < data.length; i++) {
+      let idx = -1
+      for (let j = 0; j < d.length; j++) {
+        if (d[j].name == data[i].name) {
+          idx = j
+          break
+        }
+      }
+      if (idx == -1) {
+        d.push({
+          name: data[i].name,
+          titles: [
+            {
+              title: data[i].title,
+              cnt: data[i].cnt
+            }
+          ]
+        })
+      } else {
+        d[idx].titles.push({
+          title: data[i].title,
+          cnt: data[i].cnt
+        })
+      }
+    }
+    setTD(d)
+    console.log(d)
+  }, [])
 
   const request = async (params, soter, filter) => {
     const result = await department(params)
@@ -196,6 +234,22 @@ const Department = () => {
     var toExcel = new ExportJsonExcel(option)
     toExcel.saveExcel()
     // toExcel.saveExcel()
+  }
+  const renderItem = (record, name) => {
+    return (
+      <CollapseItem header={name} name={name}>
+        <List
+          style={{ width: 622 }}
+          size="small"
+          dataSource={record}
+          render={(item, index) => (
+            <List.Item key={index}>
+              {item.title} - {item.cnt} 人
+            </List.Item>
+          )}
+        />
+      </CollapseItem>
+    )
   }
   return (
     <PageContainer>
@@ -266,6 +320,15 @@ const Department = () => {
               }}
             >
               数据导出
+            </Button>,
+            <Button
+              key="3"
+              type="primary"
+              onClick={() => {
+                setVisible(true)
+              }}
+            >
+              职称分布
             </Button>
           ]
         }}
@@ -490,6 +553,22 @@ const Department = () => {
               <DatePicker format="YYYY-MM-DD" />
             </FormItem>
           </Form>
+        </div>
+      </Modal>
+      <Modal
+        title="各院系职称及人数"
+        visible={visible}
+        onOk={() => setVisible(false)}
+        onCancel={() => setVisible(false)}
+        autoFocus={false}
+        focusLock={true}
+      >
+        <div>
+          <Collapse accordion style={{ maxWidth: 1180 }}>
+            {td.map((d) => {
+              return renderItem(d.titles, d.name)
+            })}
+          </Collapse>
         </div>
       </Modal>
       <EditDepartmentModal ref={editDepartmentModalRef} tableReload={tableReload} />

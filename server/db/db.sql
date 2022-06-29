@@ -629,6 +629,8 @@ $$
 declare
    r dt_type%rowtype;
 begin
-   return query select D.name,title,count(*) from teacher T right outer join Department D on T.department_id=D.id group by D.name,T.title;
+   return query select D.name,title,count(*) from (SELECT id,title,department_id from teacher where department_id is not null) as T(id,title,department_id),Department D
+    where  T.department_id=D.id group by D.name,T.title;
+   
 end;
 $$ language plpgsql;
