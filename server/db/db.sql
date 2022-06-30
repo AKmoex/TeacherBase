@@ -34,8 +34,8 @@ create table Teacher(
     term_date date, -- 离职时间
     department_id integer, -- 所属院系
     job varchar(255), --职务
-    ethnicity varchar(16), -- 民族
-    political varchar(16), -- 政治面貌
+    ethnicity varchar(32), -- 民族
+    political varchar(32), -- 政治面貌
     address varchar(255), -- 通讯地址
     title varchar(16), -- 职称
     foreign key (department_id) references department(id),

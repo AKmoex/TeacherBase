@@ -235,7 +235,7 @@ const AddTeacherModal = ({ cRef }) => {
                   }
                 ]}
               >
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter phone" />
               </FormItem>
               <FormItem
                 label="电子邮箱"
@@ -250,11 +250,11 @@ const AddTeacherModal = ({ cRef }) => {
                   }
                 ]}
               >
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter phone" />
               </FormItem>
 
               <FormItem label="通讯地址" field="tea_address">
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter address" />
               </FormItem>
               <FormItem label="入职时间" field="tea_entry_date">
                 <DatePicker />

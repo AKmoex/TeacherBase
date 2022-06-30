@@ -521,7 +521,7 @@ const AddTeacher = () => {
             <Alert
               style={{ marginBottom: 20, marginLeft: 200, width: 400 }}
               type="success"
-              content="初始登陆密码默认为123456"
+              content="账号密码必须包含大小写字母和数字"
             />
             <Form
               ref={formRef1}
@@ -618,7 +618,7 @@ const AddTeacher = () => {
                   }
                 ]}
               >
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter  phone" />
               </FormItem>
               <FormItem
                 label="电子邮箱"
@@ -633,7 +633,7 @@ const AddTeacher = () => {
                   }
                 ]}
               >
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter email" />
               </FormItem>
               <FormItem label="政治面貌" field="tea_political">
                 <Select
@@ -721,7 +721,7 @@ const AddTeacher = () => {
                 />
               </FormItem>
               <FormItem label="通讯地址" field="tea_address">
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter address" />
               </FormItem>
               <FormItem label="入职时间" field="tea_entry_date">
                 <DatePicker />

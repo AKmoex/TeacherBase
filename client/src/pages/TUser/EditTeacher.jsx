@@ -110,11 +110,14 @@ const EditTeacher = () => {
     setDepartment(res.data.department)
     const { data } = await getTeacherById({ tea_id: msg.data.id })
     console.log(data)
-    formRef1.current.setFieldsValue({
-      tea_name: data.name,
-      tea_id: data.id
-      //tea_password: data.password
-    })
+
+    if (formRef1 && formRef1.current) {
+      formRef1.current.setFieldsValue({
+        tea_name: data.name,
+        tea_id: data.id
+        //tea_password: data.password
+      })
+    }
     const f2t = {
       tea_photo: data.photo,
       tea_gender: data.gender,
@@ -606,7 +609,7 @@ const EditTeacher = () => {
             <Alert
               style={{ marginBottom: 20, marginLeft: 200, width: 400 }}
               type="success"
-              content="登陆密码长度在6~15位之间"
+              content="密码必须包含大小写字母和数字"
             />
             <Form
               ref={formRef1}
@@ -703,7 +706,7 @@ const EditTeacher = () => {
                   }
                 ]}
               >
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter  phone" />
               </FormItem>
               <FormItem
                 label="电子邮箱"
@@ -718,7 +721,7 @@ const EditTeacher = () => {
                   }
                 ]}
               >
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter email" />
               </FormItem>
               <FormItem label="政治面貌" field="tea_political">
                 <Select
@@ -806,7 +809,7 @@ const EditTeacher = () => {
                 />
               </FormItem>
               <FormItem label="通讯地址" field="tea_address">
-                <Input placeholder="please enter department phone" />
+                <Input placeholder="please enter address" />
               </FormItem>
               <FormItem label="入职时间" field="tea_entry_date">
                 <DatePicker />

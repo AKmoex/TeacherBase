@@ -99,8 +99,7 @@ const Welcome = () => {
               <Card.Grid
                 hoverable={true}
                 style={{
-                  width: '25%',
-                  height: 70
+                  width: '25%'
                 }}
               >
                 <Card className="card-demo-in-grid" style={{ width: '100%' }} bordered={false}>

@@ -562,6 +562,7 @@ const Department = () => {
         onCancel={() => setVisible(false)}
         autoFocus={false}
         focusLock={true}
+        footer={null}
       >
         <div>
           <Collapse accordion style={{ maxWidth: 1180 }}>
