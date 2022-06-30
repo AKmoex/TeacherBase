@@ -37,11 +37,15 @@ router.get('/id', authMiddleware(), async (req, res) => {
     data.work = res_d.rows
 
     // 查询奖惩记录
-    const res_e = await db.query(format('SELECT * FROM Archive WHERE teacher_id=%L', tea_id))
+    const res_e = await db.query(
+      format('SELECT * FROM ArchiveInfoView WHERE teacher_id=%L', tea_id)
+    )
     data.arc = res_e.rows
 
     // 查询科研项目
-    const res_f = await db.query(format('SELECT * FROM Research WHERE teacher_id=%L', tea_id))
+    const res_f = await db.query(
+      format('SELECT * FROM ResearchInfoView WHERE teacher_id=%L', tea_id)
+    )
     data.res = res_f.rows
 
     res.send({

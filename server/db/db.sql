@@ -212,6 +212,8 @@ create view ArchiveInfoView as select distinct A.*,T.name as teacher_name from A
 
 
 
+
+
 insert into Department(name,establish_date,phone,address)
  values('计算机与信息学院（人工智能学院）','2000-01-30','0551-6290 1380','翡翠湖校区双子楼A做1107');
 insert into Department(name,establish_date,phone,address)
@@ -551,44 +553,44 @@ insert into teacher(id,name,gender,entry_date,phone,job,email,ethnicity,politica
  values('00000002','金毛',1,'2000-01-30','18755005131','科研','akmoex@hfut.edu.com','维吾尔族','共青团员','安徽省合肥市翡翠湖公寓南楼503');
 
 insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('66666666','王维新',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授');
+ values('66666666','王维新',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/file-1656554375877.jpg','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授');
  
 insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('20192146','何斌',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授');
+ values('20192146','何斌',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/file-1656554375877.jpg','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','教授');
 
  insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('20192147','李样',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','副教授');
+ values('20192147','李样',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/file-1656554375877.jpg','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','副教授');
 
 insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('20192149','李死光',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','院士');
+ values('20192149','李死光',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/file-1656554375877.jpg','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','院士');
 
  insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('20192186','张艺兴',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','特任研究员');
+ values('20192186','张艺兴',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/file-1656554375877.jpg','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','特任研究员');
 
 
 insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('30192146','宇文杜',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','特任研究员');
+ values('30192146','宇文杜',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/file-1656554375877.jpg','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','特任研究员');
 
 insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('20199146','李李',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','特任教授');
+ values('20199146','李李',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/file-1656554375877.jpg','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','特任教授');
 
 insert into teacher(id,name,gender,phone,email,birthday,photo,entry_date,term_date,department_id,job,ethnicity,political,address,title)
- values('20112146','换行',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/t.png','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','院士');
+ values('20112146','换行',1,'15155068084','istormlala@mail.hfut.edu.cn','1976-06-12','/static/file-1656554375877.jpg','1987-12-01',null,'1','学院执行院长','汉族','中共党员','安徽省蜀山区阳光花园5栋301','院士');
 
 
 
- insert into Tuser(teacher_id,password,role) values('00000000','123456','admin');
- insert into tuser(teacher_id,password,role) values('00000001','123456','user');
-  insert into tuser(teacher_id,password,role) values('00000002','123456','user');
-   insert into tuser(teacher_id,password,role) values('66666666','123456','user');
+ insert into Tuser(teacher_id,password,role) values('00000000','123456Aa','admin');
+ insert into tuser(teacher_id,password,role) values('00000001','123456Aa','user');
+  insert into tuser(teacher_id,password,role) values('00000002','123456Aa','user');
+   insert into tuser(teacher_id,password,role) values('66666666','123456Aa','user');
 
-   insert into tuser(teacher_id,password,role) values('20192146','123456','user');
-   insert into tuser(teacher_id,password,role) values('20192147','123456','user');
-   insert into tuser(teacher_id,password,role) values('20192149','123456','user');
-   insert into tuser(teacher_id,password,role) values('20192186','123456','user');
-   insert into tuser(teacher_id,password,role) values('30192146','123456','user');
-   insert into tuser(teacher_id,password,role) values('20199146','123456','user');
-   insert into tuser(teacher_id,password,role) values('20112146','123456','user');
+   insert into tuser(teacher_id,password,role) values('20192146','123456Aa','user');
+   insert into tuser(teacher_id,password,role) values('20192147','123456Aa','user');
+   insert into tuser(teacher_id,password,role) values('20192149','123456Aa','user');
+   insert into tuser(teacher_id,password,role) values('20192186','123456Aa','user');
+   insert into tuser(teacher_id,password,role) values('30192146','123456Aa','user');
+   insert into tuser(teacher_id,password,role) values('20199146','123456Aa','user');
+   insert into tuser(teacher_id,password,role) values('20112146','123456Aa','user');
 
 
 

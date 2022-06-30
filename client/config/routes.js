@@ -15,8 +15,8 @@ export default [
   },
   {
     path: '/welcome',
-    name: 'welcome',
-    icon: 'smile',
+    name: '工作后台',
+    icon: 'Dashboard',
     component: './Welcome'
   },
   {
@@ -83,28 +83,28 @@ export default [
   },
   {
     name: '院系管理',
-    icon: 'table',
+    icon: 'Cluster',
     path: '/department',
     component: './Department',
     access: 'canAdmin'
   },
   {
     name: '科研管理',
-    icon: 'table',
+    icon: 'Audit',
     path: '/research',
     component: './Research',
     access: 'canAdmin'
   },
   {
     name: '奖惩管理',
-    icon: 'table',
+    icon: 'Calculator',
     path: '/archive',
     component: './Archive',
     access: 'canAdmin'
   },
   {
     name: '备份恢复',
-    icon: 'table',
+    icon: 'CloudServer',
     path: '/backup',
     component: './Backup',
     access: 'canAdmin'
