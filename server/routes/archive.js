@@ -11,7 +11,7 @@ module.exports = router
 router.get('/', authMiddleware(), async (req, res) => {
   try {
     const selectParams = [`%${'%'}%`]
-    let text = 'SELECT * FROM ArchiveInfoView WHERE title LIKE $1'
+    let text = 'SELECT * FROM ArchiveDepView WHERE title LIKE $1'
     if (!isUndefined(req.query.title)) {
       selectParams[0] = `%${req.query.title}%`
     }
@@ -31,6 +31,12 @@ router.get('/', authMiddleware(), async (req, res) => {
       text = `${text} AND obtain_date BETWEEN $${selectParams.length - 1} AND $${
         selectParams.length
       }`
+    }
+    if (req.query.dep_name) {
+      if (req.query.dep_name != '全部') {
+        selectParams.push(`%${req.query.dep_name}%`)
+        text = `${text} AND department_name LIKE $${selectParams.length}`
+      }
     }
     if (req.query.type) {
       if (req.query.type == '1') {
