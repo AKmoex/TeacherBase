@@ -1,3 +1,4 @@
+import { department as getAllDepartment } from '@/services/department'
 import { deleteResearch, research } from '@/services/research'
 import { DownOutlined } from '@ant-design/icons'
 import { ProTable } from '@ant-design/pro-components'
@@ -5,9 +6,10 @@ import { PageContainer } from '@ant-design/pro-layout'
 import { Button, Icon, Input, Message, Notification, Popconfirm } from '@arco-design/web-react'
 import { Menu } from 'antd'
 import dayjs from 'dayjs'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import AddResearchModal from './components/AddResearchModal'
 import EditResearchModal from './components/EditResearchModal'
+
 const TextArea = Input.TextArea
 const IconFont = Icon.addFromIconFontCn({
   src: '//at.alicdn.com/t/font_180975_26f1p759rvn.js'
@@ -24,6 +26,21 @@ const Research = () => {
   const addResearchModalRef = useRef()
   const editResearchModalRef = useRef()
   const [researchs, setResearchs] = useState([])
+  const [department, setDepartment] = useState({})
+
+  useEffect(async () => {
+    const res = await getAllDepartment({ keyword: '%' })
+    const d = {}
+    d['全部'] = {
+      text: '全部'
+    }
+
+    const temp = res.data.department.map((item, index) => {
+      const text = item.dep_name
+      d[item.dep_name] = { text }
+    })
+    setDepartment(d)
+  }, [])
   const request = async (params, soter, filter) => {
     if (soter.obtain_date) {
       params.sort = soter.obtain_date
@@ -51,6 +68,15 @@ const Research = () => {
       width: 48,
       hideInSearch: true,
       hideInSetting: true
+    },
+    {
+      dataIndex: 'dep_name',
+      hideInTable: true,
+      hideInSetting: true,
+      title: '院系',
+      key: 'dep_name',
+      valueType: 'select',
+      valueEnum: department
     },
     {
       dataIndex: 'id',

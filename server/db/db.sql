@@ -199,13 +199,19 @@ CREATE INDEX res_tea_index ON Research(teacher_id);
 
 
 drop view if exists TeacherInfoView cascade;
-create view TeacherInfoView as select distinct T.*,D.name as department_name from Teacher T left outer join Department D on T.department_id=D.id  ;
+create view TeacherInfoView as select  T.*,D.name as department_name from Teacher T left outer join Department D on T.department_id=D.id  ;
 
 drop view if exists ResearchInfoView cascade;
-create view ResearchInfoView as select distinct R.*,T.name as teacher_name from Research R,Teacher T where R.teacher_id=T.id  ;
+create view ResearchInfoView as select  R.*,T.name as teacher_name from Research R,Teacher T where R.teacher_id=T.id  ;
 
 drop view if exists ArchiveInfoView cascade;
-create view ArchiveInfoView as select distinct A.*,T.name as teacher_name from Archive A,Teacher T where A.teacher_id=T.id  ;
+create view ArchiveInfoView as select  A.*,T.name as teacher_name from Archive A,Teacher T where A.teacher_id=T.id  ;
+
+drop view if exists ResearchDepView cascade;
+create view ResearchDepView as select RV.*,TV.department_name  from ResearchInfoView RV,TeacherInfoView TV where  RV.teacher_id=TV.id;
+
+drop view if exists ArchiveDepView cascade;
+create view ArchiveDepView as select AV.*,TV.department_name  from ArchiveInfoView AV,TeacherInfoView TV where  AV.teacher_id=TV.id;
 
 
 

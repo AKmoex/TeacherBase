@@ -10,8 +10,9 @@ module.exports = router
 
 router.get('/', authMiddleware(), async (req, res) => {
   try {
+    console.log(req.query)
     const selectParams = [`%${'%'}%`]
-    let text = 'SELECT * FROM ResearchInfoView WHERE title LIKE $1'
+    let text = 'SELECT * FROM ResearchDepView WHERE title LIKE $1'
     if (!isUndefined(req.query.title)) {
       selectParams[0] = `%${req.query.title}%`
     }
@@ -25,6 +26,12 @@ router.get('/', authMiddleware(), async (req, res) => {
       text = `${text} AND teacher_name LIKE $${selectParams.length}`
     }
 
+    if (req.query.dep_name) {
+      if (req.query.dep_name != '全部') {
+        selectParams.push(`%${req.query.dep_name}%`)
+        text = `${text} AND department_name LIKE $${selectParams.length}`
+      }
+    }
     if (req.query.startTime && req.query.endTime) {
       selectParams.push(`${req.query.startTime}`)
       selectParams.push(`${req.query.endTime}`)
@@ -32,6 +39,7 @@ router.get('/', authMiddleware(), async (req, res) => {
         selectParams.length
       }`
     }
+
     if (req.query.sort) {
       if (req.query.sort == 'ascend') {
         text = `${text} ORDER BY obtain_date ASC`
@@ -39,6 +47,7 @@ router.get('/', authMiddleware(), async (req, res) => {
         text = `${text} ORDER BY obtain_date DESC`
       }
     }
+
     const { rows } = await db.query(text, selectParams)
     res.send({
       success: true,
