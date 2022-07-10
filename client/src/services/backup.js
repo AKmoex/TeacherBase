@@ -35,3 +35,13 @@ export async function backupSystem(params, options) {
     ...(options || {})
   })
 }
+export async function schedule(body, options) {
+  return request('/api/schedule', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    data: body,
+    ...(options || {})
+  })
+}

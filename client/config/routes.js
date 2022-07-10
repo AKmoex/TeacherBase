@@ -109,6 +109,13 @@ export default [
     component: './Backup',
     access: 'canAdmin'
   },
+  {
+    name: '定时备份',
+    icon: 'CloudServer',
+    path: '/schedule',
+    component: './Schedule',
+    access: 'canAdmin'
+  },
 
   {
     path: '/',

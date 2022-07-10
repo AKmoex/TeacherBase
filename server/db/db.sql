@@ -172,7 +172,7 @@ create table Archive(
     CONSTRAINT dateCheck CHECK (obtain_date is null or obtain_date<=now())
 );
 alter sequence arc_auto_inc owned by Archive.id;
-CREATE INDEX work_tea_index ON Work(teacher_id);
+CREATE INDEX arc_tea_index ON Work(teacher_id);
 
 
 -- 科研项目
@@ -505,11 +505,7 @@ CREATE OR REPLACE FUNCTION encrypt_password()
   RETURNS TRIGGER AS
 $func$
 BEGIN  
- --IF (TG_OP='UPDATE')THEN
- --   NEW.password := gs_encrypt_aes128(OLD.password, 'Asdf1234'); 
- --ELSE 
     NEW.password := gs_encrypt_aes128(NEW.password, 'Asdf1234'); 
- --END IF;
  RETURN NEW;
 END
 $func$ LANGUAGE plpgsql;

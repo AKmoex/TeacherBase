@@ -221,10 +221,6 @@ const Research = () => {
         dateFormatter="string"
         headerTitle="所有科研项目"
         toolBarRender={() => [
-          <Button key="show">
-            你好
-            {/* <a href={`/teacher/edit/1`} target="_blank" /> */}
-          </Button>,
           <Button key="out">
             导出数据
             <DownOutlined />
